@@ -1428,9 +1428,9 @@
       <category term="逆向" scheme="http://kiya.studio/categories/%E9%80%86%E5%90%91/"/>
     
     
-      <category term="debug" scheme="http://kiya.studio/tags/debug/"/>
-    
       <category term="MSC" scheme="http://kiya.studio/tags/MSC/"/>
+    
+      <category term="debug" scheme="http://kiya.studio/tags/debug/"/>
     
       <category term="ida" scheme="http://kiya.studio/tags/ida/"/>
     

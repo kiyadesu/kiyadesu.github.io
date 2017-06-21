@@ -67,15 +67,6 @@
 
     <ul class="menu">
         
-        <li class="menu-item">
-            <a href="javascript:;" id="search">
-                <span>搜索</span>
-                
-                    <span class="menu-item-label">search</span>
-                
-            </a>
-        </li>
-        
         
         
             <li class="menu-item">
@@ -191,7 +182,7 @@
 <p>r0为第一个参数(format字符串).</p>
 <p><strong>mov    r1, r2</strong></p>
 <p>r2为第二个参数(test_for返回值).(当参数少于4个时保存在通用寄存器中,多余4个的保存在栈中)</p>
-<p><strong>bl    8258 <a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#x70;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#116;">&#x70;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#116;</a></strong></p>
+<p><strong>bl    8258 <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#58;&#112;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#x74;">&#112;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#x74;</a></strong></p>
 <p>调用printf函数.</p>
 <p><strong>sub    sp, fp, #4</strong></p>
 <p>与开辟栈空间相对应.</p>
@@ -349,28 +340,5 @@ $(document).ready(function(){
     <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
 </div>
     
-    <div class="search" id="search">
-        <div class="mask" id="mask"></div>
-        <div class="search-wrapper syuanpi">
-            <h1 id="search-header" class="syuanpi">找啥呢</h1>
-            <div class="input">
-                <input type="text" id="local-search-input" results="0" name="">
-            </div>
-            <div id="local-search-result"></div>
-        </div>
-    </div>
-    <script>
-    var GREETING = {
-        morning: "おはよう",
-        noon: "こんにちは",
-        after: "こんにちは",
-        night: "こんばんは",
-        midnight: "おやすみ"
-    }
-    $(document).ready(function(){
-        Nlvi.search();
-    });
-    </script>
-
 </body>
 </html>
