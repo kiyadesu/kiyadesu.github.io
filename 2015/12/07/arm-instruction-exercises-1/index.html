@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> arm指令练习篇章一 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月7日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                arm指令练习篇章一
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/arm/">arm</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><strong>口号</strong>:为了熟悉arm指令而奋斗!</p>
+<a id="more"></a>
+<h1 id="for"><a href="#for" class="headerlink" title="for"></a>for</h1><h2 id="C-code"><a href="#C-code" class="headerlink" title="C code"></a>C code</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">int test_for()</div><div class="line">&#123;</div><div class="line">    int i,sum = 0;</div><div class="line">    for(i = 0; i &lt; 100; i++)</div><div class="line">        sum += i;</div><div class="line">    return sum;</div><div class="line">&#125;</div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">    printf(&quot;sum:%d\n&quot;,test_for());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="arm-code"><a href="#arm-code" class="headerlink" title="arm code"></a>arm code</h2><h3 id="main函数"><a href="#main函数" class="headerlink" title="main函数"></a>main函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">00008370 &lt;main&gt;:</div><div class="line">    8370:	e92d4800 	push	&#123;fp, lr&#125;</div><div class="line">    8374:	e28db004 	add	fp, sp, #4</div><div class="line">    8378:	e24dd008 	sub	sp, sp, #8</div><div class="line">    837c:	e50b0008 	str	r0, [fp, #-8]</div><div class="line">    8380:	e50b100c 	str	r1, [fp, #-12]</div><div class="line">    8384:	ebffffe2 	bl	8314 &lt;test_for&gt;</div><div class="line">    8388:	e1a02000 	mov	r2, r0</div><div class="line">    838c:	e59f3018 	ldr	r3, [pc, #24]	; 83ac &lt;main+0x3c&gt;</div><div class="line">    8390:	e08f3003 	add	r3, pc, r3</div><div class="line">    8394:	e1a00003 	mov	r0, r3</div><div class="line">    8398:	e1a01002 	mov	r1, r2</div><div class="line">    839c:	ebffffad 	bl	8258 &lt;printf@plt&gt;</div><div class="line">    83a0:	e1a00003 	mov	r0, r3</div><div class="line">    83a4:	e24bd004 	sub	sp, fp, #4</div><div class="line">    83a8:	e8bd8800 	pop	&#123;fp, pc&#125;</div><div class="line">    83ac:	00000030 	.word	0x00000030</div></pre></td></tr></table></figure>
+<p><strong>push    {fp, lr}</strong></p>
+<p><code>{}</code>: 其中包含多个值;<br><code>fp</code>(frame pointer): 帧指针,每个栈帧由fp和sp界定,fp相当于x86中的ebp,sp相当于x86中的esp;<br><code>lr</code>(link register): 链接寄存器,在程序中调用其他函数时,存放子程序的返回地址(即调用指令的下一条指令);</p>
+<p>本指令相当于<code>stmfd sp!,{fp,lr}</code>(!表示更新寄存器的值),将调用者的fp和lr寄存的值压入堆栈(顺序:编号小的寄存器的值存入低地址,编号大的寄存器的值存入高地址),<br>保护调用者程序的环境,子程序执行完毕后恢复环境.</p>
+<p><strong>add    fp, sp, #4</strong></p>
+<p>将被调用者的fp(栈底)指向存放调用者fp的地址.</p>
+<p><strong>sub    sp, sp, #8</strong></p>
+<p>抬高栈顶指针,开辟栈空间(8字节).</p>
+<p><strong>str    r0, [fp, #-8]</strong></p>
+<p>将r0的值(参数1)存储到fp-8所在的地址.</p>
+<p><strong>str    r1, [fp, #-12]</strong></p>
+<p>将r1的值(参数2)存储到fp-12所在的地址.<br>现在子程序的栈结构如下:<br>高地址   -&gt;   低地址<br>返回地址(fp) 参数1 参数2(sp)</p>
+<p><strong>bl    8314 <test_for></test_for></strong></p>
+<p>调用8314处的test_for函数.bl指令同时会将返回地址存储在r14(lr)中.</p>
+<p><strong>mov    r2, r0</strong></p>
+<p>r0存储的是test_for的返回值,赋给r2.</p>
+<p><strong>ldr    r3, [pc, #24]    ; 83ac <main+0x3c></main+0x3c></strong></p>
+<p>加载pc+24地址处的一个字的数据(.word    0x00000030)放入r3.r3=0x30.</p>
+<p><strong>add    r3, pc, r3</strong></p>
+<p>r3+=pc,即取”sum:%d”字符串的地址.(PC的值为当前执行指令地址+8字节)</p>
+<p><strong>mov    r0, r3</strong></p>
+<p>r0为第一个参数(format字符串).</p>
+<p><strong>mov    r1, r2</strong></p>
+<p>r2为第二个参数(test_for返回值).(当参数少于4个时保存在通用寄存器中,多余4个的保存在栈中)</p>
+<p><strong>bl    8258 <a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#x70;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#116;">&#x70;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#116;</a></strong></p>
+<p>调用printf函数.</p>
+<p><strong>sub    sp, fp, #4</strong></p>
+<p>与开辟栈空间相对应.</p>
+<p><strong>pop    {fp, pc}</strong></p>
+<p>将栈顶数据分别弹出至fp,pc,恢复调用者程序的环境(顺序:低地址的值放入编号小的寄存器,高地址的值放入编号大的寄存器).</p>
+<h3 id="test-for"><a href="#test-for" class="headerlink" title="test_for"></a>test_for</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">00008314 &lt;test_for&gt;:</div><div class="line">    8314:	e52db004 	push	&#123;fp&#125;		; (str fp, [sp, #-4]!)   @没有用到lr寄存器,无需保存</div><div class="line">    8318:	e28db000 	add	fp, sp, #0</div><div class="line">    831c:	e24dd00c 	sub	sp, sp, #12     @开辟栈空间</div><div class="line">    8320:	e3a03000 	mov	r3, #0     </div><div class="line">    8324:	e50b300c 	str	r3, [fp, #-12]  @sum</div><div class="line">    8328:	e3a03000 	mov	r3, #0</div><div class="line">    832c:	e50b3008 	str	r3, [fp, #-8]   @i</div><div class="line">    8330:	ea000006 	b	8350 &lt;test_for+0x3c&gt; @b指令直接按地址跳转,不保存返回地址</div><div class="line">    8334:	e51b200c 	ldr	r2, [fp, #-12]</div><div class="line">    8338:	e51b3008 	ldr	r3, [fp, #-8]</div><div class="line">    833c:	e0823003 	add	r3, r2, r3      @取i和sum相加</div><div class="line">    8340:	e50b300c 	str	r3, [fp, #-12]</div><div class="line">    8344:	e51b3008 	ldr	r3, [fp, #-8]   @取i值加1</div><div class="line">    8348:	e2833001 	add	r3, r3, #1</div><div class="line">    834c:	e50b3008 	str	r3, [fp, #-8]</div><div class="line">    8350:	e51b3008 	ldr	r3, [fp, #-8]   @取i值</div><div class="line">    8354:	e3530063 	cmp	r3, #99	; 0x63</div><div class="line">    8358:	dafffff5 	ble	8334 &lt;test_for+0x20&gt;    @小于等于99继续</div><div class="line">    835c:	e51b300c 	ldr	r3, [fp, #-12]</div><div class="line">    8360:	e1a00003 	mov	r0, r3          @sum值放入r0返回</div><div class="line">    8364:	e24bd000 	sub	sp, fp, #0</div><div class="line">    8368:	e49db004 	pop	&#123;fp&#125;		; (ldr fp, [sp], #4)</div><div class="line">    836c:	e12fff1e 	bx	lr   @转到返回地址</div></pre></td></tr></table></figure>
+<h1 id="switch"><a href="#switch" class="headerlink" title="switch"></a>switch</h1><h2 id="c-code"><a href="#c-code" class="headerlink" title="c code"></a>c code</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">int global_v = 5;</div><div class="line">int test_switch()</div><div class="line">&#123;</div><div class="line">    switch(global_v)&#123;</div><div class="line">        case 1: printf(&quot;1&quot;);</div><div class="line">        case 5: printf(&quot;5&quot;);</div><div class="line">        case 7: printf(&quot;7&quot;);</div><div class="line">        default: printf(&quot;fail&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">    test_switch();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="arm-code-1"><a href="#arm-code-1" class="headerlink" title="arm code"></a>arm code</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">00008344 &lt;test_switch&gt;:</div><div class="line">    8344:	e92d4800 	push	&#123;fp, lr&#125;   @保存环境</div><div class="line">    8348:	e28db004 	add	fp, sp, #4     @调整当前栈帧的栈底指针</div><div class="line">    834c:	e59f2054 	ldr	r2, [pc, #84]	; 83a8 &lt;test_switch+0x64&gt;</div><div class="line">    8350:	e08f2002 	add	r2, pc, r2</div><div class="line">    8354:	e59f3050 	ldr	r3, [pc, #80]	; 83ac &lt;test_switch+0x68&gt; @这里可见全局变量是通过地址存取的</div><div class="line">    8358:	e7923003 	ldr	r3, [r2, r3]</div><div class="line">    835c:	e5933000 	ldr	r3, [r3]</div><div class="line">    8360:	e3530005 	cmp	r3, #5  @由此可见采用了二分查找</div><div class="line">    8364:	0a000006 	beq	8384 &lt;test_switch+0x40&gt;</div><div class="line">    8368:	e3530007 	cmp	r3, #7</div><div class="line">    836c:	0a000007 	beq	8390 &lt;test_switch+0x4c&gt;</div><div class="line">    8370:	e3530001 	cmp	r3, #1</div><div class="line">    8374:	1a000008 	bne	839c &lt;test_switch+0x58&gt;</div><div class="line">    8378:	e3a00031 	mov	r0, #49	; 0x31</div><div class="line">    837c:	ebffffbe 	bl	827c &lt;putchar@plt&gt;       @单个字符的printf变成了putchar</div><div class="line">    8380:	ea000009 	b	83ac &lt;test_switch+0x68&gt;</div><div class="line">    8384:	e3a00035 	mov	r0, #53	; 0x35</div><div class="line">    8388:	ebffffbb 	bl	827c &lt;putchar@plt&gt;</div><div class="line">    838c:	ea000006 	b	83ac &lt;test_switch+0x68&gt;   @返回</div><div class="line">    8390:	e3a00037 	mov	r0, #55	; 0x37</div><div class="line">    8394:	ebffffb8 	bl	827c &lt;putchar@plt&gt;</div><div class="line">    8398:	ea000003 	b	83ac &lt;test_switch+0x68&gt;</div><div class="line">    839c:	e59f3018 	ldr	r3, [pc, #24]	; 83bc &lt;test_switch+0x78&gt;</div><div class="line">    83a0:	e08f3003 	add	r3, pc, r3</div><div class="line">    83a4:	e1a00003 	mov	r0, r3</div><div class="line">    83a8:	ebffffb6 	bl	8288 &lt;printf@plt&gt;</div><div class="line">    83ac:	e1a00003 	mov	r0, r3      @返回值</div><div class="line">    83b0:	e8bd8800 	pop	&#123;fp, pc&#125;    @恢复环境</div><div class="line">    83b4:	00001c8c 	.word	0x00001c8c</div><div class="line">    83b8:	fffffffc 	.word	0xfffffffc</div><div class="line">    83bc:	00000054 	.word	0x00000054</div></pre></td></tr></table></figure>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/07/arm-instruction-exercises-1/">http://kiya.studio/2015/12/07/arm-instruction-exercises-1/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/11/ida-dynamic-debug-dex/" id="art-left" class="art-right">
+                <span class="next-title">
+                    使用ida调试dex文件<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/05/arm-introduction/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>Arm 架构简介
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">arm指令练习篇章一</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#for"><span class="toc-text">for</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#C-code"><span class="toc-text">C code</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arm-code"><span class="toc-text">arm code</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#main函数"><span class="toc-text">main函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#test-for"><span class="toc-text">test_for</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#switch"><span class="toc-text">switch</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#c-code"><span class="toc-text">c code</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arm-code-1"><span class="toc-text">arm code</span></a></li></ol></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

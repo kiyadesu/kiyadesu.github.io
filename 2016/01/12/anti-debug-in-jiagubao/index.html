@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 某加固中的反调试 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2016年1月12日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                某加固中的反调试
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/anti-debug/">anti-debug</a>
+                    
+                        <a href="/tags/enforce/">enforce</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>以某厨房为例.</p>
+<a id="more"></a>
+<h1 id="反调试函数"><a href="#反调试函数" class="headerlink" title="反调试函数"></a>反调试函数</h1><p>（jiagu.so基址5287d000）</p>
+<p>在library load/unload断下,在mmap函数尾部下断点,断下后f8执行几句,可找到<code>libjiagu.so:528855E4 BL      loc_5288308C</code>,进入反调试.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/12/35/50" alt=""></p>
+<p>往下执行的关键跳转有<br><strong>libjiagu.so:528830D0 BLX     LR     ; debug079:5287C000</strong><br><strong>debug079:5287C014 BLX     LR         ; loc_5288042C</strong><br><strong>debug079:5287C038 BLX     LR ; loc_52880614</strong></p>
+<p><code>5287C000</code>是一个反调试模块的起始.</p>
+<p><code>libjiagu.so:loc_5288042C</code>函数作用是打开status文件获得TracerPid,此函数地址不变 其中的 <strong>libjiagu.so:52880528 BL      open_0</strong> 是调用<code>open</code>打开<code>/proc/self/status</code>的.</p>
+<p><code>loc_52880614</code>是第二种反调试.</p>
+<hr>
+<h1 id="具体的反调试过程"><a href="#具体的反调试过程" class="headerlink" title="具体的反调试过程"></a>具体的反调试过程</h1><h2 id="解析status文件"><a href="#解析status文件" class="headerlink" title="解析status文件"></a>解析status文件</h2><h3 id="找出-TracerPid"><a href="#找出-TracerPid" class="headerlink" title="找出 TracerPid"></a>找出 TracerPid</h3><p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/15/33/10-style1" alt=""></p>
+<h3 id="转换-TracerPid"><a href="#转换-TracerPid" class="headerlink" title="转换 TracerPid"></a>转换 TracerPid</h3><p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/19/37/38-style1" alt=""></p>
+<h3 id="比较-TracerPid"><a href="#比较-TracerPid" class="headerlink" title="比较 TracerPid"></a>比较 TracerPid</h3><p>如果<code>TracerPid</code>不为0,kill!</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/15/34/28-style1" alt=""></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/15/34/47-style1" alt=""></p>
+<h2 id="解析-proc-net-tcp文件"><a href="#解析-proc-net-tcp文件" class="headerlink" title="解析/proc/net/tcp文件"></a>解析/proc/net/tcp文件</h2><p>在比较过<code>tracerid</code>后,接着又解析了<code>tcp</code>文件.</p>
+<h3 id="调用处"><a href="#调用处" class="headerlink" title="调用处"></a>调用处</h3><p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/15/35/12-style1" alt=""></p>
+<h3 id="打开文件"><a href="#打开文件" class="headerlink" title="打开文件"></a>打开文件</h3><p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/15/35/33-style1" alt=""></p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/01/12/15/35/49-style1" alt=""></p>
+<p>逐行比较是否含有<code>00000000:5D8A</code>,5d8a就是23946,<code>android_server</code>监听端口即为23946,0A状态表示监听.<br>这里r0会被赋为1，返回调用处时进程就会被kill.</p>
+<p>如本机tcp文件中的内容为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">sl  local_address rem_address   st tx_queue rx_queue tr tm-&gt;when retrnsmt   uid  timeout inode                                                     </div><div class="line"> 0: 00000000:5D8A 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 42138 1 00000000 100 0 0 10 -1                            </div><div class="line"> 1: 00000000:15B3 00000000:0000 0A 00000000:00000000 00:00000000 00000000  2000        0 20426 1 00000000 100 0 0 10 -1                            </div><div class="line"> 2: 0100007F:91AF 0100007F:5D8A 01 00000000:00000000 00:00000000 00000000  2000        0 43283 1 00000000 21 4 2 10 -1                             </div><div class="line"> 3: ED01A8C0:15B3 EE01A8C0:E1B6 01 00000018:00000000 01:00000018 00000000  2000        0 20427 2 00000000 24 4 28 8 6                              </div><div class="line"> 4: 0100007F:5D8A 0100007F:91AF 01 00000000:00000000 02:00083C35 00000000     0        0 42634 2 00000000 22 4 3 10 -1</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="绕过反调试"><a href="#绕过反调试" class="headerlink" title="绕过反调试"></a>绕过反调试</h1><p>关键断点是:<code>libjiagu.so:loc_5288042C</code>,返回之后就是cmp.<br>第二种反调试<code>libjiagu.so:52880614</code>在cmp下面(若有).</p>
+<p>断下之后在lr对应的地址下断点,f9，将两个反调试函数下面的比较的r0值修改就可以了.</p>
+<hr>
+<h1 id="反调试的patch"><a href="#反调试的patch" class="headerlink" title="反调试的patch"></a>反调试的patch</h1><p>但是不止一次反调试,每次的地址也不同,而且每个采用这种加固的app都要如此,这样也太不划算了吧.既然如此,为什么不patch一下呢?</p>
+<p>将<code>libjiagu.so</code>作如下修改即可去掉反调试:(返回值r0改为0,mov r0,#0)<br>文件偏移<code>35EC</code>处 -&gt; <code>04 00 A0 E1</code>改为<code>00 00 A0 E3</code><br>文件偏移<code>3720</code>处 -&gt; <code>01 00 A0 E3</code>改为<code>00 00 A0 E3</code></p>
+<hr>
+<p>本文小白鼠: <a href="https://github.com/kiya-z/Android/blob/master/lab-mouse/com.xiachufang_138.apk" target="_blank" rel="external">here</a></p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://www.52pojie.cn/thread-435746-1-1.html" target="_blank" rel="external">xxx加固 之 动态脱壳</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2016/01/12/anti-debug-in-jiagubao/">http://kiya.studio/2016/01/12/anti-debug-in-jiagubao/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2016/03/20/install-ia32-libs/" id="art-left" class="art-right">
+                <span class="next-title">
+                    ubuntu启动ida报错找不到libgthread-2.0.so.0<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2016/01/03/xposed-class-ispreverified/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>第一个xposed模块中的“Class ref in pre-verified class resolved to unexpected implementation”错误原因
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">某加固中的反调试</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#反调试函数"><span class="toc-text">反调试函数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#具体的反调试过程"><span class="toc-text">具体的反调试过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#解析status文件"><span class="toc-text">解析status文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#找出-TracerPid"><span class="toc-text">找出 TracerPid</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#转换-TracerPid"><span class="toc-text">转换 TracerPid</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#比较-TracerPid"><span class="toc-text">比较 TracerPid</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解析-proc-net-tcp文件"><span class="toc-text">解析/proc/net/tcp文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#调用处"><span class="toc-text">调用处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#打开文件"><span class="toc-text">打开文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解析"><span class="toc-text">解析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#绕过反调试"><span class="toc-text">绕过反调试</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#反调试的patch"><span class="toc-text">反调试的patch</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

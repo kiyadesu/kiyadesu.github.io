@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 第一个xposed模块中的“Class ref in pre-verified class resolved to unexpected implementation”错误原因 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2016年1月3日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                第一个xposed模块中的“Class ref in pre-verified class resolved to unexpected implementation”错误原因
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/Xposed/">Xposed</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>在我的<a href="http://kiya.space/2015/12/28/hello-xposed/" target="_blank" rel="external">第一个 Xposed 模块</a>中曾出现<code>Class ref in pre-verified class resolved to unexpected implementation</code>错误,Xposed log如下：</p>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">01-03 19:42:03.974 134-134/? I/Xposed: Loading modules from /data/app/space.kiya.xposedtest-1.apk</div><div class="line">01-03 19:42:04.285 134-134/? I/Xposed:   Loading class space.kiya.xposedtest.ChangeStatusBar</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed: java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at dalvik.system.DexFile.defineClass(Native Method)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at dalvik.system.DexFile.loadClassBinaryName(DexFile.java:211)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at dalvik.system.DexPathList.findClass(DexPathList.java:313)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:51)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at java.lang.ClassLoader.loadClass(ClassLoader.java:501)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at java.lang.ClassLoader.loadClass(ClassLoader.java:461)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at de.robv.android.xposed.XposedBridge.loadModule(XposedBridge.java:421)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at de.robv.android.xposed.XposedBridge.loadModules(XposedBridge.java:386)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at de.robv.android.xposed.XposedBridge.main(XposedBridge.java:120)</div><div class="line">01-03 19:42:04.298 134-134/? I/Xposed:     at dalvik.system.NativeStart.main(Native Method)</div></pre></td></tr></table></figure>
+<p>从中可以看到,因为XposedBridge的main函数调用了loadModules,而loadModules又调用了loadModule,loadModule调用loadClass,这样一层一层下去最终导致了现在的错误.<br>我们就从案发现场<code>loadclass</code>和错误信息<code>Class ref in pre-verified class resolved to unexpected implementation</code>入手吧！</p>
+<h1 id="案发现场-loadclass"><a href="#案发现场-loadclass" class="headerlink" title="案发现场 loadclass"></a>案发现场 loadclass</h1><p>把<a href="https://github.com/rovo89/XposedBridge" target="_blank" rel="external">XposedBridge的代码</a>clone下来,找到<code>de/robv/android/xposed/XposedBridge</code>文件.</p>
+<p>我们知道<code>Xposed Installer</code>的界面有一个模块列表,在写Xposed模块时也需要新建文件<code>xposed_init</code>写入实现了Xposed接口的类名.</p>
+<p>main函数的作用就是初始化Xposed框架和模块,模块是怎么初始化的呢?来看loadModules函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Try to load all modules defined in &lt;code&gt;BASE_DIR/conf/modules.list&lt;/code&gt;</div><div class="line"> */</div><div class="line">private static void loadModules() throws IOException &#123;</div><div class="line">	final String filename = BASE_DIR + &quot;conf/modules.list&quot;;</div><div class="line">	BaseService service = SELinuxHelper.getAppDataFileService();</div><div class="line">	if (!service.checkFileExists(filename)) &#123;</div><div class="line">		Log.e(TAG, &quot;Cannot load any modules because &quot; + filename + &quot; was not found&quot;);</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	InputStream stream = service.getFileInputStream(filename);</div><div class="line">	BufferedReader apks = new BufferedReader(new InputStreamReader(stream));</div><div class="line">	String apk;</div><div class="line">	while ((apk = apks.readLine()) != null) &#123;</div><div class="line">		loadModule(apk);</div><div class="line">	&#125;</div><div class="line">	apks.close();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在<code>Xposed Installer</code>的安装目录<code>/data/data/de.robv.android.xposed.installer</code>下的<code>conf</code>文件夹下有一个<code>modules.list</code>文件,记录着每个xposed模块的apk的路径.<br><code>loadModules</code>对每行(一行对应一个apk路径)调用<code>loadModule</code>函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Load a module from an APK by calling the init(String) method for all classes defined</div><div class="line"> * in &lt;code&gt;assets/xposed_init&lt;/code&gt;.</div><div class="line"> */</div><div class="line">@SuppressWarnings(&quot;deprecation&quot;)</div><div class="line">private static void loadModule(String apk) &#123;</div><div class="line">	log(&quot;Loading modules from &quot; + apk);</div><div class="line"></div><div class="line">	if (!new File(apk).exists()) &#123;</div><div class="line">		log(&quot;  File does not exist&quot;);</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	ClassLoader mcl = new PathClassLoader(apk, BOOTCLASSLOADER);</div><div class="line">	InputStream is = mcl.getResourceAsStream(&quot;assets/xposed_init&quot;);</div><div class="line">	if (is == null) &#123;</div><div class="line">		log(&quot;assets/xposed_init not found in the APK&quot;);</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	BufferedReader moduleClassesReader = new BufferedReader(new InputStreamReader(is));</div><div class="line">	try &#123;</div><div class="line">		String moduleClassName;</div><div class="line">		while ((moduleClassName = moduleClassesReader.readLine()) != null) &#123;</div><div class="line">			moduleClassName = moduleClassName.trim();</div><div class="line">			if (moduleClassName.isEmpty() || moduleClassName.startsWith(&quot;#&quot;))</div><div class="line">				continue;</div><div class="line"></div><div class="line">			try &#123;</div><div class="line">				log (&quot;  Loading class &quot; + moduleClassName);</div><div class="line">				Class&lt;?&gt; moduleClass = mcl.loadClass(moduleClassName);</div><div class="line"></div><div class="line">				if (!IXposedMod.class.isAssignableFrom(moduleClass)) &#123;</div><div class="line">					log (&quot;    This class doesn&apos;t implement any sub-interface of IXposedMod, skipping it&quot;);</div><div class="line">					continue;</div><div class="line">				&#125; else if (disableResources &amp;&amp; IXposedHookInitPackageResources.class.isAssignableFrom(moduleClass)) &#123;</div><div class="line">					log (&quot;    This class requires resource-related hooks (which are disabled), skipping it.&quot;);</div><div class="line">					continue;</div><div class="line">				&#125;</div><div class="line"></div><div class="line">				final Object moduleInstance = moduleClass.newInstance();</div><div class="line">				if (isZygote) &#123;</div><div class="line">					if (moduleInstance instanceof IXposedHookZygoteInit) &#123;</div><div class="line">						IXposedHookZygoteInit.StartupParam param = new IXposedHookZygoteInit.StartupParam();</div><div class="line">						param.modulePath = apk;</div><div class="line">						param.startsSystemServer = startsSystemServer;</div><div class="line">						((IXposedHookZygoteInit) moduleInstance).initZygote(param);</div><div class="line">					&#125;</div><div class="line"></div><div class="line">					if (moduleInstance instanceof IXposedHookLoadPackage)</div><div class="line">						hookLoadPackage(new IXposedHookLoadPackage.Wrapper((IXposedHookLoadPackage) moduleInstance));</div><div class="line"></div><div class="line">					if (moduleInstance instanceof IXposedHookInitPackageResources)</div><div class="line">						hookInitPackageResources(new IXposedHookInitPackageResources.Wrapper((IXposedHookInitPackageResources) moduleInstance));</div><div class="line">				&#125; else &#123;</div><div class="line">					if (moduleInstance instanceof IXposedHookCmdInit) &#123;</div><div class="line">						IXposedHookCmdInit.StartupParam param = new IXposedHookCmdInit.StartupParam();</div><div class="line">						param.modulePath = apk;</div><div class="line">						param.startClassName = startClassName;</div><div class="line">						((IXposedHookCmdInit) moduleInstance).initCmdApp(param);</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">				log(t);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125; catch (IOException e) &#123;</div><div class="line">		log(e);</div><div class="line">	&#125; finally &#123;</div><div class="line">		try &#123;</div><div class="line">			is.close();</div><div class="line">		&#125; catch (IOException ignored) &#123;&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>loadModule</code>读取每个apk文件中的<code>assets/xposed_init</code>,使用<code>PathClassLoader</code>的<code>loadclass</code>方法加载每个注册的类,然后将类的实例作为相应xposed模块的回调.</p>
+<p>那么<code>Class&lt;?&gt; moduleClass = mcl.loadClass(moduleClassName);</code>这句代码是怎么会出错的呢?</p>
+<h1 id="何方神圣-CLASS-ISPREVERIFIED"><a href="#何方神圣-CLASS-ISPREVERIFIED" class="headerlink" title="何方神圣 CLASS_ISPREVERIFIED"></a>何方神圣 CLASS_ISPREVERIFIED</h1><p><code>CLASS_ISPREVERIFIED</code>是虚拟机在对dex文件优化时的一个<code>ClassFlags</code>,表示某个类是否已经被预验证过.<br>也就是说当某个类中引用的方法全部来自所在的dex文件中时,这个类就会被打上这个标记.<br>若app有多个dex文件时,当引用了某个带有这个标记的类时,虚拟机不需要在全部的dex文件中查找,从而帮助提高dalvik虚拟机的性能.</p>
+<p>关于如何验证的细节稍后分析.</p>
+<p>我们写的<code>ChangeStatusBar</code>类实现了<code>IXposedHookLoadPackage</code>,同时jar包的引用方式为<code>compile</code>,所以也把XposedBridge.jar编译进dex了,因此在验证<code>ChangeStatusBar</code>类时在本dex中可以找到<code>IXposedHookLoadPackage</code>从而被标记了<code>CLASS_ISPREVERIFIED</code>.</p>
+<p><strong>那么是在哪里检查是否有CLASS_ISPREVERIFIED标记的呢？</strong></p>
+<p>源代码文件<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Resolve.cpp#119" target="_blank" rel="external">/dalvik/vm/oo/Resolve.cpp</a>的<code>dvmResolveClass</code>函数中:有这么一段代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">if (!fromUnverifiedConstant &amp;&amp; IS_CLASS_FLAG_SET(referrer, CLASS_ISPREVERIFIED))</div><div class="line">&#123;</div><div class="line">    ClassObject* resClassCheck = resClass;</div><div class="line">    if (dvmIsArrayClass(resClassCheck))</div><div class="line">        resClassCheck = resClassCheck-&gt;elementClass;</div><div class="line"></div><div class="line">    if (referrer-&gt;pDvmDex != resClassCheck-&gt;pDvmDex &amp;&amp;</div><div class="line">        resClassCheck-&gt;classLoader != NULL)</div><div class="line">    &#123;</div><div class="line">        ALOGW(&quot;Class resolved by unexpected DEX:&quot;</div><div class="line">             &quot; %s(%p):%p ref [%s] %s(%p):%p&quot;,</div><div class="line">            referrer-&gt;descriptor, referrer-&gt;classLoader,</div><div class="line">            referrer-&gt;pDvmDex,</div><div class="line">            resClass-&gt;descriptor, resClassCheck-&gt;descriptor,</div><div class="line">            resClassCheck-&gt;classLoader, resClassCheck-&gt;pDvmDex);</div><div class="line">        ALOGW(&quot;(%s had used a different %s during pre-verification)&quot;,</div><div class="line">            referrer-&gt;descriptor, resClass-&gt;descriptor);</div><div class="line">        dvmThrowIllegalAccessError(</div><div class="line">            &quot;Class ref in pre-verified class resolved to unexpected &quot;</div><div class="line">            &quot;implementation&quot;);</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>当虚拟机找到需要引用的类时,如果引用者已经被预验证过,且引用者所在的dex和被引用者所在的dex不同时,抛出<code>Class ref in pre-verified class ...</code>异常!</p>
+<p>而在我的<a href="http://kiya.space/2015/12/28/hello-xposed/" target="_blank" rel="external">第一个 Xposed 模块</a>出现错误时dalvik的log如下(经过剪切):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">01-04 20:11:03.463 134-134/? W/dalvikvm: Class resolved by unexpected DEX: Lspace/kiya/xposedtest/ChangeStatusBar;(0x40e59fc8):0x5028f000 ref [Lde/robv/android/xposed/IXposedHookLoadPackage;] Lde/robv/android/xposed/IXposedHookLoadPackage;(0x40da2fd0):0x4f2f8000</div><div class="line">01-04 20:14:06.184 134-134/? W/dalvikvm: (Lspace/kiya/xposedtest/ChangeStatusBar; had used a different Lde/robv/android/xposed/IXposedHookLoadPackage; during pre-verification)</div><div class="line"></div><div class="line">01-04 20:11:03.467 134-134/? W/dalvikvm: Class resolved by unexpected DEX: Lspace/kiya/xposedtest/GetQQPassword;(0x40e59fc8):0x5028f000 ref [Lde/robv/android/xposed/IXposedHookLoadPackage;] Lde/robv/android/xposed/IXposedHookLoadPackage;(0x40da2fd0):0x4f2f8000</div><div class="line">01-04 20:14:06.187 134-134/? W/dalvikvm: (Lspace/kiya/xposedtest/GetQQPassword; had used a different Lde/robv/android/xposed/IXposedHookLoadPackage; during pre-verification)</div></pre></td></tr></table></figure>
+<p>这里可以看出在<code>loadclass</code>时的引用者是<code>Lspace/kiya/xposedtest/ChangeStatusBar</code>,被引用者是<code>Lde/robv/android/xposed/IXposedHookLoadPackage</code>.<br>(解析类的过程包括类的所有引用的检查,这里问题是出在模块类引用其他类时而非xposed加载模块类时,故引用者是被加载的模块类)</p>
+<p>dalvik解析的时候发现<code>IXposedHookLoadPackage</code>和<code>ChangeStatusBar</code>不在一个dex文件内,但是<code>ChangeStatusBar</code>类已经被校验过了呀,里面所有的方法都在本dex内,现在又告诉我不在一起了,那肯定要报错了!</p>
+<p>和上一小节的问题结合起来,必然是<code>loadclass</code>加载类的同时做了验证!是否是这样我们随后再验证.</p>
+<p>现在的问题是明明<code>ChangeStatusBar</code>已经通过了校验,<code>IXposedHookLoadPackage</code>和<code>ChangeStatusBar</code>在同一个dex中,怎么加载时<code>IXposedHookLoadPackage</code>又不在这里了?</p>
+<h1 id="罪魁祸首-PathClassLoader"><a href="#罪魁祸首-PathClassLoader" class="headerlink" title="罪魁祸首 PathClassLoader"></a>罪魁祸首 PathClassLoader</h1><p>这就要说说PathClassLoader了.</p>
+<p><code>XposedBridge</code>源码中使用的类加载器就是PathClassLoader.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">public static final ClassLoader BOOTCLASSLOADER = ClassLoader.getSystemClassLoader();</div><div class="line">ClassLoader mcl = new PathClassLoader(apk, BOOTCLASSLOADER);</div></pre></td></tr></table></figure>
+<p>其中apk是模块apk的路径;BOOTCLASSLOADER是系统类加载器的实例,从classpath中加载类.</p>
+<blockquote>
+<p>loadClass方法在加载一个类的实例的时候，<br>会先查询当前ClassLoader实例是否加载过此类，有就返回；<br>如果没有。查询Parent是否已经加载过此类，如果已经加载过，就直接返回Parent加载的类；<br>如果继承路线上的ClassLoader都没有加载，才由Child执行类的加载工作；</p>
+</blockquote>
+<p>也就是说我们的<code>apk</code>是最后一个被查找的路径.</p>
+<p>而在<code>Xposed</code>源码中的<code>app_main.cpp</code>(被修改过的app_process)调用了<code>xposed::initialize(zygote, startSystemServer, className, argc, argv)</code>,<code>initialize</code>中又调用了<code>addJarToClasspath()</code>,功能就是将<code>XposedBridge.jar</code>添加到Java classpath!</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">#define XPOSED_JAR               &quot;/system/framework/XposedBridge.jar&quot;</div><div class="line">/** Add XposedBridge.jar to the Java classpath. */</div><div class="line">bool addJarToClasspath() &#123;</div><div class="line">    ALOGI(&quot;-----------------&quot;);</div><div class="line"></div><div class="line">    if (access(XPOSED_JAR, R_OK) == 0) &#123;</div><div class="line">        if (!addPathToEnv(&quot;CLASSPATH&quot;, XPOSED_JAR))</div><div class="line">            return false;</div><div class="line"></div><div class="line">        ALOGI(&quot;Added Xposed (%s) to CLASSPATH&quot;, XPOSED_JAR);</div><div class="line">        return true;</div><div class="line">    &#125; else &#123;</div><div class="line">        ALOGE(&quot;ERROR: Could not access Xposed jar &apos;%s&apos;&quot;, XPOSED_JAR);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>所以<code>loadclass</code>在检查<code>apk</code>路径之前系统类加载器就在系统类路径中的<code>XposedBridge.jar</code>中找到了<code>IXposedHookLoadPackage</code>,虽然我们的apk中也有这个函数,但是还没有等到加载就已经结束了.</p>
+<p>到这里就可以理清错误为什么发生了:</p>
+<ol>
+<li>编写模块时我们把<code>XposedBridge.jar</code>编译进了dex文件中;</li>
+<li>dalvik在优化dex时为模块类打上了<code>CLASS_ISPREVERIFIED</code>标记,表示没有引用的类全部来自本dex;</li>
+<li>xposed框架修改后的app_process会在开机时将<code>/system/framework/XposedBridge.jar</code>加入类路径;</li>
+<li>随后xposed要加载我们注册的模块类,在事先为其准备好的jar包中找到了引用的类;</li>
+<li>但是模块类被打上标记了,xposed发现模块就没打算用自己准备好的类,反而要自给自足,这哪是框架和模块的关系!简直是造反!于是愤而报错.</li>
+</ol>
+<p>前面也提到解决方法就是不将<code>XposedBridge.jar</code>编译进dex即可,这样不会被打上标记,万事ok.<br>现在app的热修复原理也是这样.</p>
+<h1 id="凌晨4点-startvm"><a href="#凌晨4点-startvm" class="headerlink" title="凌晨4点 startvm"></a>凌晨4点 startvm</h1><p>到了现在,如果不在意一些细节,本案已经被破!</p>
+<p>之前说到,当类加载器调用<code>loadclass</code>加载类时发现<code>ChangeStatusBar</code>类已经被校验过…<br>等等!我们的XposedBridge加载模块类的代码是在app_process中呀,而校验是属于dexopt(dex优化)的步骤哇,难道dex优化比app_process这个启动代码还要早?</p>
+<p>那么问题就清晰多了: <strong>app_process 和 dexopt 的关系</strong>.</p>
+<p>一个app实质上就是一个app_process进程,app_process的作用如下:</p>
+<ol>
+<li>创建jvm</li>
+<li>执行startClass的main方法</li>
+</ol>
+<p><code>app_main.cpp</code>中的部分添加代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">#define XPOSED_CLASS_DOTS_ZYGOTE &quot;de.robv.android.xposed.XposedBridge&quot;</div><div class="line">isXposedLoaded = xposed::initialize(zygote, startSystemServer, className, argc, argv);</div><div class="line">if (zygote) &#123;</div><div class="line">    runtime.start(isXposedLoaded ? XPOSED_CLASS_DOTS_ZYGOTE : &quot;com.android.internal.os.ZygoteInit&quot;,</div><div class="line">            startSystemServer ? &quot;start-system-server&quot; : &quot;&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>initialize</code>在上面提到过,而<code>runtime.start</code>就是android源码<a href="http://androidxref.com/4.4.4_r1/xref/frameworks/base/core/jni/AndroidRuntime.cpp#805" target="_blank" rel="external">/frameworks/base/core/jni/AndroidRuntime.cpp</a>中的<code>AndroidRuntime::start</code>函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Start the Android runtime.  This involves starting the virtual machine</div><div class="line"> * and calling the &quot;static void main(String[] args)&quot; method in the class</div><div class="line"> * named by &quot;className&quot;.</div><div class="line"> *</div><div class="line"> * Passes the main function two arguments, the class name and the specified</div><div class="line"> * options string.</div><div class="line"> */</div><div class="line">void AndroidRuntime::start(const char* className, const char* options)</div></pre></td></tr></table></figure>
+<p><strong>此函数主要功能是:</strong> 启动虚拟机,执行传入类的main函数<br><strong>流程:</strong> AndroidRuntime::start -&gt; startvm -&gt; 执行传入的类的main函数<br>本案中传入的类是<code>de.robv.android.xposed.XposedBridge</code>.</p>
+<p>而startvm中又执行了什么呢?<br>startvm -&gt; JNI_CreateJavaVM -&gt; dvmStartup -&gt; dvmClassStartup -&gt; … -&gt; 直到优化dex时验证class</p>
+<p>====&gt; 因此当XposedBridge的main函数执行时,dex中的各个类已经被verify过了.我们的猜想是对哩.</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://bugly.qq.com/blog/?p=781" target="_blank" rel="external">【新技能get】让App像Web一样发布新版本</a></p>
+<p><a href="http://gold.xitu.io/entry/564ab7eb60b259caed3827f1" target="_blank" rel="external">Android 热补丁动态修复框架小结</a></p>
+<p><a href="http://segmentfault.com/a/1190000004062880" target="_blank" rel="external">Android动态加载基础 ClassLoader工作机制</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2016/01/03/xposed-class-ispreverified/">http://kiya.studio/2016/01/03/xposed-class-ispreverified/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2016/01/12/anti-debug-in-jiagubao/" id="art-left" class="art-right">
+                <span class="next-title">
+                    某加固中的反调试<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/28/hello-xposed/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>第一个 Xposed 模块
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">第一个xposed模块中的“Class ref in pre-verified class resolved to unexpected implementation”错误原因</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#案发现场-loadclass"><span class="toc-text">案发现场 loadclass</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#何方神圣-CLASS-ISPREVERIFIED"><span class="toc-text">何方神圣 CLASS_ISPREVERIFIED</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#罪魁祸首-PathClassLoader"><span class="toc-text">罪魁祸首 PathClassLoader</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#凌晨4点-startvm"><span class="toc-text">凌晨4点 startvm</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

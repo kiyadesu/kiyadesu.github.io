@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> dex及其类的加载过程 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月28日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                dex及其类的加载过程
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                        <a href="/tags/dalvik/">dalvik</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <blockquote>
+<p>在Android系统中，应用程序进程都是由Zygote进程孵化出来的，而Zygote进程是由Init进程启动的。Zygote进程在启动时会创建一个Dalvik虚拟机实例，每当它孵化一个新的应用程序进程时，都会将这个Dalvik虚拟机实例复制到新的应用程序进程里面去，从而使得每一个应用程序进程都有一个独立的Dalvik虚拟机实例。</p>
+</blockquote>
+<a id="more"></a>
+<p>每个android应用程序都是运行在虚拟机实例上的，而其中dex的加载就比如离开不了虚拟机的初始化。</p>
+<h1 id="JNI-CreateJavaVM"><a href="#JNI-CreateJavaVM" class="headerlink" title="JNI_CreateJavaVM"></a>JNI_CreateJavaVM</h1><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/Jni.cpp#3524" target="_blank" rel="external">/dalvik/vm/Jni.cpp</a>.<br>创建了一个虚拟机之后调用 dvmStartup 初始化虚拟机。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">std::string status = dvmStartup(argc, argv.get(), args-&gt;ignoreUnrecognized, (JNIEnv*)pEnv);</div></pre></td></tr></table></figure>
+<h1 id="dvmStartup"><a href="#dvmStartup" class="headerlink" title="dvmStartup"></a>dvmStartup</h1><p>位于<a href="(http://androidxref.com/4.4.4_r1/xref/dalvik/vm/Init.cpp#1382">/dalvik/vm/Init.cpp</a>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">std::string dvmStartup(int argc, const char* const argv[],</div><div class="line">        bool ignoreUnrecognized, JNIEnv* pEnv)</div><div class="line">&#123;</div><div class="line">    ...</div><div class="line">    if (!dvmClassStartup()) &#123;   //初始化文件的结构体引用</div><div class="line">        return &quot;dvmClassStartup failed&quot;;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">    if (!dvmFindRequiredClassesAndMembers()) &#123;  //初始化成员、类的引用</div><div class="line">        return &quot;dvmFindRequiredClassesAndMembers failed&quot;;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="dvmClassStartup"><a href="#dvmClassStartup" class="headerlink" title="dvmClassStartup"></a>dvmClassStartup</h2><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Class.cpp#409" target="_blank" rel="external">/dalvik/vm/oo/Class.cpp</a><br>处理启动类路径，打开特定的dex/jar文件，可能会进行一些优化。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bool dvmClassStartup()</div><div class="line">&#123;</div><div class="line">    ...</div><div class="line">    processClassPath(gDvm.bootClassPathStr, true);</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="processClassPath"><a href="#processClassPath" class="headerlink" title="processClassPath"></a>processClassPath</h3><p>将一些文件路径转化为ClassPathEntry结构。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">static ClassPathEntry* processClassPath(const char* pathStr, bool isBootstrap)</div><div class="line">&#123;</div><div class="line">    ...</div><div class="line">    cp = mangle;</div><div class="line">    idx = 0;</div><div class="line">    while (cp &lt; end) &#123;  //循环遍历pathStr</div><div class="line">        ...</div><div class="line">            ClassPathEntry tmp;</div><div class="line">            tmp.kind = kCpeUnknown;</div><div class="line">            tmp.fileName = strdup(cp);</div><div class="line">            tmp.ptr = NULL;</div><div class="line">            cpe[idx].kind = kCpeLastEntry;</div><div class="line">            cpe[idx].fileName = NULL;</div><div class="line">            cpe[idx].ptr = NULL;</div><div class="line">            //为每个文件准备一个cpe</div><div class="line">            if (!prepareCpe(&amp;tmp, isBootstrap)) &#123;</div><div class="line">                /* drop from list and continue on */</div><div class="line">                free(tmp.fileName);</div><div class="line">            &#125; else &#123;</div><div class="line">                /* copy over, pointers and all */</div><div class="line">                cpe[idx] = tmp;</div><div class="line">                idx++;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        cp += strlen(cp) +1;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">    return cpe;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="prepareCpe"><a href="#prepareCpe" class="headerlink" title="prepareCpe"></a>prepareCpe</h3><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Class.cpp#603" target="_blank" rel="external">/dalvik/vm/oo/Class.cpp</a>.<br>根据传进的文件名判断这是一个什么样的文件，提取出有用的信息，存入ClassPathEntry结构体。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">static bool prepareCpe(ClassPathEntry* cpe, bool isBootstrap)</div><div class="line">&#123;</div><div class="line">    ...</div><div class="line">    char suffix[10];</div><div class="line">    getFileNameSuffix(cpe-&gt;fileName, suffix, sizeof(suffix));</div><div class="line">    //根据后缀名判断文件类型</div><div class="line">    if ((strcmp(suffix, &quot;jar&quot;) == 0) || (strcmp(suffix, &quot;zip&quot;) == 0) ||</div><div class="line">            (strcmp(suffix, &quot;apk&quot;) == 0)) &#123;</div><div class="line">        JarFile* pJarFile = NULL;</div><div class="line">        if (dvmJarFileOpen(cpe-&gt;fileName, NULL, &amp;pJarFile, isBootstrap) == 0) &#123;</div><div class="line">            cpe-&gt;kind = kCpeJar;</div><div class="line">            cpe-&gt;ptr = pJarFile;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">    &#125; else if (strcmp(suffix, &quot;dex&quot;) == 0) &#123;</div><div class="line">        RawDexFile* pRawDexFile = NULL;</div><div class="line">        if (dvmRawDexFileOpen(cpe-&gt;fileName, NULL, &amp;pRawDexFile, isBootstrap) == 0) &#123;</div><div class="line">            cpe-&gt;kind = kCpeDex;</div><div class="line">            cpe-&gt;ptr = pRawDexFile;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">        ALOGE(&quot;Unknown type suffix &apos;%s&apos;&quot;, suffix);</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="dvmRawDexFileOpen"><a href="#dvmRawDexFileOpen" class="headerlink" title="dvmRawDexFileOpen"></a>dvmRawDexFileOpen</h3><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/RawDexFile.cpp#109" target="_blank" rel="external">/dalvik/vm/RawDexFile.cpp</a>.<br>打开一个原生dex文件，优化，加载。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"> int dvmRawDexFileOpen(const char* fileName, const char* odexOutputName,</div><div class="line">     RawDexFile** ppRawDexFile, bool isBootstrap)</div><div class="line"> &#123;</div><div class="line">    ...</div><div class="line">     dexFd = open(fileName, O_RDONLY);  //打开文件</div><div class="line">     if (dexFd &lt; 0) goto bail;</div><div class="line">     if (odexOutputName == NULL) &#123;  //构造一个dex cache name</div><div class="line">         cachedName = dexOptGenerateCacheFileName(fileName, NULL);</div><div class="line">         if (cachedName == NULL)</div><div class="line">             goto bail;</div><div class="line">     &#125;</div><div class="line">    ...</div><div class="line">    //打开cache中的文件，如果没有会新建一个，填充头部，验证dependencies</div><div class="line">     optFd = dvmOpenCachedDexFile(fileName, cachedName, modTime,</div><div class="line">         adler32, isBootstrap, &amp;newFile, /*createIfMissing=*/true);</div><div class="line">    //新生成一个优化的dex</div><div class="line">     if (newFile) &#123;</div><div class="line">         ...</div><div class="line">         if (result) &#123;     //内部执行了system/bin目录下的dexopt文件</div><div class="line">             result = dvmOptimizeDexFile(optFd, dexOffset, fileSize,</div><div class="line">                 fileName, modTime, adler32, isBootstrap);</div><div class="line">         &#125;</div><div class="line">         ...</div><div class="line">     &#125;</div><div class="line">     if (dvmDexFileOpenFromFd(optFd, &amp;pDvmDex) != 0) &#123;</div><div class="line">         ALOGI(&quot;Unable to map cached %s&quot;, fileName);</div><div class="line">         goto bail;</div><div class="line">     &#125;</div><div class="line">     ...</div><div class="line">     *ppRawDexFile = (RawDexFile*) calloc(1, sizeof(RawDexFile));</div><div class="line">     (*ppRawDexFile)-&gt;cacheFileName = cachedName;</div><div class="line">     (*ppRawDexFile)-&gt;pDvmDex = pDvmDex;    //新文件的指针</div><div class="line">     cachedName = NULL;      // don&apos;t free it below</div><div class="line">     result = 0;</div><div class="line">...</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="dvmFindRequiredClassesAndMembers"><a href="#dvmFindRequiredClassesAndMembers" class="headerlink" title="dvmFindRequiredClassesAndMembers"></a>dvmFindRequiredClassesAndMembers</h2><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/InitRefs.cpp#481" target="_blank" rel="external">/dalvik/vm/InitRefs.cpp</a> .<br>遍历类列表和成员列表，将他们的引用存入全局遍历gDvm中以便日后引用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Look up the set of classes and members used directly by the VM,</div><div class="line"> * storing references to them into the globals instance. See</div><div class="line"> * Globals.h. This function is exposed so that dex optimization may</div><div class="line"> * call it (while avoiding doing other unnecessary VM initialization).</div><div class="line"> *</div><div class="line"> * The function returns a success flag (true == success).</div><div class="line"> */</div><div class="line">bool dvmFindRequiredClassesAndMembers() &#123;</div><div class="line">    /*</div><div class="line">     * Note: Under normal VM use, this is called by dvmStartup()</div><div class="line">     * in Init.c. For dex optimization, this is called as well, but in</div><div class="line">     * that case, the call is made from DexPrepare.c.</div><div class="line">     */</div><div class="line">    return initClassReferences()</div><div class="line">        &amp;&amp; initFieldOffsets()</div><div class="line">        &amp;&amp; initConstructorReferences()</div><div class="line">        &amp;&amp; initDirectMethodReferences()</div><div class="line">        &amp;&amp; initVirtualMethodOffsets()</div><div class="line">        &amp;&amp; initFinalizerReference()</div><div class="line">        &amp;&amp; verifyStringOffsets();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>仅以initClassReferences为例。</p>
+<h3 id="initClassReferences"><a href="#initClassReferences" class="headerlink" title="initClassReferences"></a>initClassReferences</h3><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/InitRefs.cpp#initClassReferences" target="_blank" rel="external">/dalvik/vm/InitRefs.cpp</a> .<br>初始化一下核心类、数组类、异常类的引用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static bool initClassReferences() &#123;</div><div class="line">    ...</div><div class="line">    int i;      //初始化类的引用</div><div class="line">    for (i = 0; classes[i].ref != NULL; i++) &#123;</div><div class="line">        if (!initClassReference(classes[i].ref, classes[i].name)) &#123;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="initClassReference"><a href="#initClassReference" class="headerlink" title="initClassReference"></a>initClassReference</h4><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/InitRefs.cpp#24" target="_blank" rel="external">/dalvik/vm/InitRefs.cpp</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">static bool initClassReference(ClassObject** pClass, const char* name) &#123;</div><div class="line">    ClassObject* result;</div><div class="line">    assert(*pClass == NULL);</div><div class="line">    if (name[0] == &apos;[&apos;) &#123;   //基本类类型的数组</div><div class="line">        result = dvmFindArrayClass(name, NULL);</div><div class="line">    &#125; else &#123;    //系统类的引用</div><div class="line">        result = dvmFindSystemClassNoInit(name);</div><div class="line">    &#125;</div><div class="line">    if (result == NULL) &#123;</div><div class="line">        ALOGE(&quot;Could not find essential class %s&quot;, name);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line">    *pClass = result;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="dvmFindSystemClassNoInit"><a href="#dvmFindSystemClassNoInit" class="headerlink" title="dvmFindSystemClassNoInit"></a>dvmFindSystemClassNoInit</h4><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Class.cpp#1454" target="_blank" rel="external">/dalvik/vm/oo/Class.cpp</a>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Find the named class (by descriptor), searching for it in the</div><div class="line"> * bootclasspath.</div><div class="line"> *</div><div class="line"> * On failure, this returns NULL with an exception raised.</div><div class="line"> */</div><div class="line">ClassObject* dvmFindSystemClassNoInit(const char* descriptor)</div><div class="line">&#123;</div><div class="line">    return findClassNoInit(descriptor, NULL, NULL);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="findClassNoInit"><a href="#findClassNoInit" class="headerlink" title="findClassNoInit"></a>findClassNoInit</h3><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Class.cpp#1473" target="_blank" rel="external">/dalvik/vm/oo/Class.cpp</a><br>通过文件描述符找到相应的类，如果类没有加载，我们就去加载并链接，但是不会执行<clinit>.<br>这里会返回一个是通过加载得到的类还是用的已有的类定义的标识，以防在同一个class loader中被加载两次。</clinit></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">static ClassObject* findClassNoInit(const char* descriptor, Object* loader,</div><div class="line">    DvmDex* pDvmDex)</div><div class="line">&#123;</div><div class="line">    //在已经加载的类列表中查找（hash）</div><div class="line">    clazz = dvmLookupClass(descriptor, loader, true);</div><div class="line">    if (clazz == NULL) &#123;    //如果没有找到相应的类切没有传进dex文件的参数，就在dex列表中查找，找到之后加载dex文件中的类</div><div class="line">        const DexClassDef* pClassDef;</div><div class="line">        ...</div><div class="line">        if (pDvmDex == NULL) &#123;</div><div class="line">            assert(loader == NULL);     /* shouldn&apos;t be here otherwise */</div><div class="line">            pDvmDex = searchBootPathForClass(descriptor, &amp;pClassDef); //在dex列表中查找</div><div class="line">        &#125; else &#123;    //在提供的dex文件中查找</div><div class="line">            pClassDef = dexFindClass(pDvmDex-&gt;pDexFile, descriptor);</div><div class="line">        &#125;</div><div class="line">        ...</div><div class="line">        /* found a match, try to load it */</div><div class="line">        clazz = loadClassFromDex(pDvmDex, pClassDef, loader);   //加载dex！</div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="loadClassFromDex"><a href="#loadClassFromDex" class="headerlink" title="loadClassFromDex"></a>loadClassFromDex</h3><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Class.cpp#1953" target="_blank" rel="external">/dalvik/vm/oo/Class.cpp</a>.<br>从指定的dex文件中加载指定的类。此函数相当于loadClass()+defineClass().</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Try to load the indicated class from the specified DEX file.</div><div class="line"> *</div><div class="line"> * This is effectively loadClass()+defineClass() for a DexClassDef.  The</div><div class="line"> * loading was largely done when we crunched through the DEX.</div><div class="line"> *</div><div class="line"> * Returns NULL on failure.  If we locate the class but encounter an error</div><div class="line"> * while processing it, an appropriate exception is thrown.</div><div class="line"> */</div><div class="line">static ClassObject* loadClassFromDex(DvmDex* pDvmDex,</div><div class="line">    const DexClassDef* pClassDef, Object* classLoader)</div><div class="line">&#123;</div><div class="line">    ...</div><div class="line">    pDexFile = pDvmDex-&gt;pDexFile;</div><div class="line">    //通过pClassDef得到class_data_item指针</div><div class="line">    pEncodedData = dexGetClassData(pDexFile, pClassDef);</div><div class="line">    if (pEncodedData != NULL) &#123;</div><div class="line">        dexReadClassDataHeader(&amp;pEncodedData, &amp;header);</div><div class="line">    &#125; else &#123;</div><div class="line">        // Provide an all-zeroes header for the rest of the loading.</div><div class="line">        memset(&amp;header, 0, sizeof(header));</div><div class="line">    &#125;</div><div class="line">    //通过头部数据和class_data_item得到其他的数据</div><div class="line">    result = loadClassFromDex0(pDvmDex, pClassDef, &amp;header, pEncodedData,</div><div class="line">            classLoader);</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="loadClassFromDex0"><a href="#loadClassFromDex0" class="headerlink" title="loadClassFromDex0"></a>loadClassFromDex0</h3><p>位于<a href="http://androidxref.com/4.4.4_r1/xref/dalvik/vm/oo/Class.cpp#1727" target="_blank" rel="external">/dalvik/vm/oo/Class.cpp</a>.<br>通过头部数据和class_data_item，返回一个class的全部数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">static ClassObject* loadClassFromDex0(DvmDex* pDvmDex,</div><div class="line">    const DexClassDef* pClassDef, const DexClassDataHeader* pHeader,</div><div class="line">    const u1* pEncodedData, Object* classLoader)</div><div class="line">&#123;</div><div class="line">    ClassObject* newClass = NULL;</div><div class="line">    descriptor = dexGetClassDescriptor(pDexFile, pClassDef);</div><div class="line">    newClass-&gt;descriptor = descriptor; //描述符</div><div class="line">    SET_CLASS_FLAG(newClass, pClassDef-&gt;accessFlags);   //权限标识</div><div class="line">    newClass-&gt;pDvmDex = pDvmDex;</div><div class="line">    newClass-&gt;primitiveType = PRIM_NOT;</div><div class="line">    newClass-&gt;status = CLASS_IDX;</div><div class="line">    ...</div><div class="line">    newClass-&gt;super = (ClassObject*) pClassDef-&gt;superclassIdx;  //父类</div><div class="line">    ....</div><div class="line">    ....</div><div class="line">    newClass-&gt;sourceFile = dexGetSourceFile(pDexFile, pClassDef);   //源文件</div><div class="line">    /* caller must call dvmReleaseTrackedAlloc */</div><div class="line">    return newClass;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>虚拟机创建后开始初始化，其中一步就是初始化类的引用，类成员的引用。</p>
+<p>在初始化文件结构体的引用时，虚拟机根据全局变量gDvm中的启动类路径来为每个类生成一个ClassPathEntry的结构体引用，处理的过程中为压缩文件/dex调用了不同的函数，<br>处理dex文件时顺便对齐进行了优化，生成了odex文件。(当然4.4之后由于采用了ART代替dalvik，优化后的文件格式应为elf)。</p>
+<p>在初始化类中数据的引用时，先是在已经加载的类列表中查找，如果没有的话再逐个的对dex进行解剖查找，找到相应的dex后，加载这个dex文件解析全部数据。</p>
+<hr>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://androidxref.com/4.4.4_r1/" target="_blank" rel="external">Android在线源码</a><br><a href="http://blog.csdn.net/luoshengyang/article/details/8885792" target="_blank" rel="external">Dalvik虚拟机的启动过程分析</a><br><a href="http://www.cnblogs.com/jacobchen/p/3599483.html" target="_blank" rel="external">Dalvik的BOOTCLASSPATH和dexopt流程</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/28/dex-loading-flow/">http://kiya.studio/2015/11/28/dex-loading-flow/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/02/compile-android-sourcecode-4-4-4-r2/" id="art-left" class="art-right">
+                <span class="next-title">
+                    ubuntu 14.04编译运行android 4.4.4_r2源码<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/27/smali-grammar-special-classes/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>smali 语法 - 内部类和注解类
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">dex及其类的加载过程</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JNI-CreateJavaVM"><span class="toc-text">JNI_CreateJavaVM</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dvmStartup"><span class="toc-text">dvmStartup</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#dvmClassStartup"><span class="toc-text">dvmClassStartup</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#processClassPath"><span class="toc-text">processClassPath</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#prepareCpe"><span class="toc-text">prepareCpe</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dvmRawDexFileOpen"><span class="toc-text">dvmRawDexFileOpen</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dvmFindRequiredClassesAndMembers"><span class="toc-text">dvmFindRequiredClassesAndMembers</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#initClassReferences"><span class="toc-text">initClassReferences</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#initClassReference"><span class="toc-text">initClassReference</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#dvmFindSystemClassNoInit"><span class="toc-text">dvmFindSystemClassNoInit</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#findClassNoInit"><span class="toc-text">findClassNoInit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#loadClassFromDex"><span class="toc-text">loadClassFromDex</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#loadClassFromDex0"><span class="toc-text">loadClassFromDex0</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> hook - 拦截系统调用 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月21日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                hook - 拦截系统调用
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/hook/">hook</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>本文是对<a href="http://www.weibo.com/zhengmin1989" target="_blank" rel="external">大犇蒸米spark</a>的<a href="http://drops.wooyun.org/tips/9300" target="_blank" rel="external">安卓动态调试七种武器之离别钩 – Hooking</a>的实践记录以及知识整理!原文请戳<a href="http://drops.wooyun.org/tips/9300" target="_blank" rel="external">链接</a>.</p>
+<a id="more"></a>
+<p>实现hook就离不开<a href="http://kiya.space/2015/12/18/ptrace-basis/" target="_blank" rel="external">ptrace</a>.</p>
+<h1 id="ARM上的系统调用"><a href="#ARM上的系统调用" class="headerlink" title="ARM上的系统调用"></a>ARM上的系统调用</h1><p>系统调用由SWI实现,即软件中断(Software Interrupt),在请求系统服务时造成的中断,由SWI指令造成异常从而切入特权模式,从而允许非特权模式访问特权模式的函数.</p>
+<p>ARM中有两种系统调用方式: OABI(old application binary interface)和EABI(extended application binary interface).见(内核源码arch/arm/kernel/entry-common.S文件).</p>
+<p>对于OABI: 通过跟随在swi指令后的调用号来进行. <code>1101 1111 vvvv vvvv -- SWI immed_8</code> (Thumb指令)格式)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">swi (#num | 0x900000) (0x900000是个magic值)</div></pre></td></tr></table></figure></p>
+<p>对于EABI: 调用号存放在r7中. <code>1110 1111 0000 0000 -- SWI 0</code> (Thumb指令格式)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mov r7, #num</div><div class="line">swi 0x0</div></pre></td></tr></table></figure></p>
+<p>在 <a href="https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf" target="_blank" rel="external">arm.pdf</a>的 <strong>A4.1.107 SWI</strong> 和 <strong>A7.1.69 SWI</strong> 分别是对ARM和Thumb中SWI的描述.</p>
+<p>所有的系统调用号在<code>arch/arm/include/asm/unistd.h</code>文件.</p>
+<p>所以在得到一条SWI指令时,要解析出系统调用号得分两种情况:<br>这里的源程序直接按ARM指令集处理了,没有做判断thumb的处理.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">if(ins == 0xef000000)&#123;      //直接和指令比较</div><div class="line">    return regs-&gt;ARM_r7;</div><div class="line">&#125;else&#123;</div><div class="line">    if((ins &amp; 0x0ff00000) != 0x0f900000)&#123;   //和magic值比较,这里我认为前面两位0f改成别的值也是可以的,重要的是magic值</div><div class="line">        return -1;</div><div class="line">    &#125;</div><div class="line">    return ins &amp;= 0x000fffff;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h1 id="拦截系统调用"><a href="#拦截系统调用" class="headerlink" title="拦截系统调用"></a>拦截系统调用</h1><p><strong>整个思路是:</strong></p>
+<p>使被调试程序在下次次调用系统函数前后停下(SYSCALL),这时调试程序对被调试进行操作(PTRACE_PEEKTEXT/PTRACE_GETREGS…),随后使被调试程序继续运行(SYSCALL),调试程序等待(wait).</p>
+<p><strong>被调试程序:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">#include&lt;stdlib.h&gt;</div><div class="line">int count = 0;</div><div class="line">void print()</div><div class="line">&#123;</div><div class="line">	printf(&quot;hello,%d\n&quot;,count);</div><div class="line">        sleep(1);</div><div class="line">&#125;</div><div class="line">int main(int argc, char const *argv[])</div><div class="line">&#123;</div><div class="line">	while(1)&#123;</div><div class="line">		print();</div><div class="line">		count++;</div><div class="line">	&#125;</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>调试程序:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">#include&lt;sys/ptrace.h&gt;  //头文件路径根据ndk目录下/platforms/android-21/arch-arm/usr/include</div><div class="line">#include&lt;asm/unistd.h&gt;</div><div class="line">long getSystemCallNumber(int pid, struct pt_regs *regs)</div><div class="line">&#123;</div><div class="line">    long ins = 0;</div><div class="line">    ins = ptrace(PTRACE_PEEKTEXT, pid, (void *)(regs-&gt;ARM_pc - 4), NULL);   //r15-4</div><div class="line">    if(ins == 0)&#123;</div><div class="line">        return 0;</div><div class="line">    &#125;</div><div class="line">    if(ins == 0xef000000)&#123;      //EABI</div><div class="line">        return regs-&gt;ARM_r7;</div><div class="line">    &#125;else&#123;</div><div class="line">        if((ins &amp; 0x0ff00000) != 0x0f900000)&#123;   //OABI</div><div class="line">            return -1;</div><div class="line">        &#125;</div><div class="line">        return ins &amp;= 0x000fffff;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">void doSthBefore(int pid)</div><div class="line">&#123;</div><div class="line">    struct pt_regs regs;</div><div class="line">    int sysCallNumber = 0;</div><div class="line">    ptrace(PTRACE_GETREGS,pid,NULL,&amp;regs);</div><div class="line">    sysCallNumber = getSystemCallNumber(pid,&amp;regs);</div><div class="line">    printf(&quot;before syscallno: %d\n&quot;, sysCallNumber);</div><div class="line">    if(sysCallNumber == __NR_write)&#123;    //得到参数</div><div class="line">        printf(&quot;__NR_write &lt;&lt; %ld, %p, %ld\n&quot;,regs.ARM_r0, (void*)regs.ARM_r1, regs.ARM_r2);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">void doSthAfter(int pid)</div><div class="line">&#123;</div><div class="line">    struct pt_regs regs;</div><div class="line">    int sysCallNumber = 0;</div><div class="line">    ptrace(PTRACE_GETREGS,pid,NULL,&amp;regs);</div><div class="line">    sysCallNumber = getSystemCallNumber(pid,&amp;regs);</div><div class="line">    printf(&quot;after syscallno: %d\n&quot;, sysCallNumber);</div><div class="line">    if(sysCallNumber == __NR_write)&#123;</div><div class="line">        printf(&quot;__NR_write &gt;&gt; %ld\n&quot;,regs.ARM_r0);</div><div class="line">    &#125;</div><div class="line">    printf(&quot;\n&quot;);</div><div class="line">&#125;</div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">    if(argc != 2)&#123;</div><div class="line">        printf(&quot;usage: %s &lt;pid to be traced&gt;\n&quot;,argv[0]);</div><div class="line">        return 1;</div><div class="line">    &#125;</div><div class="line">    int pid = atoi(argv[1]);</div><div class="line">    if(0 != ptrace(PTRACE_ATTACH, pid, NULL, NULL))&#123;</div><div class="line">        printf(&quot;attach failed.&quot;);</div><div class="line">        return 1;</div><div class="line">    &#125;</div><div class="line">    ptrace(PTRACE_SYSCALL, pid, NULL, NULL);    //使之在系统调用前后停下</div><div class="line">    int status;</div><div class="line">    while(1)&#123;</div><div class="line">        wait(&amp;status);</div><div class="line">        doSthBefore(pid);</div><div class="line">        ptrace(PTRACE_SYSCALL, pid, NULL, NULL);</div><div class="line">        wait(&amp;status);</div><div class="line">        doSthAfter(pid);</div><div class="line">        ptrace(PTRACE_SYSCALL, pid, NULL, NULL);</div><div class="line">    &#125;</div><div class="line">    ptrace(PTRACE_DETACH, pid, NULL, NULL);</div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>结果:</strong></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/19/16/20/25" alt=""></p>
+<h1 id="修改函数参数"><a href="#修改函数参数" class="headerlink" title="修改函数参数"></a>修改函数参数</h1><p>修改printf的参数:字符串及其长度.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div></pre></td><td class="code"><pre><div class="line">#define long_size 4</div><div class="line">void readData(int pid, long addr, char *str, int len)</div><div class="line">&#123;</div><div class="line">    int i,j;</div><div class="line">    char *laddr;</div><div class="line">    union u&#123;</div><div class="line">        long val;</div><div class="line">        char chars[long_size];</div><div class="line">    &#125;data;</div><div class="line">    i = 0;</div><div class="line">    j = len / long_size;</div><div class="line">    laddr = str;</div><div class="line">    while (i &lt; j) &#123;</div><div class="line">        data.val = ptrace(PTRACE_PEEKDATA, pid, addr+i*4, NULL);    //PEEKDATA一次读一个字</div><div class="line">        memcpy(laddr,data.chars,long_size);</div><div class="line">        laddr += long_size;</div><div class="line">        i++;</div><div class="line">    &#125;</div><div class="line">    j = len % long_size;</div><div class="line">    if (j != 0) &#123;</div><div class="line">        data.val = ptrace(PTRACE_PEEKDATA, pid, addr+i*4, NULL);    //PEEKDATA一次读一个字</div><div class="line">        memcpy(laddr,data.chars,long_size);</div><div class="line">    &#125;</div><div class="line">    str[len] = &apos;\0&apos;;</div><div class="line">&#125;</div><div class="line">void writeData(int pid, long addr, char *str, int len)</div><div class="line">&#123;</div><div class="line">    int i,j;</div><div class="line">    char *laddr;</div><div class="line">    union u&#123;</div><div class="line">        long val;</div><div class="line">        char chars[long_size];</div><div class="line">    &#125;data;</div><div class="line">    i = 0;</div><div class="line">    j = len / long_size;</div><div class="line">    laddr = str;</div><div class="line">    while (i &lt; j) &#123;</div><div class="line">        memcpy(data.chars,laddr,long_size);</div><div class="line">        ptrace(PTRACE_POKEDATA, pid, addr+i*4, data.val);    //PEEKDATA一次写一个字</div><div class="line">        laddr += long_size;</div><div class="line">        i++;</div><div class="line">    &#125;</div><div class="line">    j = len % long_size;</div><div class="line">    if (j != 0) &#123;</div><div class="line">        memcpy(data.chars,laddr,j);</div><div class="line">        ptrace(PTRACE_POKEDATA, pid, addr+i*4, data.val);    //POKEDATA一次写一个字</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">void strrev(char *p)</div><div class="line">&#123;</div><div class="line">  char *q = p;</div><div class="line">  while(q &amp;&amp; *q) ++q;</div><div class="line">  for(--q; p &lt; q; ++p, --q)</div><div class="line">    *p = *p ^ *q,</div><div class="line">    *q = *p ^ *q,</div><div class="line">    *p = *p ^ *q;</div><div class="line">&#125;</div><div class="line">void modifyString(int pid,long addr,long len)</div><div class="line">&#123;</div><div class="line">    char *str;</div><div class="line">    str = (char*)calloc(sizeof(char)*(len+1),1);</div><div class="line">    readData(pid,addr,str,len);</div><div class="line">    strrev(str);</div><div class="line">    writeData(pid,addr,str,len);</div><div class="line">&#125;</div><div class="line">void doSthBefore(int pid)</div><div class="line">&#123;</div><div class="line">    struct pt_regs regs;</div><div class="line">    int sysCallNumber = 0;</div><div class="line">    ptrace(PTRACE_GETREGS,pid,NULL,&amp;regs);</div><div class="line">    sysCallNumber = getSystemCallNumber(pid,&amp;regs);</div><div class="line">    printf(&quot;before syscallno: %d\n&quot;, sysCallNumber);</div><div class="line">    if(sysCallNumber == __NR_write)&#123;</div><div class="line">        printf(&quot;__NR_write &lt;&lt; %ld, %p, %ld\n&quot;,regs.ARM_r0, (void*)regs.ARM_r1, regs.ARM_r2);</div><div class="line">        modifyString(pid,regs.ARM_r1,regs.ARM_r2);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://drops.wooyun.org/tips/9300" target="_blank" rel="external">安卓动态调试七种武器之离别钩 – Hooking</a></p>
+<p><a href="http://www.xuebuyuan.com/706076.html" target="_blank" rel="external">Android ptrace简介</a></p>
+<p><a href="http://blog.csdn.net/ce123/article/details/6925375" target="_blank" rel="external">浅谈EABI和OABI</a></p>
+<p><a href="http://blog.csdn.net/myarrow/article/details/7036266" target="_blank" rel="external">Arm Linux系统调用流程详细解析-SWI</a></p>
+<p><a href="http://bbs.pediy.com/showthread.php?t=196435" target="_blank" rel="external">linux arm 系统调用</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/21/hook-syscall/">http://kiya.studio/2015/12/21/hook-syscall/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/22/csdn-login/" id="art-left" class="art-right">
+                <span class="next-title">
+                    Python爬虫 - 登录csdn<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/18/ptrace-basis/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>反调试方法二 - 抢占ptrace
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">hook - 拦截系统调用</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ARM上的系统调用"><span class="toc-text">ARM上的系统调用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#拦截系统调用"><span class="toc-text">拦截系统调用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#修改函数参数"><span class="toc-text">修改函数参数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

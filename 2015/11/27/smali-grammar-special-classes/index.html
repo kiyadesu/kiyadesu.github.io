@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> smali 语法 - 内部类和注解类 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月27日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                smali 语法 - 内部类和注解类
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/smali/">smali</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <blockquote>
+<p>本文环境<br><code>java version &quot;1.7.0_75&quot;</code><br><code>dx version 1.11</code><br><code>baksmali 2.1.0</code></p>
+</blockquote>
+<a id="more"></a>
+<h1 id="知识预备"><a href="#知识预备" class="headerlink" title="知识预备"></a>知识预备</h1><h2 id="系统注解"><a href="#系统注解" class="headerlink" title="系统注解"></a>系统注解</h2><p>系统注解用来表示java反射相关的信息，是由编译器生成的。<br>存在于 .dex 文件annotation部分，只在运行时系统可见。<br>源码在 /libcore/dalvik/src/main/java/dalvik/annotation/ 目录下.</p>
+<h3 id="AnnotationDefault"><a href="#AnnotationDefault" class="headerlink" title="AnnotationDefault"></a>AnnotationDefault</h3><p>注解类的默认注解类，如果指定了默认值，此注解类就会出现。</p>
+<h3 id="EnclosingClass"><a href="#EnclosingClass" class="headerlink" title="EnclosingClass"></a>EnclosingClass</h3><p>出现在内部类中，指定该 内部类/匿名内部类 所在的最近的外部类，此注解类必须和InnerClass注解类一同出现,不能和EnclosingMethod一同出现。</p>
+<h3 id="EnclosingMethod"><a href="#EnclosingMethod" class="headerlink" title="EnclosingMethod"></a>EnclosingMethod</h3><p>出现在内部类中，指定该内部类所在的最近的外部函数，此注解类必须和InnerClass注解类一同出现,不能和EnclosingClass一同出现。</p>
+<h3 id="InnerClass"><a href="#InnerClass" class="headerlink" title="InnerClass"></a>InnerClass</h3><p>出现在内部类中，提供内部类的名字(不包括包名,匿名内部类值为null)和访问权限(同类的访问权限)。<br>该注解类需和EnclosingMethod或EnclosingClass之一一同出现。</p>
+<h3 id="MemberClasses"><a href="#MemberClasses" class="headerlink" title="MemberClasses"></a>MemberClasses</h3><p>出现在具有内部类的类中，提供直接内部类(不包含嵌套)的类名列表。</p>
+<h3 id="Signature"><a href="#Signature" class="headerlink" title="Signature"></a>Signature</h3><p>出现由更复杂的类型定义的类、字段或者方法中，dex文件不定义signature的格式，此注解类只是指定<code>源语言能够实现其语义</code>的相应的signature。<br>因此，signature并不能被解析或这验证，只能被高一级的API或者工具(如调试器)接管。<br>signature以字符串数组的形式存在，使用的时候拼接。只有编译工具才能将一个完整的signature分成几个字符串。</p>
+<h3 id="Throws"><a href="#Throws" class="headerlink" title="Throws"></a>Throws</h3><p>以数组形式指定某个方法抛出的异常类型。</p>
+<h1 id="内部类"><a href="#内部类" class="headerlink" title="内部类"></a>内部类</h1><p>java 在编译的时候会为每个类生成一个class文件，内部类的格式为 <code>[外部类]$[内部类].class</code>.</p>
+<h2 id="java-代码"><a href="#java-代码" class="headerlink" title="java 代码"></a>java 代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class HeyInnerclass</div><div class="line">&#123;</div><div class="line">    class Inner1&#123;</div><div class="line">        class Inner1_1&#123;&#125;</div><div class="line">    &#125;</div><div class="line">    class Inner2&#123;&#125;</div><div class="line">    private void func()&#123;</div><div class="line">        class InnerFun&#123;&#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="smali-代码"><a href="#smali-代码" class="headerlink" title="smali 代码"></a>smali 代码</h2><p>以下仅为部分相关代码。</p>
+<h3 id="HeyInnerclass"><a href="#HeyInnerclass" class="headerlink" title="HeyInnerclass"></a>HeyInnerclass</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"># annotations   //注解类MemberClasses</div><div class="line">.annotation system Ldalvik/annotation/MemberClasses;</div><div class="line">    value = &#123;</div><div class="line">        LHeyInnerclass$Inner2;,</div><div class="line">        LHeyInnerclass$Inner1;</div><div class="line">    &#125;</div><div class="line">.end annotation</div><div class="line">.method private func()V</div><div class="line">    .registers 1</div><div class="line">    .prologue</div><div class="line">    .line 18</div><div class="line">    return-void</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<p>HeyInnerclass 中有 HeyInnerclass$Inner2 和 HeyInnerclass$Inner1 两个类！<br>func 方法中并没有任何实现还是占用了一个寄存器，这个寄存器表示自身(this)的引用。</p>
+<h3 id="Inner1"><a href="#Inner1" class="headerlink" title="Inner1"></a>Inner1</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"># annotations   //注解类 EnclosingClass</div><div class="line">.annotation system Ldalvik/annotation/EnclosingClass;</div><div class="line">    value = LHeyInnerclass;</div><div class="line">.end annotation</div><div class="line">//注解类 InnerClass</div><div class="line">.annotation system Ldalvik/annotation/InnerClass;</div><div class="line">    accessFlags = 0x0</div><div class="line">    name = &quot;Inner1&quot;</div><div class="line">.end annotation</div><div class="line">//注解类 MemberClasses</div><div class="line">.annotation system Ldalvik/annotation/MemberClasses;</div><div class="line">    value = &#123;</div><div class="line">        LHeyInnerclass$Inner1$Inner1_1;</div><div class="line">    &#125;</div><div class="line">.end annotation</div><div class="line"># instance fields   //声明字段this$0</div><div class="line">.field final synthetic this$0:LHeyInnerclass;</div><div class="line"># direct methods</div><div class="line">.method constructor &lt;init&gt;(LHeyInnerclass;)V</div><div class="line">    .registers 2</div><div class="line">    .prologue</div><div class="line">    .line 3     //初始化字段 this$0</div><div class="line">    iput-object p1, p0, LHeyInnerclass$Inner1;-&gt;this$0:LHeyInnerclass;</div><div class="line">    invoke-direct &#123;p0&#125;, Ljava/lang/Object;-&gt;&lt;init&gt;()V</div><div class="line">    .line 5</div><div class="line">    return-void</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<p>Inner1 中有一个内部类 HeyInnerclass$Inner1$Inner1_1，所在的外部类是 HeyInnerclass，名字是 Inner1，访问权限 0x0.<br><code>this$0</code> 是 HeyInnerclass 类型的，是内部类的保留的对所在的外部类的引用，this表示父类的引用，0表示引用的层数。<br><code>synthetic</code>表示这是合成的，由编译器生成的，不是写出来的。</p>
+<p>Inner2 与 Inner1 除了没有字节的内部类外其余基本一致，代码就不贴了。</p>
+<h3 id="Inner1-1"><a href="#Inner1-1" class="headerlink" title="Inner1_1"></a>Inner1_1</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"># annotations   #注解类</div><div class="line">.annotation system Ldalvik/annotation/EnclosingClass;</div><div class="line">    value = LHeyInnerclass$Inner1;</div><div class="line">.end annotation</div><div class="line">.annotation system Ldalvik/annotation/InnerClass;   #注解类</div><div class="line">    accessFlags = 0x0</div><div class="line">    name = &quot;Inner1_1&quot;</div><div class="line">.end annotation</div><div class="line"># instance fields</div><div class="line">.field final synthetic this$1:LHeyInnerclass$Inner1;</div><div class="line"># direct methods</div><div class="line">.method constructor &lt;init&gt;(LHeyInnerclass$Inner1;)V</div><div class="line">    .registers 2</div><div class="line">    .prologue</div><div class="line">    .line 5</div><div class="line">    iput-object p1, p0, LHeyInnerclass$Inner1$Inner1_1;-&gt;this$1:LHeyInnerclass$Inner1;</div><div class="line">    invoke-direct &#123;p0&#125;, Ljava/lang/Object;-&gt;&lt;init&gt;()V</div><div class="line">    return-void</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<p>Inner1_1 名字是 Inner1_1,访问权限为0x0,所在的外部类是HeyInnerclass$Inner1,<br>对外部类的的引用是 this$1，类型是 HeyInnerclass$Inner1，1表示引用层数深了一层。</p>
+<h3 id="InnerFun"><a href="#InnerFun" class="headerlink" title="InnerFun"></a>InnerFun</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"># annotations   #注解类</div><div class="line">.annotation system Ldalvik/annotation/EnclosingMethod;</div><div class="line">    value = LHeyInnerclass;-&gt;func()V</div><div class="line">.end annotation</div><div class="line">.annotation system Ldalvik/annotation/InnerClass;   #注解类</div><div class="line">    accessFlags = 0x0</div><div class="line">    name = &quot;InnerFun&quot;</div><div class="line">.end annotation</div><div class="line"># instance fields   #引用字段</div><div class="line">.field final synthetic this$0:LHeyInnerclass;</div><div class="line"># direct methods</div><div class="line">.method constructor &lt;init&gt;(LHeyInnerclass;)V</div><div class="line">    .registers 2</div><div class="line">    .prologue</div><div class="line">    .line 17</div><div class="line">    iput-object p1, p0, LHeyInnerclass$1InnerFun;-&gt;this$0:LHeyInnerclass;</div><div class="line">    invoke-direct &#123;p0&#125;, Ljava/lang/Object;-&gt;&lt;init&gt;()V</div><div class="line">    return-void</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<p>InnerFun的名字是InnerFun,访问权限是0x0，所在的方法是 LHeyInnerclass;-&gt;func()V .<br>对外部类的引用是 this$0,类型是 HeyInnerclass,引用层数为0.</p>
+<hr>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/27/smali-grammar-special-classes/">http://kiya.studio/2015/11/27/smali-grammar-special-classes/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/28/dex-loading-flow/" id="art-left" class="art-right">
+                <span class="next-title">
+                    dex及其类的加载过程<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/26/smali-grammar-iterator-switch/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>smali 语法 - iterator & switch-case & try-catch
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">smali 语法 - 内部类和注解类</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#知识预备"><span class="toc-text">知识预备</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#系统注解"><span class="toc-text">系统注解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AnnotationDefault"><span class="toc-text">AnnotationDefault</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EnclosingClass"><span class="toc-text">EnclosingClass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EnclosingMethod"><span class="toc-text">EnclosingMethod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#InnerClass"><span class="toc-text">InnerClass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MemberClasses"><span class="toc-text">MemberClasses</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Signature"><span class="toc-text">Signature</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Throws"><span class="toc-text">Throws</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#内部类"><span class="toc-text">内部类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#java-代码"><span class="toc-text">java 代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#smali-代码"><span class="toc-text">smali 代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HeyInnerclass"><span class="toc-text">HeyInnerclass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Inner1"><span class="toc-text">Inner1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Inner1-1"><span class="toc-text">Inner1_1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#InnerFun"><span class="toc-text">InnerFun</span></a></li></ol></li></ol></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

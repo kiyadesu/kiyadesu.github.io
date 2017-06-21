@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 第一个 Xposed 模块 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月28日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                第一个 Xposed 模块
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/Xposed/">Xposed</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>环境:<br>已root手机一枚(Android 4.4.4)<br>Android Studio一枚</p>
+<a id="more"></a>
+<p>官方文档参考<a href="https://github.com/rovo89/XposedBridge/wiki/Development-tutorial-style1" target="_blank" rel="external">这里</a>.</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>我们需要事先下载一个<a href="http://dl-xda.xposed.info/modules/de.robv.android.xposed.installer_v33_36570c.apk-style1" target="_blank" rel="external">Xposed installer</a>安装在手机上,用来管理所有的模块.</p>
+<p>安装完成后打开:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/09/53/02-style1" alt=""></p>
+<p>点击<code>框架</code>,</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/09/53/32-style1" alt=""></p>
+<p>点击<code>安装/更新</code>安装框架,</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/09/53/49-style1" alt=""></p>
+<p>点击确定重启,框架界面是这样的:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/09/54/11-style1" alt=""></p>
+<h1 id="编写新模块"><a href="#编写新模块" class="headerlink" title="编写新模块"></a>编写新模块</h1><p>打开android studio,新建工程,选择<code>Add no activity</code></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/09/54/35-style1" alt=""></p>
+<p>新建完成后,找到<code>app</code>目录下的<code>build.gradle</code>文件,将<code>dependencies</code>中的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile fileTree(dir: &apos;libs&apos;, include: [&apos;*.jar&apos;])</div></pre></td></tr></table></figure>
+<p>改为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">provided fileTree(dir: &apos;libs&apos;, include: [&apos;*.jar&apos;])</div></pre></td></tr></table></figure>
+<p>下载<a href="http://forum.xda-developers.com/attachment.php?attachmentid=2748878&amp;d=1400342298-style1" target="_blank" rel="external">XposedBridgeApi-54.jar</a>并放入app目录下的libs文件夹.</p>
+<p>在<code>AndroidManifest.xml</code>文件的<code>application</code>中添加如下代码,其中的54是前面下载的文件中的号码.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&lt;meta-data</div><div class="line">    android:name=&quot;xposedmodule&quot;</div><div class="line">    android:value=&quot;true&quot; /&gt;</div><div class="line">&lt;meta-data</div><div class="line">    android:name=&quot;xposeddescription&quot;</div><div class="line">    android:value=&quot;kiya&apos;s test module&quot; /&gt;</div><div class="line">&lt;meta-data</div><div class="line">    android:name=&quot;xposedminversion&quot;</div><div class="line">    android:value=&quot;54&quot; /&gt;</div></pre></td></tr></table></figure>
+<p>新建一个<code>Test</code>类,写入:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">package space.kiya.xposedtest;</div><div class="line">import de.robv.android.xposed.IXposedHookLoadPackage;</div><div class="line">import de.robv.android.xposed.XposedBridge;</div><div class="line">import de.robv.android.xposed.callbacks.XC_LoadPackage;</div><div class="line"></div><div class="line">public class Test implements IXposedHookLoadPackage&#123;</div><div class="line">    @Override public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable &#123;</div><div class="line">        XposedBridge.log(&quot;loaded: &quot; + loadPackageParam.packageName);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>新建<code>assets</code>文件夹,在里面新建文件名为<code>xposed_init</code>,写入刚刚的类名,此处应为<code>space.kiya.xposedtest.Test</code>.</p>
+<p>这时就可以编译安装了.</p>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>因为工程没有activity,所以在桌面上看不到该应用。<br>来到<code>xposed installer</code>的<code>模块</code>中,可以看到我们的模块出现在这里,现在勾选它:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/10/17/03-style1" alt=""></p>
+<p>在重启使之生效之前,我们在logcat新建一个tag为<code>Xposed</code>的过滤器,这样就可以过滤出模块输出的log.<br>大概是这样的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Loading Xposed v54(for Zygote)...</div><div class="line">Loading modules from /data/app/space.kiya.xposedtest-1.apk</div><div class="line">  Loading class space.kiya.xposedtest.Test</div><div class="line">Loaded: android</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>这样的日志在<code>xposed installer</code>的<code>日志</code>中也是可以看到的.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/10/16/42-style1" alt=""></p>
+<h1 id="可能出现的错误"><a href="#可能出现的错误" class="headerlink" title="可能出现的错误"></a>可能出现的错误</h1><p>如果输出的log中出现了如下错误:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation</div></pre></td></tr></table></figure>
+<p>说明是前面步骤中没有修改<code>build.gradle</code>导致的.</p>
+<p>具体原因见<a href="http://kiya.space/2016/01/03/xposed-class-ispreverified/" target="_blank" rel="external">另一篇博客</a>.</p>
+<h1 id="xposed怎样工作"><a href="#xposed怎样工作" class="headerlink" title="xposed怎样工作?"></a>xposed怎样工作?</h1><p>开机时,<code>./init.rc</code>脚本文件会启动<code>Zygote</code>进程,Zygote对应的具体程序是<code>/system/bin/app_process</code>,然后加载需要的类,调用初始化的方法,之后启动的每个应用都是Zygote的拷贝,所以Zygote进程是十分重要的.</p>
+<p>通过在类路径中添加一个jar包,在<code>app_process</code>的特定位置调用jar包中的方法,Xposed框架实现了带扩展功能的<code>app_process</code>,然后将原有的<code>app_process</code>替换掉.<br>在<code>/data/data/de.robv.android.xposed.installer/bin/</code>目录下有一个<code>XposedBridge.jar</code>文件,它就是被引用的jar包,源码在<a href="https://github.com/rovo89/XposedBridge-style1" target="_blank" rel="external">github</a>,main函数在<code>/src/de/robv/android/xposed/XposedBridge.java</code>中,每个进程每次启动时都会被调用.加载模块的功能也是在这里实现.</p>
+<p>Xposed真正强大的是它可以hook调用的方法.当你反编译修改apk时,你可以在里面插入xposed的命令,于是你就可以在方法调用前后注入自己的代码.</p>
+<p>XposedBridge有一个私有的本地方法<code>hookMethodNative</code>,代码实现放在<code>app_process</code>中.在调用被hook的方法前会先调用此方法,<code>hookMethodNative</code>有一个<code>handleHookedMethod</code>方法,可以修改传递给被hook函数的参数,变量甚至是调用其他方法.</p>
+<h1 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h1><p>以上仅仅是证明了我们的xposed模块是可以工作的.现在来修改点什么,比如状态栏上的时间?</p>
+<p>在安装源码下的<a href="http://androidxref.com/4.4.4_r1/xref/frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java#42" target="_blank" rel="external">/frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java</a>文件中有一个<code>updateClock</code>函数用来更新时间.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">final void updateClock() &#123;</div><div class="line">    if (mDemoMode) return;</div><div class="line">    mCalendar.setTimeInMillis(System.currentTimeMillis());</div><div class="line">    setText(getSmallTime());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在代码中使用<code>findAndHookMethod</code>函数找到这一函数,并在updateClock函数执行后将<code>TextView</code>的内容重新设置即可.注意在使用前需要这样将其导入:<code>import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;</code>.<br>我们的效果是将时间后面加上一个笑脸,颜色设为红色.<br>代码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">package space.kiya.xposedtest;</div><div class="line"></div><div class="line">import android.graphics.Color;</div><div class="line">import android.widget.TextView;</div><div class="line"></div><div class="line">import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;</div><div class="line">import de.robv.android.xposed.IXposedHookLoadPackage;</div><div class="line">import de.robv.android.xposed.XC_MethodHook;</div><div class="line">import de.robv.android.xposed.XposedBridge;</div><div class="line">import de.robv.android.xposed.callbacks.XC_LoadPackage;</div><div class="line"></div><div class="line">public class Test implements IXposedHookLoadPackage&#123;</div><div class="line">    @Override public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable &#123;</div><div class="line">        if(loadPackageParam.packageName.equals(&quot;com.android.systemui&quot;))&#123;</div><div class="line">            findAndHookMethod(&quot;com.android.systemui.statusbar.policy.Clock&quot;, loadPackageParam.classLoader, &quot;updateClock&quot;, new XC_MethodHook() &#123;</div><div class="line">                @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable &#123;</div><div class="line">                    TextView tv = (TextView)param.thisObject;</div><div class="line">                    String text = tv.getText().toString();</div><div class="line">                    tv.setText(text + &quot;:)&quot;);</div><div class="line">                    tv.setTextColor(Color.RED);</div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>效果如下:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/29/15/34/49-style1" alt=""></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/28/hello-xposed/">http://kiya.studio/2015/12/28/hello-xposed/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2016/01/03/xposed-class-ispreverified/" id="art-left" class="art-right">
+                <span class="next-title">
+                    第一个xposed模块中的“Class ref in pre-verified class resolved to unexpected implementation”错误原因<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/23/hook-call-function-in-so/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>hook - Android ARM下的的so注入
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">第一个 Xposed 模块</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#准备工作"><span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#编写新模块"><span class="toc-text">编写新模块</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#可能出现的错误"><span class="toc-text">可能出现的错误</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#xposed怎样工作"><span class="toc-text">xposed怎样工作?</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#修改"><span class="toc-text">修改</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

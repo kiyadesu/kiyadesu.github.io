@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 解析 dex 文件结构 - 索引区和数据区（一） - Strings & Types · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月19日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                解析 dex 文件结构 - 索引区和数据区（一） - Strings & Types
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><img src="http://7xo976.com1.z0.glb.clouddn.com/images/github-io/Android/dex-file-general-structure-1.png" alt="part-1"></p>
+<a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在 <a href="http://kiya-z.github.io/2015/11/17/parse-dex-file-part-dex-header/" target="_blank" rel="external">解析 dex 文件结构 - DexHeader</a> 中我们知道 Table 部分就是索引结构区，他们是是作为指向 Data 区数据的结构索引而存在的。<br>数据区是 dex 会用到的全部数据。</p>
+<hr>
+<h1 id="StringIds-和-StringData"><a href="#StringIds-和-StringData" class="headerlink" title="StringIds 和 StringData"></a>StringIds 和 StringData</h1><p>StringIds 存放的是字符串的 id，也就是数据区中各个 StringData 的文件偏移。<br>StringIds 的大小和文件偏移在 DexHeader 和 map_list 中都有指定。</p>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>StringIds 以4字节对齐，即总大小为 4 * stringIdsSize .</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;string_id_item&quot;.</div><div class="line"> */</div><div class="line">struct DexStringId &#123;</div><div class="line">    u4 stringDataOff;      /* file offset to string_data_item */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>按照 StringIds 指示的偏移来到数据区对应的位置，StringData 采用的格式为：</p>
+<p><strong>字符串长度</strong> : uleb128 格式，不包括字符串尾部的 00 。<br><strong>字符串内容</strong>：MUTF-8(经过修改的UTF-8)，以 00 结尾 .</p>
+<h2 id="手工查找"><a href="#手工查找" class="headerlink" title="手工查找"></a>手工查找</h2><p><strong>某 dex 文件的 StringIds 部分</strong>：</p>
+<p>stringIdsSize：0x5c<br>stringIdsOff：0x0070</p>
+<p>0x0070 ~ 0x01df</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">00000070  bc 04 00 00 ef 04 00 00  26 05 00 00 30 05 00 00  |........&amp;...0...|</div><div class="line">00000080  38 05 00 00 41 05 00 00  44 05 00 00 48 05 00 00  |8...A...D...H...|</div><div class="line">00000090  4b 05 00 00 4f 05 00 00  52 05 00 00 56 05 00 00  |K...O...R...V...|</div><div class="line">000000a0  71 05 00 00 8c 05 00 00  a0 05 00 00 bf 05 00 00  |q...............|</div><div class="line">000000b0  dd 05 00 00 f9 05 00 00  09 06 00 00 24 06 00 00  |............$...|</div><div class="line">000000c0  40 06 00 00 57 06 00 00  6e 06 00 00 85 06 00 00  |@...W...n.......|</div><div class="line">........  .. .. .. ..</div><div class="line">000001c0  c4 09 00 00 c9 09 00 00  d1 09 00 00 dd 09 00 00  |................|</div><div class="line">000001d0  e4 09 00 00 eb 09 00 00  f0 09 00 00 f4 09 00 00  |................|</div></pre></td></tr></table></figure>
+<p>以第一个字符串为例，文件偏移为 <code>bc 04 00 00</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">000004b0  64 0a 00 00 de 0f 00 00  00 00 00 00 31 2f 64 61  |d...........1/da|</div><div class="line">000004c0  74 61 2f 64 61 74 61 2f  63 6f 6d 2e 7a 79 68 2e  |ta/data/com.zyh.|</div><div class="line">000004d0  6c 69 67 68 74 69 6e 67  62 61 63 6b 75 70 2f 2e  |lightingbackup/.|</div><div class="line">000004e0  6c 69 62 2f 6c 69 62 65  78 65 63 2e 73 6f 00 35  |lib/libexec.so.5|</div></pre></td></tr></table></figure></p>
+<p>根据 <a href="http://kiya-z.github.io/2015/11/18/parse-dex-file-part-leb128/" target="_blank" rel="external">LEB128 的解码格式</a>可知：<br>字符串的长度为 0x31(有效位：011 0001) = 49 个字节。(“/data/data/com.zyh.lightingbackup/.lib/libexec.so”)</p>
+<p><strong>以此类推：</strong></p>
+<table>
+<thead>
+<tr>
+<th>序数</th>
+<th>文件偏移</th>
+<th>字符串长度</th>
+<th>字符串</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>0x04bc</td>
+<td>0x31</td>
+<td>/data/data/com.zyh.lightingbackup/.lib/libexec.so</td>
+</tr>
+<tr>
+<td>0x01</td>
+<td>0x04ef</td>
+<td>0x35</td>
+<td>/data/data/com.zyh.lightingbackup/.lib/libexecmain.so</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>0x04</td>
+<td>0x0538</td>
+<td>0x07</td>
+<td>CPU_ABI</td>
+</tr>
+<tr>
+<td>0x05</td>
+<td>0x0541</td>
+<td>0x01</td>
+<td>I</td>
+</tr>
+<tr>
+<td>0x06</td>
+<td>0x0544</td>
+<td>0x02</td>
+<td>IL</td>
+</tr>
+<tr>
+<td>0x07</td>
+<td>0x0548</td>
+<td>0x01</td>
+<td>J</td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>0x054b</td>
+<td>0x02</td>
+<td>JL</td>
+</tr>
+<tr>
+<td>0x09</td>
+<td>0x054f</td>
+<td>0x01</td>
+<td>L</td>
+</tr>
+<tr>
+<td>0x0a</td>
+<td>0x0552</td>
+<td>0x02</td>
+<td>LL</td>
+</tr>
+<tr>
+<td>0x0b</td>
+<td>0x0556</td>
+<td>0x19</td>
+<td>Landroid/app/Application;</td>
+</tr>
+<tr>
+<td>0x0c</td>
+<td>0x0571</td>
+<td>0x19</td>
+<td>Landroid/content/Context;</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>0x5b</td>
+<td>0x09f0</td>
+<td>0x02</td>
+<td>ze</td>
+</tr>
+<tr>
+<td>0x5c</td>
+<td>0x09f4</td>
+<td>0x02</td>
+<td>zf</td>
+</tr>
+</tbody>
+</table>
+<h2 id="写程序解析字符串"><a href="#写程序解析字符串" class="headerlink" title="写程序解析字符串"></a>写程序解析字符串</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">def readuleb128(f):</div><div class="line">    num = struct.unpack(&apos;B&apos;,f.read(1))[0]     # 读第一字节</div><div class="line">    if num &gt; 0x7f :</div><div class="line">        cur = struct.unpack(&apos;B&apos;,f.read(1))[0]     #读第二字节</div><div class="line">        num = (num &amp; 0x7f) | ((cur &amp; 0x7f) &lt;&lt; 7)</div><div class="line">        if cur &gt; 0x7f:</div><div class="line">            cur = struct.unpack(&apos;B&apos;,f.read(1))[0]     #读第三字节</div><div class="line">            num = num | ((cur &amp; 0x7f) &lt;&lt; 14)</div><div class="line">            if cur &gt; 0x7f:</div><div class="line">                cur = struct.unpack(&apos;B&apos;,f.read(1))[0]     #读第四字节</div><div class="line">                num = num | ((cur &amp; 0x7f) &lt;&lt; 21)</div><div class="line">                if cur &gt; 0x7f:</div><div class="line">                    cur = struct.unpack(&apos;B&apos;,f.read(1))[0]     #读第五字节</div><div class="line">                    num = num | ((cur &amp; 0x7f) &lt;&lt; 28)</div><div class="line">    return num</div><div class="line">def parseStrings(f):</div><div class="line">    f.seek(DexStruct.DexHeader[&apos;stringIdsOff&apos;])</div><div class="line">    stringIds_data = f.read(4*DexStruct.DexHeader[&apos;stringIdsSize&apos;])</div><div class="line">    cur_pos = 0</div><div class="line">    for i in range(DexStruct.DexHeader[&apos;stringIdsSize&apos;]):</div><div class="line">        str_off =  struct.unpack(&apos;I&apos;,stringIds_data[cur_pos:cur_pos+4])[0]</div><div class="line">        f.seek(str_off)</div><div class="line">        str_len = readuleb128(f)</div><div class="line">        str_content = f.read(str_len)</div><div class="line">        cur_pos += 4</div><div class="line">        tmpDexStringItem = &#123;</div><div class="line">            &apos;offset&apos; : str_off,</div><div class="line">            &apos;len&apos; : str_len,</div><div class="line">            &apos;content&apos; : str_content,</div><div class="line">        &#125;</div><div class="line">        DexStruct.DexStrings.append(tmpDexStringItem)</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="TypeIds"><a href="#TypeIds" class="headerlink" title="TypeIds"></a>TypeIds</h1><p>TypeIds 存放的是 stringIds 内的索引，也就是说 StringData 里面的一些字符串是类型描述符。<br>TypeIds 的大小和文件偏移在 DexHeader 和 map_list 中都有指定。</p>
+<p>这里的类型描述符可以代表 dex 文件中的任何类型，包括基本类型，类类型，数组类型和空类型。</p>
+<h2 id="结构-1"><a href="#结构-1" class="headerlink" title="结构"></a>结构</h2><p>TypeIds 以4字节对齐，即总大小为 4 * typeIdsSize .</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;type_id_item&quot;.</div><div class="line"> */</div><div class="line">struct DexTypeId &#123;</div><div class="line">    u4  descriptorIdx;      /* index into stringIds list for type descriptor */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>通过 <code>descriptorIdx</code> 可以得到相应<code>类型描述符</code>的字符串的 StringId，从而找到相应的字符串。</p>
+<h2 id="手动查找"><a href="#手动查找" class="headerlink" title="手动查找"></a>手动查找</h2><p><strong>某 dex 文件的 TypeIds 部分</strong>：</p>
+<p>TypeIdsSize：0x19<br>TypeIdsOff：0x01e0</p>
+<p>0x01e0 ~ 0x0244</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">000001e0  05 00 00 00 07 00 00 00  0b 00 00 00 0c 00 00 00  |................|</div><div class="line">000001f0  0d 00 00 00 0e 00 00 00  0f 00 00 00 10 00 00 00  |................|</div><div class="line">00000200  11 00 00 00 12 00 00 00  13 00 00 00 14 00 00 00  |................|</div><div class="line">00000210  15 00 00 00 16 00 00 00  17 00 00 00 18 00 00 00  |................|</div><div class="line">00000220  19 00 00 00 1a 00 00 00  1b 00 00 00 1c 00 00 00  |................|</div><div class="line">00000230  1d 00 00 00 1e 00 00 00  21 00 00 00 26 00 00 00  |........!...&amp;...|</div><div class="line">00000240  29 00 00 00</div></pre></td></tr></table></figure>
+<p>以第一个索引值 0x05 为例，在 StringIds 中找到第 0x05 个 StringId，也就是 0x0070(stringIdsOff) + 0x05 * 4 = 0x0084，<br>该地址值为 0x0541，0x0541 处的字符串为 “I”，int 类型。类型对照参见下表 - Dalvik 字节码类型。</p>
+<table>
+<thead>
+<tr>
+<th>语法</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V</td>
+<td>void; 只用于返回值</td>
+</tr>
+<tr>
+<td>Z</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>B</td>
+<td>byte</td>
+</tr>
+<tr>
+<td>S</td>
+<td>short</td>
+</tr>
+<tr>
+<td>C</td>
+<td>char</td>
+</tr>
+<tr>
+<td>I</td>
+<td>int</td>
+</tr>
+<tr>
+<td>J</td>
+<td>long</td>
+</tr>
+<tr>
+<td>F</td>
+<td>float</td>
+</tr>
+<tr>
+<td>D</td>
+<td>double</td>
+</tr>
+<tr>
+<td>Lfully/qualified/Name;</td>
+<td>类名：fully.qualified.Name</td>
+</tr>
+<tr>
+<td>[descriptor</td>
+<td>数组描述符，可以表示多维数组如 [[[descriptor，但最多只能有255个维度</td>
+</tr>
+</tbody>
+</table>
+<p>以此类推：</p>
+<table>
+<thead>
+<tr>
+<th>序数</th>
+<th>descriptorIdx</th>
+<th>StringId</th>
+<th>Type</th>
+<th>真正类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>0x05</td>
+<td>0x0084</td>
+<td>I</td>
+<td>int</td>
+</tr>
+<tr>
+<td>0x01</td>
+<td>0x07</td>
+<td>0x008c</td>
+<td>J</td>
+<td>long</td>
+</tr>
+<tr>
+<td>0x02</td>
+<td>0x0b</td>
+<td>0x009c</td>
+<td>Landroid/app/Application;</td>
+<td>android.app.Application</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>0x0c</td>
+<td>0x00a0</td>
+<td>Landroid/content/Context;</td>
+<td>android.content.Context</td>
+</tr>
+<tr>
+<td>0x04</td>
+<td>0x0d</td>
+<td>0x00a4</td>
+<td>Landroid/os/Build;</td>
+<td>android.os.Build</td>
+</tr>
+<tr>
+<td>0x05</td>
+<td>0x0e</td>
+<td>0x00a8</td>
+<td>Lcom/shell/NativeApplication;</td>
+<td>com.shell.NativeApplication</td>
+</tr>
+<tr>
+<td>0x06</td>
+<td>0x0f</td>
+<td>0x00ac</td>
+<td>Lcom/shell/SuperApplication;</td>
+<td>com.shell.SuperApplication</td>
+</tr>
+<tr>
+<td>0x07</td>
+<td>0x10</td>
+<td>0x00b0</td>
+<td>Ldalvik/annotation/Throws;</td>
+<td>dalvik.annotation.Throws</td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>0x11</td>
+<td>0x00b4</td>
+<td>Ljava/io/File;</td>
+<td>java.io.File</td>
+</tr>
+<tr>
+<td>0x09</td>
+<td>0x12</td>
+<td>0x00b8</td>
+<td>Ljava/io/FileInputStream;</td>
+<td>java.io.FileInputStream</td>
+</tr>
+<tr>
+<td>0x0a</td>
+<td>0x13</td>
+<td>0x00bc</td>
+<td>Ljava/io/FileOutputStream;</td>
+<td>java.io.FileOutputStream</td>
+</tr>
+<tr>
+<td>0x0b</td>
+<td>0x14</td>
+<td>0x00c0</td>
+<td>Ljava/io/IOException;</td>
+<td>java.io.IOException</td>
+</tr>
+<tr>
+<td>0x0c</td>
+<td>0x15</td>
+<td>0x00c4</td>
+<td>Ljava/io/InputStream;</td>
+<td>java.io.InputStream</td>
+</tr>
+<tr>
+<td>0x0d</td>
+<td>0x16</td>
+<td>0x00c8</td>
+<td>Ljava/lang/Exception;</td>
+<td>java.lang.Exception</td>
+</tr>
+<tr>
+<td>0x0e</td>
+<td>0x17</td>
+<td>0x00cc</td>
+<td>Ljava/lang/Object;</td>
+<td>java.lang.Object</td>
+</tr>
+<tr>
+<td>0x0f</td>
+<td>0x18</td>
+<td>0x00d0</td>
+<td>Ljava/lang/String;</td>
+<td>java.lang.String</td>
+</tr>
+<tr>
+<td>0x10</td>
+<td>0x19</td>
+<td>0x00d4</td>
+<td>Ljava/lang/System;</td>
+<td>java.lang.System</td>
+</tr>
+<tr>
+<td>0x11</td>
+<td>0x1a</td>
+<td>0x00d8</td>
+<td>Ljava/util/zip/CRC32;</td>
+<td>java.util.zip.CRC32</td>
+</tr>
+<tr>
+<td>0x12</td>
+<td>0x1b</td>
+<td>0x00dc</td>
+<td>Ljava/util/zip/CheckedInputStream;</td>
+<td>java.util.zip.CheckedInputStream</td>
+</tr>
+<tr>
+<td>0x13</td>
+<td>0x1c</td>
+<td>0x00e0</td>
+<td>Ljava/util/zip/Checksum;</td>
+<td>java.util.zip.Checksum</td>
+</tr>
+<tr>
+<td>0x14</td>
+<td>0x1d</td>
+<td>0x00e4</td>
+<td>Ljava/util/zip/ZipEntry;</td>
+<td>java.util.zip.ZipEntry</td>
+</tr>
+<tr>
+<td>0x15</td>
+<td>0x1e</td>
+<td>0x00e8</td>
+<td>Ljava/util/zip/ZipFile;</td>
+<td>java.util.zip.ZipFile</td>
+</tr>
+<tr>
+<td>0x16</td>
+<td>0x21</td>
+<td>0x00f4</td>
+<td>V</td>
+<td>void</td>
+</tr>
+<tr>
+<td>0x17</td>
+<td>0x26</td>
+<td>0x0108</td>
+<td>Z</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>0x18</td>
+<td>0x29</td>
+<td>0x0114</td>
+<td>[B]</td>
+<td>byte[]</td>
+</tr>
+</tbody>
+</table>
+<h2 id="写程序解析-TypeIds"><a href="#写程序解析-TypeIds" class="headerlink" title="写程序解析 TypeIds"></a>写程序解析 TypeIds</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">def parseTypes(f):</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    此函数基于 parseStrings 函数的结果，调用前需先调用 parseStrings</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    f.seek(DexStruct.DexHeader[&apos;typeIdsOff&apos;])</div><div class="line">    for i in range(DexStruct.DexHeader[&apos;typeIdsSize&apos;]):</div><div class="line">        type_desc_id = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        DexStruct.DexTypes.append(DexStruct.DexStrings[type_desc_id])</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://source.android.com/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik Executable format</a></p>
+<p><a href="http://www.ituring.com.cn/book/1131" target="_blank" rel="external">《Android 软件安全与逆向分析》</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/19/parse-dex-file-part-strings-and-type-descriptors/">http://kiya.studio/2015/11/19/parse-dex-file-part-strings-and-type-descriptors/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/20/parse-dex-file-part-protos-fields-methods/" id="art-left" class="art-right">
+                <span class="next-title">
+                    解析 dex 文件结构 - 索引区和数据区（二） - Protos & Fields & Methods<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/19/tools-010-editor/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>号称 Edit Everything 的 010 Editor
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">解析 dex 文件结构 - 索引区和数据区（一） - Strings & Types</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#StringIds-和-StringData"><span class="toc-text">StringIds 和 StringData</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手工查找"><span class="toc-text">手工查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析字符串"><span class="toc-text">写程序解析字符串</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#TypeIds"><span class="toc-text">TypeIds</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构-1"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手动查找"><span class="toc-text">手动查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析-TypeIds"><span class="toc-text">写程序解析 TypeIds</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 解析 dex 文件结构 - DexHeader · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月17日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                解析 dex 文件结构 - DexHeader
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><img src="http://7xo976.com1.z0.glb.clouddn.com/images/github-io/Android/dex-file-general-structure-header.png" alt="header"></p>
+<h2 id="dex-简介"><a href="#dex-简介" class="headerlink" title="dex 简介"></a>dex 简介</h2><p>dex 文件是 dalvik 虚拟机的可执行文件。</p>
+<a id="more"></a>
+<hr>
+<h2 id="dex-文件结构"><a href="#dex-文件结构" class="headerlink" title="dex 文件结构"></a>dex 文件结构</h2><p>该结构位于系统源码 <code>dalvik\libdex\DexFile.h</code> 中，描述的是 dex 文件被映射到内存中的结构。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Structure representing a DEX file.</div><div class="line"> *</div><div class="line"> * Code should regard DexFile as opaque, using the API calls provided here</div><div class="line"> * to access specific structures.</div><div class="line"> */</div><div class="line">struct DexFile &#123;</div><div class="line">    /* directly-mapped &quot;opt&quot; header */</div><div class="line">    const DexOptHeader* pOptHeader;</div><div class="line">    /* pointers to directly-mapped structs and arrays in base DEX */</div><div class="line">    const DexHeader*    pHeader;</div><div class="line">    const DexStringId*  pStringIds;</div><div class="line">    const DexTypeId*    pTypeIds;</div><div class="line">    const DexFieldId*   pFieldIds;</div><div class="line">    const DexMethodId*  pMethodIds;</div><div class="line">    const DexProtoId*   pProtoIds;</div><div class="line">    const DexClassDef*  pClassDefs;</div><div class="line">    const DexLink*      pLinkData;</div><div class="line">    /*</div><div class="line">     * These are mapped out of the &quot;auxillary&quot; section, and may not be</div><div class="line">     * included in the file.</div><div class="line">     */</div><div class="line">    const DexClassLookup* pClassLookup;</div><div class="line">    const void*         pRegisterMapPool;       // RegisterMapClassPool</div><div class="line">    /* points to start of DEX file data */</div><div class="line">    const u1*           baseAddr;</div><div class="line">    /* track memory overhead for auxillary structures */</div><div class="line">    int                 overhead;</div><div class="line">    /* additional app-specific data structures associated with the DEX */</div><div class="line">    //void*               auxData;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>基本的文件结构只需关注:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">struct DexFile&#123;</div><div class="line">    DexHeader    Header;</div><div class="line">    DexStringId  StringIds[stringIdsSize];</div><div class="line">    DexTypeId    TypeIds[typeIdsSize];</div><div class="line">    DexFieldId   FieldIds[fieldIdsSize];</div><div class="line">    DexMethodId  MethodIds[methodIdsSize];</div><div class="line">    DexProtoId   ProtoIds[protoIdsSize];</div><div class="line">    DexClassDef  ClassDefs[classDefsSize];</div><div class="line">    DexData      Data[];</div><div class="line">    DexLink      LinkData;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h3 id="大体结构图"><a href="#大体结构图" class="headerlink" title="大体结构图"></a>大体结构图</h3><p><img src="http://7xo976.com1.z0.glb.clouddn.com/images/github-io/Android/dex-file-general-structure.png" alt="dex-file-general-structure"></p>
+<p>大致可以将 dex 文件分为三个部分：DexHeader 、Table 是索引结构区 、data 部分是数据区。<br>程序使用到的数据都在 data section 内， Tables 是指向 data section 中具体数据结构的索引。</p>
+<hr>
+<h2 id="DexHeader-结构"><a href="#DexHeader-结构" class="headerlink" title="DexHeader 结构"></a>DexHeader 结构</h2><p>头部记录了整个文件的索引。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * 160-bit SHA-1 digest.</div><div class="line"> */</div><div class="line">enum &#123; kSHA1DigestLen = 20,</div><div class="line">       kSHA1DigestOutputLen = kSHA1DigestLen*2 +1 &#125;;</div><div class="line">/*</div><div class="line"> * Direct-mapped &quot;header_item&quot; struct.</div><div class="line"> */</div><div class="line">struct DexHeader &#123;</div><div class="line">    u1  magic[8];           /* 版本标识 */</div><div class="line">    u4  checksum;           /* adler32 检验 */</div><div class="line">    u1  signature[kSHA1DigestLen]; /* SHA-1 哈希值 */</div><div class="line">    u4  fileSize;           /* 整个文件大小 */</div><div class="line">    u4  headerSize;         /* DexHeader 大小 */</div><div class="line">    u4  endianTag;          /* 字节序标记 */</div><div class="line">    u4  linkSize;           /* 链接段大小 */</div><div class="line">    u4  linkOff;            /* 链接段偏移 */</div><div class="line">    u4  mapOff;             /* DexMapList 的文件偏移 */</div><div class="line">    u4  stringIdsSize;      /* DexStringId 的个数 */</div><div class="line">    u4  stringIdsOff;       /* DexStringId 的文件偏移 */</div><div class="line">    u4  typeIdsSize;        /* DexTypeId 的个数 */</div><div class="line">    u4  typeIdsOff;         /* DexTypeId 的文件偏移 */</div><div class="line">    u4  protoIdsSize;       /* DexProtoId 的个数 */</div><div class="line">    u4  protoIdsOff;        /* DexProtoId 的文件偏移 */</div><div class="line">    u4  fieldIdsSize;       /* DexFieldId 的个数 */</div><div class="line">    u4  fieldIdsOff;        /* DexFieldId 的文件偏移 */</div><div class="line">    u4  methodIdsSize;      /* DexMethodId 的个数 */</div><div class="line">    u4  methodIdsOff;       /* DexMethodId 的文件偏移 */</div><div class="line">    u4  classDefsSize;      /* DexClassDef 的个数 */</div><div class="line">    u4  classDefsOff;       /* DexClassDef 的文件偏移 */</div><div class="line">    u4  dataSize;           /* 数据段的大小 */</div><div class="line">    u4  dataOff;            /* 数据段的文件偏移 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="其中："><a href="#其中：" class="headerlink" title="其中："></a>其中：</h3><table>
+<thead>
+<tr>
+<th>field</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>magic</strong></td>
+<td>dex文件标识，值必须为常量 <code>DEX_FILE_MAGIC</code> = { 0x64 0x65 0x78 0x0a 0x30 0x33 0x35 0x00 } = “dex\n035\0”</td>
+</tr>
+<tr>
+<td><strong>checkSum</strong></td>
+<td>对除 magic 和 checkSum 外的剩余文件计算 adler32 校验值，目的是检测文件是否损坏</td>
+</tr>
+<tr>
+<td><strong> signature</strong></td>
+<td>对除 magic、checkSum 和 signature 外的剩余文件计算 SHA-1 校验值，用来确定文件的唯一性</td>
+</tr>
+<tr>
+<td><strong> fileSize</strong></td>
+<td>以字节为单位，整个文件（包括头部）的大小</td>
+</tr>
+<tr>
+<td><strong> headerSize</strong></td>
+<td>头部大小，0x70 字节，已经考虑到兼容性</td>
+</tr>
+<tr>
+<td><strong> endianTag</strong></td>
+<td>两种字节序取值: <code>uint ENDIAN_CONSTANT = 0x12345678</code> ; <code>uint REVERSE_ENDIAN_CONSTANT = 0x78563412</code></td>
+</tr>
+<tr>
+<td><strong> linkSize</strong></td>
+<td>链接段的大小，如果没有使用静态链接，值为0</td>
+</tr>
+<tr>
+<td><strong> linkOff</strong></td>
+<td>链接段的文件偏移，指向链接数据段内，如果 <code>linkSize</code> 为 0，则为 0</td>
+</tr>
+<tr>
+<td><strong> mapOff</strong></td>
+<td>map item 的文件偏移，指向数据段内，数据结构为 <code>mapList</code>，如果没有 map，值为 0</td>
+</tr>
+<tr>
+<td><strong> stringIdsSize</strong></td>
+<td>字符串 id 的个数</td>
+</tr>
+<tr>
+<td><strong> stringIdsOff</strong></td>
+<td>字符串 id 清单的文件偏移，指向 <code>stringIds</code> 的起始地址，如果 stringIdsSize 为 0，值为0</td>
+</tr>
+<tr>
+<td><strong> typeIdsSize</strong></td>
+<td>类型标识符的个数</td>
+</tr>
+<tr>
+<td><strong> typeIdsOff</strong></td>
+<td>类型标识符清单的文件偏移，指向 <code>typeIds</code> 的起始地址，如果 typeIdsSize 为 0，值为 0 (<em>这就很奇怪了哟</em>)</td>
+</tr>
+<tr>
+<td><strong> protoIdsSize</strong></td>
+<td>原型标识符的个数</td>
+</tr>
+<tr>
+<td><strong> protoIdsOff</strong></td>
+<td>原型标识符清单的文件偏移，指向 <code>protoIds</code> 的起始地址，如果 protoIdsSize 为 0，值为 0 (<em>这就很奇怪了哟</em>)</td>
+</tr>
+<tr>
+<td><strong>  fieldIdsSize</strong></td>
+<td>字段标识符的个数</td>
+</tr>
+<tr>
+<td><strong> fieldIdsOff</strong></td>
+<td>字段标识符清单的文件偏移，指向 <code>fieldIds</code> 的起始地址，如果 fieldIdsSize 为 0，值为 0</td>
+</tr>
+<tr>
+<td><strong> methodIdsSize</strong></td>
+<td>方法标识符的个数</td>
+</tr>
+<tr>
+<td><strong> methodIdsOff</strong></td>
+<td>方法标识符清单的文件偏移，指向 <code>methodIds</code> 的起始地址，如果 methodIdsSize 为 0，值为 0</td>
+</tr>
+<tr>
+<td><strong> classDefsSize</strong></td>
+<td>类的个数</td>
+</tr>
+<tr>
+<td><strong> classDefsOff</strong></td>
+<td>类清单的文件偏移，指向 <code>classDefs</code> 的起始地址，如果 classDefsSize 为 0，值为 0 (<em>这就很奇怪了哟</em>)</td>
+</tr>
+<tr>
+<td><strong> dataSize</strong></td>
+<td>数据段的大小，以字节为单位，并且是 sizeof(uint) 的偶数倍</td>
+</tr>
+<tr>
+<td><strong> dataOff</strong></td>
+<td>数据段的文件偏移</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="手工查找"><a href="#手工查找" class="headerlink" title="手工查找"></a>手工查找</h2><p>更方便的方式是使用 <a href="http://www.sweetscape.com/download/010editor/" target="_blank" rel="external">010 Editor</a>，下载其官网上可解析 dex 文件的<a href="http://www.sweetscape.com/010editor/templates/" target="_blank" rel="external">脚本文件</a>，可高亮相应的二进制。</p>
+<p>linux 下可以使用 <code>hexdump</code> 查看某文件的二进制数据 -&gt; <code>hexdump -C classes.dex</code></p>
+<p><a href="http://archive.oreilly.com/linux/cmd/cmd.csp?path=h/hexdump" target="_blank" rel="external">常用选项</a></p>
+<table>
+<thead>
+<tr>
+<th>option</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-b</td>
+<td>将每个字节显示为8进制</td>
+</tr>
+<tr>
+<td>-c</td>
+<td>将每个字节显示为ASCII字符</td>
+</tr>
+<tr>
+<td>-C</td>
+<td>每个字节显示为16进制和相应的ASCII字符</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>每两个字节显示为10进制</td>
+</tr>
+<tr>
+<td>-o</td>
+<td>每两个字节显示为8进制</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>每两个字节显示为16进制</td>
+</tr>
+</tbody>
+</table>
+<p><strong>某 dex 文件的头部：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">00000000  64 65 78 0a 30 33 35 00  3b ba fe c3 83 7e aa be  |dex.035.;....~..|</div><div class="line">00000010  09 97 71 1e 17 96 9f e9  0c bd 01 60 b4 2a 1a c9  |..q........`.*..|</div><div class="line">00000020  c4 10 00 00 70 00 00 00  78 56 34 12 00 00 00 00  |....p...xV4.....|</div><div class="line">00000030  00 00 00 00 00 10 00 00  5c 00 00 00 70 00 00 00  |........\...p...|</div><div class="line">00000040  19 00 00 00 e0 01 00 00  12 00 00 00 44 02 00 00  |............D...|</div><div class="line">00000050  01 00 00 00 1c 03 00 00  2b 00 00 00 24 03 00 00  |........+...$...|</div><div class="line">00000060  02 00 00 00 7c 04 00 00  08 0c 00 00 bc 04 00 00  |....|...........|</div></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>binary</th>
+<th>field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64 65 78 0a 30 33 35 00</td>
+<td>magic</td>
+</tr>
+<tr>
+<td>3b ba fe c3</td>
+<td>checksum</td>
+</tr>
+<tr>
+<td>83 7e aa be 09 97 71 1e 17 96 9f e9 0c bd 01 60 b4 2a 1a c9</td>
+<td>signature</td>
+</tr>
+<tr>
+<td>c4 10 00 00</td>
+<td>fileSize</td>
+</tr>
+<tr>
+<td>70 00 00 00</td>
+<td>headerSize</td>
+</tr>
+<tr>
+<td>78 56 34 12</td>
+<td>endianTag</td>
+</tr>
+<tr>
+<td>00 00 00 00</td>
+<td>linkSize</td>
+</tr>
+<tr>
+<td>00 00 00 00</td>
+<td>linkOff</td>
+</tr>
+<tr>
+<td>00 10 00 00</td>
+<td>mapOff</td>
+</tr>
+<tr>
+<td>5c 00 00 00</td>
+<td>stringIdsSize</td>
+</tr>
+<tr>
+<td>70 00 00 00</td>
+<td>stringIdsOff</td>
+</tr>
+<tr>
+<td>19 00 00 00</td>
+<td>typeIdsSize</td>
+</tr>
+<tr>
+<td>e0 01 00 00</td>
+<td>typeIdsOff</td>
+</tr>
+<tr>
+<td>12 00 00 00</td>
+<td>protoIdsSize</td>
+</tr>
+<tr>
+<td>44 02 00 00</td>
+<td>protoIdsOff</td>
+</tr>
+<tr>
+<td>01 00 00 00</td>
+<td>fieldIdsSize</td>
+</tr>
+<tr>
+<td>1c 03 00 00</td>
+<td>fieldIdsOff</td>
+</tr>
+<tr>
+<td>2b 00 00 00</td>
+<td>methodIdsSize</td>
+</tr>
+<tr>
+<td>24 03 00 00</td>
+<td>methodIdsOff</td>
+</tr>
+<tr>
+<td>02 00 00 00</td>
+<td>classDefsSize</td>
+</tr>
+<tr>
+<td>7c 04 00 00</td>
+<td>classDefsOff</td>
+</tr>
+<tr>
+<td>08 0c 00 00</td>
+<td>dataSize</td>
+</tr>
+<tr>
+<td>bc 04 00 00</td>
+<td>dataOff</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="写程序解析-DexHeader"><a href="#写程序解析-DexHeader" class="headerlink" title="写程序解析 DexHeader"></a>写程序解析 DexHeader</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line">class DexStruct(object):</div><div class="line">    DexHeader = &#123;</div><div class="line">          &quot;magic&quot;: 0,</div><div class="line">          &quot;checkSum&quot;: 0,</div><div class="line">          &apos;signature&apos;: 0,</div><div class="line">          &apos;fileSize&apos;: 0,</div><div class="line">          &quot;headerSize&quot;: 0,</div><div class="line">          &quot;endianTag&quot;: 0,</div><div class="line">          &quot;linkSize&quot;: 0,</div><div class="line">          &quot;linkOff&quot;: 0,</div><div class="line">          &quot;mapOff&quot;: 0,</div><div class="line">          &quot;stringIdsSize&quot;: 0,</div><div class="line">          &quot;stringIdsOff&quot;: 0,</div><div class="line">          &quot;typeIdsSize&quot;: 0,</div><div class="line">          &quot;typeIdsOff&quot;: 0,</div><div class="line">          &quot;protoIdsSize&quot;: 0,</div><div class="line">          &quot;protoIdsOff&quot;: 0,</div><div class="line">          &quot;fieldIdsSize&quot;: 0,</div><div class="line">          &quot;fieldIdsOff&quot;: 0,</div><div class="line">          &quot;methodIdsSize&quot;: 0,</div><div class="line">          &quot;methodIdsOff&quot;: 0,</div><div class="line">          &quot;classDefsSize&quot;: 0,</div><div class="line">          &quot;classDefsOff&quot;: 0,</div><div class="line">          &quot;dataSize&quot;: 0,</div><div class="line">          &quot;dataOff&quot;: 0,   &#125;</div><div class="line">def parseHeader(header_data):</div><div class="line">        header_list = [header_data[i:i+4] for i in range(32,112,4)]</div><div class="line">        header_list.insert(0,header_data[12:32])</div><div class="line">        header_list.insert(0,header_data[8:12])</div><div class="line">        header_list.insert(0,header_data[:8])</div><div class="line">        DexStruct.DexHeader[&apos;magic&apos;] = struct.unpack(&apos;8s&apos;,header_list[0])[0]</div><div class="line">        if DexStruct.DexHeader[&apos;magic&apos;] != &quot;dex\n035\0&quot;:</div><div class="line">            print &apos;invalid dex file.&apos;</div><div class="line">            exit(-1)</div><div class="line">        DexStruct.DexHeader[&apos;checkSum&apos;] = struct.unpack(&apos;I&apos;,header_list[1])[0]</div><div class="line">        DexStruct.DexHeader[&apos;signature&apos;] = struct.unpack(&apos;20s&apos;,header_list[2])[0]</div><div class="line">        DexStruct.DexHeader[&apos;fileSize&apos;] = struct.unpack(&apos;I&apos;,header_list[3])[0]</div><div class="line">        DexStruct.DexHeader[&apos;headerSize&apos;] = struct.unpack(&apos;I&apos;,header_list[4])[0]</div><div class="line">        DexStruct.DexHeader[&apos;endianTag&apos;] = struct.unpack(&apos;I&apos;,header_list[5])[0]</div><div class="line">        DexStruct.DexHeader[&apos;linkSize&apos;] = struct.unpack(&apos;I&apos;,header_list[6])[0]</div><div class="line">        DexStruct.DexHeader[&apos;linkOff&apos;] = struct.unpack(&apos;I&apos;,header_list[7])[0]</div><div class="line">        DexStruct.DexHeader[&apos;mapOff&apos;] = struct.unpack(&apos;I&apos;,header_list[8])[0]</div><div class="line">        DexStruct.DexHeader[&apos;stringIdsSize&apos;] = struct.unpack(&apos;I&apos;,header_list[9])[0]</div><div class="line">        DexStruct.DexHeader[&apos;stringIdsOff&apos;] = struct.unpack(&apos;I&apos;,header_list[10])[0]</div><div class="line">        DexStruct.DexHeader[&apos;typeIdsSize&apos;] = struct.unpack(&apos;I&apos;,header_list[11])[0]</div><div class="line">        DexStruct.DexHeader[&apos;typeIdsOff&apos;] = struct.unpack(&apos;I&apos;,header_list[12])[0]</div><div class="line">        DexStruct.DexHeader[&apos;protoIdsSize&apos;] = struct.unpack(&apos;I&apos;,header_list[13])[0]</div><div class="line">        DexStruct.DexHeader[&apos;protoIdsOff&apos;] = struct.unpack(&apos;I&apos;,header_list[14])[0]</div><div class="line">        DexStruct.DexHeader[&apos;fieldIdsSize&apos;] = struct.unpack(&apos;I&apos;,header_list[15])[0]</div><div class="line">        DexStruct.DexHeader[&apos;fieldIdsOff&apos;] = struct.unpack(&apos;I&apos;,header_list[16])[0]</div><div class="line">        DexStruct.DexHeader[&apos;methodIdsSize&apos;] = struct.unpack(&apos;I&apos;,header_list[17])[0]</div><div class="line">        DexStruct.DexHeader[&apos;methodIdsOff&apos;] = struct.unpack(&apos;I&apos;,header_list[18])[0]</div><div class="line">        DexStruct.DexHeader[&apos;classDefsSize&apos;] = struct.unpack(&apos;I&apos;,header_list[19])[0]</div><div class="line">        DexStruct.DexHeader[&apos;classDefsOff&apos;] = struct.unpack(&apos;I&apos;,header_list[20])[0]</div><div class="line">        DexStruct.DexHeader[&apos;dataSize&apos;] = struct.unpack(&apos;I&apos;,header_list[21])[0]</div><div class="line">        DexStruct.DexHeader[&apos;dataOff&apos;] = struct.unpack(&apos;I&apos;,header_list[22])[0]</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://source.android.com/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik Executable format</a></p>
+<p><a href="http://www.ituring.com.cn/book/1131" target="_blank" rel="external">《Android 软件安全与逆向分析》</a></p>
+<p><a href="http://www.blogfshare.com/dex-format.html" target="_blank" rel="external">Android安全–Dex文件格式详解</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/17/parse-dex-file-part-dex-header/">http://kiya.studio/2015/11/17/parse-dex-file-part-dex-header/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/18/parse-dex-file-part-map-list/" id="art-left" class="art-right">
+                <span class="next-title">
+                    解析 dex 文件结构 - map_list<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/16/how-to-run-file-ended-with-smali/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>如何运行 .smali 程序
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">解析 dex 文件结构 - DexHeader</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#dex-简介"><span class="toc-text">dex 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dex-文件结构"><span class="toc-text">dex 文件结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#大体结构图"><span class="toc-text">大体结构图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DexHeader-结构"><span class="toc-text">DexHeader 结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#其中："><span class="toc-text">其中：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手工查找"><span class="toc-text">手工查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析-DexHeader"><span class="toc-text">写程序解析 DexHeader</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

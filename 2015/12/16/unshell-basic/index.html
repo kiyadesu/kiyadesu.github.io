@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 脱壳基础 dvmDexFileOpenPartial · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月16日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                脱壳基础 dvmDexFileOpenPartial
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/MSC/">MSC</a>
+                    
+                        <a href="/tags/enforce/">enforce</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>栗子<a href="https://github.com/kiya-z/Android/blob/master/lab-mouse/shell-protect-1.apk" target="_blank" rel="external">在此</a></p>
+<a id="more"></a>
+<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><p><a href="http://kiya.space/2015/12/11/ida-dynamic-debug-dex/" target="_blank" rel="external">附加进程</a>后,在<code>libdvm.so</code>中的<code>dvmDexFileOpenPartial</code>函数下断点.</p>
+<p>dvmDexFileOpenPartial的函数原型为(位于/dalvik/vm/DvmDex.cpp):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * @addr: 传入参数, dex文件的起始地址</div><div class="line"> * @len: 传出参数, dex文件的大小</div><div class="line"> * @ppDvmDex: 传出参数,指向 DvmDex 结构的地址</div><div class="line">*/</div><div class="line">int dvmDexFileOpenPartial(const void* addr, int len, DvmDex** ppDvmDex)</div></pre></td></tr></table></figure></p>
+<p>运行后断下:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/16/13/39/27" alt=""></p>
+<p>得R0为addr,R1为len.</p>
+<p>执行脚本:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/16/13/39/41" alt=""></p>
+<p>现在就可以使用baksmali处理dex文件继续分析了.</p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>dalvik虚拟机会把dex文件优化为odex文件,而优化的源代码为<code>/dalvik/dexopt/OptMain.cpp</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Main entry point.  Decide where to go.</div><div class="line"> */</div><div class="line">int main(int argc, char* const argv[])</div><div class="line">&#123;</div><div class="line">	...</div><div class="line">    if (argc &gt; 1) &#123;</div><div class="line">        if (strcmp(argv[1], &quot;--zip&quot;) == 0)</div><div class="line">            return fromZip(argc, argv);</div><div class="line">        else if (strcmp(argv[1], &quot;--dex&quot;) == 0)</div><div class="line">            return fromDex(argc, argv);</div><div class="line">        else if (strcmp(argv[1], &quot;--preopt&quot;) == 0)</div><div class="line">            return preopt(argc, argv);</div><div class="line">    &#125;</div><div class="line">	...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中<code>fromzip</code>和<code>preopt</code>都会调用<code>processZipFile</code>先将dex文件提取出来,<code>fromDex</code>则直接调用<code>dvmContinueOptimization</code>优化.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Common functionality for normal device-side processing as well as</div><div class="line"> * preoptimization.</div><div class="line"> */</div><div class="line">static int processZipFile(int zipFd, int cacheFd, const char* zipName,</div><div class="line">        const char *dexoptFlags)</div><div class="line">&#123;</div><div class="line">   	...</div><div class="line">    int result = extractAndProcessZip(zipFd, cacheFd, zipName, isBootstrap,</div><div class="line">            bcp, dexoptFlags);</div><div class="line">    free(bcpCopy);</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在<code>extractAndProcessZip</code>中处理zip文件并将dex提取出来,随后调用优化函数.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Extract &quot;classes.dex&quot; from zipFd into &quot;cacheFd&quot;, leaving a little space</div><div class="line"> * up front for the DEX optimization header.</div><div class="line"> */</div><div class="line">static int extractAndProcessZip(int zipFd, int cacheFd,</div><div class="line">    const char* debugFileName, bool isBootstrap, const char* bootClassPath,</div><div class="line">    const char* dexoptFlagStr)</div><div class="line">&#123;</div><div class="line">	...</div><div class="line">    /*</div><div class="line">     * Open the zip archive, find the DEX entry.</div><div class="line">     */</div><div class="line">    if (dexZipPrepArchive(zipFd, debugFileName, &amp;zippy) != 0) &#123;</div><div class="line">        ALOGW(&quot;DexOptZ: unable to open zip archive &apos;%s&apos;&quot;, debugFileName);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">    zipEntry = dexZipFindEntry(&amp;zippy, kClassesDex);</div><div class="line">    if (zipEntry == NULL) &#123;</div><div class="line">        ALOGW(&quot;DexOptZ: zip archive &apos;%s&apos; does not include %s&quot;,</div><div class="line">            debugFileName, kClassesDex);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">    /*</div><div class="line">     * Extract some info about the zip entry.</div><div class="line">     */</div><div class="line">    if (dexZipGetEntryInfo(&amp;zippy, zipEntry, NULL, &amp;uncompLen, NULL, NULL,</div><div class="line">            &amp;modWhen, &amp;crc32) != 0)</div><div class="line">    &#123;</div><div class="line">        ALOGW(&quot;DexOptZ: zip archive GetEntryInfo failed on %s&quot;, debugFileName);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">    uncompLen = uncompLen;</div><div class="line">    modWhen = modWhen;</div><div class="line">    crc32 = crc32;</div><div class="line">    /*</div><div class="line">     * Extract the DEX data into the cache file at the current offset.</div><div class="line">     */</div><div class="line">    if (dexZipExtractEntryToFile(&amp;zippy, zipEntry, cacheFd) != 0) &#123;</div><div class="line">        ALOGW(&quot;DexOptZ: extraction of %s from %s failed&quot;,</div><div class="line">            kClassesDex, debugFileName);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">   	...</div><div class="line">    /*</div><div class="line">     * Prep the VM and perform the optimization.</div><div class="line">     */</div><div class="line">    if (dvmPrepForDexOpt(bootClassPath, dexOptMode, verifyMode,</div><div class="line">            dexoptFlags) != 0)</div><div class="line">    &#123;</div><div class="line">        ALOGE(&quot;DexOptZ: VM init failed&quot;);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">    //vmStarted = 1;</div><div class="line">    /* do the optimization */</div><div class="line">    if (!dvmContinueOptimization(cacheFd, dexOffset, uncompLen, debugFileName,</div><div class="line">            modWhen, crc32, isBootstrap))</div><div class="line">    &#123;</div><div class="line">        ALOGE(&quot;Optimization failed&quot;);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>dvmContinueOptimization</code>函数位于/dalvik/vm/analysis/DexPrepare.cpp文件,其中调用了<code>dvmDexFileOpenPartial</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Do the actual optimization.  This is executed in the dexopt process.</div><div class="line"> *</div><div class="line"> * For best use of disk/memory, we want to extract once and perform</div><div class="line"> * optimizations in place.  If the file has to expand or contract</div><div class="line"> * to match local structure padding/alignment expectations, we want</div><div class="line"> * to do the rewrite as part of the extract, rather than extracting</div><div class="line"> * into a temp file and slurping it back out.  (The structure alignment</div><div class="line"> * is currently correct for all platforms, and this isn&apos;t expected to</div><div class="line"> * change, so we should be okay with having it already extracted.)</div><div class="line"> *</div><div class="line"> * Returns &quot;true&quot; on success.</div><div class="line"> */</div><div class="line">bool dvmContinueOptimization(int fd, off_t dexOffset, long dexLength,</div><div class="line">    const char* fileName, u4 modWhen, u4 crc, bool isBootstrap)</div><div class="line">&#123;</div><div class="line">   ...</div><div class="line">		success = rewriteDex(((u1*) mapAddr) + dexOffset, dexLength,</div><div class="line">                    doVerify, doOpt, &amp;pClassLookup, NULL);</div><div class="line">        if (success) &#123;</div><div class="line">            DvmDex* pDvmDex = NULL;</div><div class="line">            u1* dexAddr = ((u1*) mapAddr) + dexOffset;</div><div class="line">            if (dvmDexFileOpenPartial(dexAddr, dexLength, &amp;pDvmDex) != 0) &#123;</div><div class="line">                ALOGE(&quot;Unable to create DexFile&quot;);</div><div class="line">                success = false;</div><div class="line">            &#125; else &#123;</div><div class="line">                ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">   ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>dvmDexFileOpenPartial</code>调用了<code>dexFileParse</code>,用来解析内存中优化过或未优化过的dex文件,返回dexFile结构.<br>所以此时dex文件已经被加载进内存,就可以dump出来了.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Create a DexFile structure for a &quot;partial&quot; DEX.  This is one that is in</div><div class="line"> * the process of being optimized.  The optimization header isn&apos;t finished</div><div class="line"> * and we won&apos;t have any of the auxillary data tables, so we have to do</div><div class="line"> * the initialization slightly differently.</div><div class="line"> *</div><div class="line"> * Returns nonzero on error.</div><div class="line"> */</div><div class="line">int dvmDexFileOpenPartial(const void* addr, int len, DvmDex** ppDvmDex)</div><div class="line">&#123;</div><div class="line">    DvmDex* pDvmDex;</div><div class="line">    DexFile* pDexFile;</div><div class="line">    int parseFlags = kDexParseDefault;</div><div class="line">    int result = -1;</div><div class="line">    /* -- file is incomplete, new checksum has not yet been calculated</div><div class="line">    if (gDvm.verifyDexChecksum)</div><div class="line">        parseFlags |= kDexParseVerifyChecksum;</div><div class="line">    */</div><div class="line">    pDexFile = dexFileParse((u1*)addr, len, parseFlags);</div><div class="line">    if (pDexFile == NULL) &#123;</div><div class="line">        ALOGE(&quot;DEX parse failed&quot;);</div><div class="line">        goto bail;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/16/unshell-basic/">http://kiya.studio/2015/12/16/unshell-basic/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/18/ptrace-basis/" id="art-left" class="art-right">
+                <span class="next-title">
+                    反调试方法二 - 抢占ptrace<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/14/android-anti-debug-read-status/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>反调试方法一 - 读取进程status文件
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">脱壳基础 dvmDexFileOpenPartial</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#步骤"><span class="toc-text">步骤</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#原理"><span class="toc-text">原理</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

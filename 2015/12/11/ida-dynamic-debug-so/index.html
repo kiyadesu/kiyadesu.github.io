@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 使用ida调试so文件 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月11日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                使用ida调试so文件
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/debug/">debug</a>
+                    
+                        <a href="/tags/MSC/">MSC</a>
+                    
+                        <a href="/tags/ida/">ida</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>保护代码通常放在so文件中.</p>
+<a id="more"></a>
+<h1 id="正常的应用"><a href="#正常的应用" class="headerlink" title="正常的应用"></a>正常的应用</h1><h2 id="android机的准备工作"><a href="#android机的准备工作" class="headerlink" title="android机的准备工作"></a>android机的准备工作</h2><p>找到<code>ida</code>目录下的<code>/dbgsrv/android_server</code>文件,push进android机,启动<code>android_server</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">adb push android_server /data/local/tmp/</div><div class="line">adb shell</div><div class="line">su</div><div class="line">cd data/local/tmp</div><div class="line">chmod 755 android_server</div><div class="line">./android_server</div></pre></td></tr></table></figure>
+<p>出现:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@android:/data/local/tmp # ./android_server</div><div class="line">IDA Android 32-bit remote debug server(ST) v1.19. Hex-Rays (c) 2004-2015</div><div class="line">Listening on port #23946...</div></pre></td></tr></table></figure>
+<p>另开命令行进行tcp端口转发：<br><code>adb forward tcp:23946 tcp:23946</code></p>
+<p>[<strong>注意事项</strong>]</p>
+<ol>
+<li>此android_server需和ida是配套的</li>
+<li>出现<code>bind: Address already in use</code>错误<br>这是因为手机中可能已经在运行android_server,使用<code>ps | grep android_server</code>看一下,有的话杀掉.<br>如下:(14061是pid)</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@android:/ # ps | grep android_server</div><div class="line">root      14061 13574 11180  9504  ffffffff 40183da0 S /data/local/tmp/android_server</div><div class="line">127|root@android:/ # kill -s 9 14061</div></pre></td></tr></table></figure>
+<h2 id="ida-的准备"><a href="#ida-的准备" class="headerlink" title="ida 的准备"></a>ida 的准备</h2><p>打开ida，打开so文件,记录so文件中感兴趣的函数的文件偏移.</p>
+<p>手机打开app.</p>
+<p>另开一个ida,菜单栏设置<code>Debugger -&gt; Attach -&gt; Remote ARMLinux/Android debugger</code>如下:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/46/45" alt=""></p>
+<p>点击ok,弹出进程列表,例如:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/49/17" alt=""></p>
+<blockquote>
+<p><strong>注意</strong><br>如果此时进程列表中只有一两个进程,可能是因为上一步启动<code>android_server</code>时你使用了这样的命令:<br><code>adb shell /data/local/tmp/android_server</code><br>只要先进入<code>adb shell</code>再执行就没问题了.</p>
+</blockquote>
+<p>选择要调试的进程,等待分析完毕.</p>
+<p><code>ctrl+s</code>打开segment列表,找到要调试的so文件,选择class属性为CODE的那个就ok了.记得记下so的基址(start属性).<br>基址加上刚刚记录的函数的文件偏移即得函数的地址,按快捷键G输入地址跳转,下断点运行即可.</p>
+<h1 id="不正常的应用"><a href="#不正常的应用" class="headerlink" title="不正常的应用"></a>不正常的应用</h1><p>(此步骤也适用于给系统函数下断点)<br>so文件在被加载的时候会首先执行.init_array中的函数，然后再执行JNI_OnLoad()函数。如果在这中间加了反调试代码,那么我们一旦开始调试app可能就会退出.所以我们需要在so文件被加载之前就断下来.</p>
+<h2 id="启动app"><a href="#启动app" class="headerlink" title="启动app"></a>启动app</h2><p>使用am start命令启动app:<br><code>adb shell am start -D -n com.yaotong.crackme/com.yaotong.crackme.MainActivity</code><br><strong>com.yaotong.crackme</strong> 为包名,<strong>com.yaotong.crackme.MainActivity</strong> 为主activity名.</p>
+<p>此时手机上会弹出:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/12/13/35/08" alt=""></p>
+<h2 id="ida准备"><a href="#ida准备" class="headerlink" title="ida准备"></a>ida准备</h2><p>同样是设置<code>Debugger -&gt; Attach -&gt; Remote ARMLinux/Android debugger</code>再选择进程.<br>之后需要设置调试器调试选项为:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/12/13/35/31" alt=""></p>
+<p>F9运行.<br>在控制台使用jdb恢复进程运行:<br><code>jdb -connect com.sun.jdi.SocketAttach:hostname=127.0.0.1,port=8700</code></p>
+<p>正常情况会出现:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">设置未捕获的java.lang.Throwable</div><div class="line">设置延迟的未捕获的java.lang.Throwable</div><div class="line">正在初始化jdb...</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">java.net.ConnectException: Connection refused: connect</div><div class="line">        at java.net.DualStackPlainSocketImpl.connect0(Native Method)</div><div class="line">        at java.net.DualStackPlainSocketImpl.socketConnect(DualStackPlainSocketImpl.java:79)</div><div class="line">        at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:345)</div><div class="line">        at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)</div><div class="line">        at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)</div><div class="line">        at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:172)</div><div class="line">        at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)</div><div class="line">        at java.net.Socket.connect(Socket.java:589)</div><div class="line">        at com.sun.tools.jdi.SocketTransportService.attach(SocketTransportService.java:222)</div><div class="line">        at com.sun.tools.jdi.GenericAttachingConnector.attach(GenericAttachingConnector.java:116)</div><div class="line">        at com.sun.tools.jdi.SocketAttachingConnector.attach(SocketAttachingConnector.java:90)</div><div class="line">        at com.sun.tools.example.debug.tty.VMConnection.attachTarget(VMConnection.java:519)</div><div class="line">        at com.sun.tools.example.debug.tty.VMConnection.open(VMConnection.java:328)</div><div class="line">        at com.sun.tools.example.debug.tty.Env.init(Env.java:63)</div><div class="line">        at com.sun.tools.example.debug.tty.TTY.main(TTY.java:1066)</div><div class="line">致命错误:</div><div class="line">无法附加到目标 VM。</div></pre></td></tr></table></figure>
+<ul>
+<li>打开ddms尝试.</li>
+<li>检查调试的app配置文件中是否有<code>android:debuggable=&quot;true&quot;</code>，导致不能调试。<br>若无则在清单文件的application中加上,重新打包即可.</li>
+</ul>
+<p>接下来就可以在.initarray和JNI_OnLoad下断点了.</p>
+<hr>
+<blockquote>
+<p>番外</p>
+</blockquote>
+<h1 id="initarray"><a href="#initarray" class="headerlink" title=".initarray"></a>.initarray</h1><p>静态分析so文件时,按<code>ctrl+s</code>出现segment列表,进入<code>.initarray</code>即可看到列表.</p>
+<h1 id="如何dump-so文件"><a href="#如何dump-so文件" class="headerlink" title="如何dump so文件"></a>如何dump so文件</h1><p>dump时务必确保so文件已经加载.<br>python脚本:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">import idaapi</div><div class="line">data = idaapi.dbg_read_memory(start_addr,file_len)</div><div class="line">f = open(r&apos;C:\Users\...\Desktop\dump.so&apos;,&apos;wb&apos;)</div><div class="line">f.write(data)</div><div class="line">f.close()</div></pre></td></tr></table></figure>
+<p>ida的api函数地址:<a href="https://www.hex-rays.com/products/ida/support/idapython_docs/idaapi-module.html" target="_blank" rel="external">https://www.hex-rays.com/products/ida/support/idapython_docs/idaapi-module.html</a></p>
+<p>以上.</p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/11/ida-dynamic-debug-so/">http://kiya.studio/2015/12/11/ida-dynamic-debug-so/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/14/android-anti-debug-read-status/" id="art-left" class="art-right">
+                <span class="next-title">
+                    反调试方法一 - 读取进程status文件<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/11/ida-dynamic-debug-dex/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>使用ida调试dex文件
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">使用ida调试so文件</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#正常的应用"><span class="toc-text">正常的应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#android机的准备工作"><span class="toc-text">android机的准备工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ida-的准备"><span class="toc-text">ida 的准备</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#不正常的应用"><span class="toc-text">不正常的应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#启动app"><span class="toc-text">启动app</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ida准备"><span class="toc-text">ida准备</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#initarray"><span class="toc-text">.initarray</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#如何dump-so文件"><span class="toc-text">如何dump so文件</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

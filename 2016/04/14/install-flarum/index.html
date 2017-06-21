@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 升级站长秘籍：使用flarum框架搭建一个有逼格的轻论坛 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2016年4月14日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                升级站长秘籍：使用flarum框架搭建一个有逼格的轻论坛
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/instruction/">instruction</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>先来个成品图观赏观赏：</p>
+<a id="more"></a>
+<p>手机版：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/14/21/10/30-style1" alt=""></p>
+<p>电脑版：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/14/21/05/53-style1" alt=""></p>
+<hr>
+<p>我的环境：ubuntu 14.06 x64 VPS</p>
+<h1 id="安装准备"><a href="#安装准备" class="headerlink" title="安装准备"></a>安装准备</h1><p>依次安装 apache2、php5、mysql-server、php5-mysql .</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">sudo apt-get install apache2</div><div class="line">sudo apt-get install php5</div><div class="line">sudo apt-get install mysql-server</div><div class="line">sudo apt-get install php5-mysql</div></pre></td></tr></table></figure>
+<p>安装composer.(这一步直接在官网下载可执行文件加上可执行权限复制到/usr/local/bin中就行)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">php -r &quot;readfile(&apos;https://getcomposer.org/installer&apos;);&quot; &gt; composer-setup.php</div><div class="line">php -r &quot;if (hash(&apos;SHA384&apos;, file_get_contents(&apos;composer-setup.php&apos;)) === &apos;7228c001f88bee97506740ef0888240bd8a760b046ee16db8f4095c0d8d525f2367663f22a46b48d072c816e7fe19959&apos;) &#123; echo &apos;Installer verified&apos;; &#125; else &#123; echo &apos;Installer corrupt&apos;; unlink(&apos;composer-setup.php&apos;); &#125; echo PHP_EOL;&quot;</div><div class="line">php composer-setup.php --install-dir=bin --filename=composer</div><div class="line">php -r &quot;unlink(&apos;composer-setup.php&apos;);&quot;</div></pre></td></tr></table></figure>
+<h1 id="创建flarum工程"><a href="#创建flarum工程" class="headerlink" title="创建flarum工程"></a>创建flarum工程</h1><p>一定要在空目录里执行create-object.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mkdir V2NB_forum</div><div class="line">cd V2NB_forum/</div><div class="line">composer create-project flarum/flarum . --stability=beta</div></pre></td></tr></table></figure>
+<p>安装过程中可能会出现错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">Installing flarum/flarum (v0.1.0-beta.5)</div><div class="line">  - Installing flarum/flarum (v0.1.0-beta.5)</div><div class="line">    Downloading: 100%         </div><div class="line"></div><div class="line">Created project in .</div><div class="line">Loading composer repositories with package information</div><div class="line">Updating dependencies (including require-dev)</div><div class="line">Your requirements could not be resolved to an installable set of packages.</div><div class="line"></div><div class="line">  Problem 1</div><div class="line">    - flarum/flarum-ext-akismet v0.1.0-beta.3 requires tijsverkoyen/akismet ^1.1 -&gt; satisfiable by tijsverkoyen/akismet[1.1.0].</div><div class="line">    - flarum/flarum-ext-akismet v0.1.0-beta.5 requires tijsverkoyen/akismet ^1.1 -&gt; satisfiable by tijsverkoyen/akismet[1.1.0].</div><div class="line">    - tijsverkoyen/akismet 1.1.0 requires ext-curl * -&gt; the requested PHP extension curl is missing from your system.</div><div class="line">    - Installation request for flarum/flarum-ext-akismet ^0.1.0 -&gt; satisfiable by flarum/flarum-ext-akismet[v0.1.0-beta.3, v0.1.0-beta.5].</div><div class="line"></div><div class="line">  To enable extensions, verify that they are enabled in those .ini files:</div><div class="line">    - /etc/php5/cli/php.ini</div><div class="line">    - /etc/php5/cli/conf.d/05-opcache.ini</div><div class="line">    - /etc/php5/cli/conf.d/10-pdo.ini</div><div class="line">    - /etc/php5/cli/conf.d/20-json.ini</div><div class="line">    - /etc/php5/cli/conf.d/20-mysql.ini</div><div class="line">    - /etc/php5/cli/conf.d/20-mysqli.ini</div><div class="line">    - /etc/php5/cli/conf.d/20-pdo_mysql.ini</div><div class="line">    - /etc/php5/cli/conf.d/20-readline.ini</div><div class="line">  You can also run `php --ini` inside terminal to see which files are used by PHP in CLI mode.</div></pre></td></tr></table></figure>
+<p>这时需要安装php-curl后，删除目录中的所有文件(包括.开头的隐藏文件)再执行<code>composer create-project flarum/flarum . --stability=beta</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo apt-get install php5-curl</div></pre></td></tr></table></figure>
+<p>正常的安装日志应该好长好长。</p>
+<p>这时工程目录中的文件如下：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/14/21/35/27-style1" alt=""></p>
+<h1 id="一些修改和设置"><a href="#一些修改和设置" class="headerlink" title="一些修改和设置"></a>一些修改和设置</h1><h2 id="修改权限"><a href="#修改权限" class="headerlink" title="修改权限"></a>修改权限</h2><p>将工程目录全部文件和文件夹的权限修改为777.<br>如我的是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo chmod -R 777 /home/kiya/v2nb</div></pre></td></tr></table></figure>
+<h2 id="开启rewrite"><a href="#开启rewrite" class="headerlink" title="开启rewrite"></a>开启rewrite</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /etc/apache2/mods-enabled</div><div class="line">sudo ln -s ../mods-available/rewrite.load</div></pre></td></tr></table></figure>
+<h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>修改<code>/etc/apache2/sites-available/000-default.conf</code>文件中的DocumentRoot项为你的项目文件夹路径. 如<code>DocumentRoot /home/kiya/v2nb</code>.<br>并在该文件中的<code>VirtualHost</code>节点之间添加如下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;Directory /home/kiya/V2NB&gt;</div><div class="line">    AllowOverride All</div><div class="line">&lt;/Directory&gt;</div></pre></td></tr></table></figure>
+<p>在<code>/etc/apache2/apache2.conf</code>文件中找到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;Directory /&gt;</div><div class="line">        Options FollowSymLinks</div><div class="line">        AllowOverride None</div><div class="line">        Require all denied</div><div class="line">&lt;/Directory&gt;</div></pre></td></tr></table></figure>
+<p>将<code>Require all denied</code>改为<code>Require all granted</code>,将<code>AllowOverride None</code>改为<code>AllowOverride All</code>.</p>
+<h2 id="修改host"><a href="#修改host" class="headerlink" title="修改host"></a>修改host</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo vim /etc/hosts</div></pre></td></tr></table></figure>
+<p>打开hosts新增加一行<code>23.105.197.243 v2nb.today</code>. 这里的ip是vps的ip，域名随便写. 本机的话可以ip可以写成<code>127.0.0.1</code>.<br>如果这里不加在启动apache服务时会警告:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">AH00558: apache2: Could not reliably determine the server&apos;s fully qualified domain name, using v2nb.today. Set the &apos;ServerName&apos; directive globally to suppress this message</div></pre></td></tr></table></figure>
+<h1 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h1><p>命令行创建一个论坛用的数据库,user和pass时安装mysql时填写的账号密码. 待会要用到.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mysql -u user -p</div><div class="line">pass</div><div class="line">create database v2nb;</div></pre></td></tr></table></figure>
+<h1 id="安装flarum"><a href="#安装flarum" class="headerlink" title="安装flarum"></a>安装flarum</h1><p>重启apache服务.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo service apache2 restart</div></pre></td></tr></table></figure>
+<p>用浏览器访问<code>23.105.197.243</code>. 如果是本地测试则访问<code>localhost</code>.</p>
+<p>如果出现的是：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/14/23/39/41-style1" alt=""></p>
+<p>则需要安装<code>gd</code>模块,执行<code>sudo apt-get install php5-gd</code>重启apache即可.</p>
+<p>正确的话会出现下图页面用以填写信息：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/14/23/43/21-style1" alt=""></p>
+<p>其中的<code>MySQL Database</code>是上面我们自己创建的数据库名字. 填好之后点击<code>Install Flarum</code>.</p>
+<p>出现下图就安装好啦~</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/14/23/47/54-style1" alt=""></p>
+<p>管理员界面:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2016/04/15/00/11/45-style1" alt=""></p>
+<h1 id="访问oops"><a href="#访问oops" class="headerlink" title="访问oops"></a>访问oops</h1><p>在使用域名打开论坛时如果经常出现<code>Oops! Something went wrong. Please reload the page and try again</code>并且资源也加载不出,可能是说明请求的url和配置的url不一样.<br>需要修改工程目录下的<code>config.php</code>文件.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo vim config.php</div></pre></td></tr></table></figure>
+<p>如将<code>&#39;url&#39; =&gt; &#39;23.105.197.243&#39;</code>改为<code>&#39;url&#39; =&gt; &#39;v2nb.today&#39;</code>.</p>
+<h1 id="enjoy"><a href="#enjoy" class="headerlink" title="enjoy !"></a>enjoy !</h1><p>累煞我也.</p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2016/04/14/install-flarum/">http://kiya.studio/2016/04/14/install-flarum/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2016/08/06/recompile-uiautomatorviewer/" id="art-left" class="art-right">
+                <span class="next-title">
+                    如何重新编译 uiautomatorviewer<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2016/03/20/install-ia32-libs/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>ubuntu启动ida报错找不到libgthread-2.0.so.0
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">升级站长秘籍：使用flarum框架搭建一个有逼格的轻论坛</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#安装准备"><span class="toc-text">安装准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#创建flarum工程"><span class="toc-text">创建flarum工程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#一些修改和设置"><span class="toc-text">一些修改和设置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#修改权限"><span class="toc-text">修改权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开启rewrite"><span class="toc-text">开启rewrite</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#重定向"><span class="toc-text">重定向</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改host"><span class="toc-text">修改host</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据库"><span class="toc-text">数据库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装flarum"><span class="toc-text">安装flarum</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#访问oops"><span class="toc-text">访问oops</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#enjoy"><span class="toc-text">enjoy !</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

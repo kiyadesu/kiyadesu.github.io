@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 解析 dex 文件结构 - 索引区和数据区（三） - ClassDefs · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月21日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                解析 dex 文件结构 - 索引区和数据区（三） - ClassDefs
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><img src="http://7xo976.com1.z0.glb.clouddn.com/images/github-io/Android/dex-file-general-structure-3.png" alt="part-class-defs"></p>
+<a id="more"></a>
+<p>ClassDefs 表示某个类的全部信息，包括类类型、访问权限、父类、接口、源文件名、注解和代码等信息。<br>ClassDefs 的大小和文件偏移在 DexHeader 和 map_list 中都有指定。</p>
+<hr>
+<h1 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h1><p>ClassDefs 以4字节对齐，即总大小为 4 * 8 * ClassDefsSize .</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;class_def_item&quot;.</div><div class="line"> */</div><div class="line">struct DexClassDef &#123;</div><div class="line">    u4  classIdx;           /* 指向 typeIds 的索引，表示类的类型 */</div><div class="line">    u4  accessFlags;        /* 类的访问标识*/</div><div class="line">    u4  superclassIdx;      /* 指向 typeIds 的索引，表示父类类型 */</div><div class="line">    u4  interfacesOff;      /* 指向 DexTypeList 的文件偏移，表示接口*/</div><div class="line">    u4  sourceFileIdx;      /* 指向 stringIds 的索引，表示源文件名 */</div><div class="line">    u4  annotationsOff;     /* 指向 annotations_directory_item 的文件偏移，表示注解*/</div><div class="line">    u4  classDataOff;       /* 指向 class_data_item 的文件偏移*/</div><div class="line">    u4  staticValuesOff;    /* 指向 DexEncodedArray 的文件偏移*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="classIdx"><a href="#classIdx" class="headerlink" title="classIdx"></a>classIdx</h2><p>指向 typeIds 的索引，类类型，必须是一个类类型而不是数组或者基本类型。</p>
+<hr>
+<h2 id="accessFlags"><a href="#accessFlags" class="headerlink" title="accessFlags"></a>accessFlags</h2><p>类的访问标识，如 public、final 等，常量定义如下，包括类、字段和方法的访问标识：</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>For Classes (and InnerClass annotations)</th>
+<th>For Fields</th>
+<th>For Methods</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ACC_PUBLIC</td>
+<td>0x1</td>
+<td>public: visible everywhere</td>
+<td>public: visible everywhere</td>
+<td>public: visible everywhere</td>
+</tr>
+<tr>
+<td>ACC_PRIVATE</td>
+<td>0x2</td>
+<td>* private: only visible to defining class</td>
+<td>private: only visible to defining class</td>
+<td>private: only visible to defining class</td>
+</tr>
+<tr>
+<td>ACC_PROTECTED</td>
+<td>0x4</td>
+<td>* protected: visible to package and subclasses</td>
+<td>protected: visible to package and subclasses</td>
+<td>protected: visible to package and subclasses</td>
+</tr>
+<tr>
+<td>ACC_STATIC</td>
+<td>0x8</td>
+<td>* static: is not constructed with an outer this reference</td>
+<td>static: global to defining class</td>
+<td>static: does not take a this argument</td>
+</tr>
+<tr>
+<td>ACC_FINAL</td>
+<td>0x10</td>
+<td>final: not subclassable</td>
+<td>final: immutable after construction</td>
+<td>final: not overridable</td>
+</tr>
+<tr>
+<td>ACC_SYNCHRONIZED</td>
+<td>0x20</td>
+<td></td>
+<td></td>
+<td>synchronized: associated lock automatically acquired around call to this method.Note: This is only valid to set when ACC_NATIVE is also set.</td>
+</tr>
+<tr>
+<td>ACC_BRIDGE</td>
+<td>0x40</td>
+<td></td>
+<td></td>
+<td>bridge method, added automatically by compiler as a type-safe bridge</td>
+</tr>
+<tr>
+<td>ACC_VOLATILE</td>
+<td>0x40</td>
+<td></td>
+<td>volatile: special access rules to help with thread safety</td>
+<td></td>
+</tr>
+<tr>
+<td>ACC_TRANSIENT</td>
+<td>0x80</td>
+<td></td>
+<td>transient: not to be saved by default serialization</td>
+<td></td>
+</tr>
+<tr>
+<td>ACC_VARARGS</td>
+<td>0x80</td>
+<td></td>
+<td></td>
+<td>last argument should be treated as a “rest” argument by compiler</td>
+</tr>
+<tr>
+<td>ACC_NATIVE</td>
+<td>0x100</td>
+<td></td>
+<td></td>
+<td>native: implemented in native code</td>
+</tr>
+<tr>
+<td>ACC_INTERFACE</td>
+<td>0x200</td>
+<td>interface: multiply-implementable abstract class</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ACC_ABSTRACT</td>
+<td>0x400</td>
+<td>abstract: not directly instantiable</td>
+<td></td>
+<td>abstract: unimplemented by this class</td>
+</tr>
+<tr>
+<td>ACC_STRICT</td>
+<td>0x800</td>
+<td></td>
+<td></td>
+<td>strictfp: strict rules for floating-point arithmetic</td>
+</tr>
+<tr>
+<td>ACC_SYNTHETIC</td>
+<td>0x1000</td>
+<td>not directly defined in source code</td>
+<td>not directly defined in source code</td>
+<td>not directly defined in source code</td>
+</tr>
+<tr>
+<td>ACC_ANNOTATION</td>
+<td>0x2000</td>
+<td>declared as an annotation class</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ACC_ENUM</td>
+<td>0x4000</td>
+<td>declared as an enumerated type</td>
+<td>declared as an enumerated value</td>
+<td></td>
+</tr>
+<tr>
+<td>(unused)</td>
+<td>0x8000</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ACC_CONSTRUCTOR</td>
+<td>0x10000</td>
+<td></td>
+<td></td>
+<td>constructor method (class or instance initializer)</td>
+</tr>
+<tr>
+<td>ACC_DECLARED_SYNCHRONIZED</td>
+<td>0x20000</td>
+<td></td>
+<td></td>
+<td>declared synchronized. Note: This has no effect on execution (other than in reflection of this flag, per se).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="superclassIdx"><a href="#superclassIdx" class="headerlink" title="superclassIdx"></a>superclassIdx</h2><p>指向 typeIds 的索引，父类类型；如果没有父类值为 NO_INDEX . 注意 NO_INDEX 值不是0，因为 0 是一个合法的索引，而且 NO_INDEX 是以 uleb128p1 编码的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">uint NO_INDEX = 0xffffffff;    // == -1 if treated as a signed int</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="interfacesOff"><a href="#interfacesOff" class="headerlink" title="interfacesOff"></a>interfacesOff</h2><p>指向 DexTypeList 的文件偏移（在数据段中），表示接口；如果没有接口此值为 0 。<br>DexTypeList 中的值必须是类类型，并且没有重复。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;type_list&quot;.</div><div class="line"> */</div><div class="line">struct DexTypeList &#123;</div><div class="line">    u4  size;               /* DexTypeItem的个数 */</div><div class="line">    DexTypeItem list[1];    /* DexTypeItem的内容 */</div><div class="line">&#125;;</div><div class="line">/*</div><div class="line"> * Direct-mapped &quot;type_item&quot;.</div><div class="line"> */</div><div class="line">struct DexTypeItem &#123;</div><div class="line">    u2  typeIdx;            /* 指向 typeIds 的索引 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="sourceFileIdx"><a href="#sourceFileIdx" class="headerlink" title="sourceFileIdx"></a>sourceFileIdx</h2><p>指向 stringIds 的索引，表示本类所在的源文件名，如果没有这个信息值为 NO_INDEX</p>
+<hr>
+<h2 id="annotationsOff"><a href="#annotationsOff" class="headerlink" title="annotationsOff"></a>annotationsOff</h2><p>指向 annotations_directory_item 的文件偏移，表示注解；如果没有注解，此值为 0 。</p>
+<h3 id="annotations-directory-item"><a href="#annotations-directory-item" class="headerlink" title="annotations_directory_item"></a>annotations_directory_item</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;annotations_directory_item&quot;.</div><div class="line"> */</div><div class="line">struct DexAnnotationsDirectoryItem &#123;</div><div class="line">    u4  classAnnotationsOff;  /* 指向 DexAnnotationSetItem 的文件偏移，若无，值为0*/</div><div class="line">    u4  fieldsSize;           /* DexFieldAnnotationsItem 的个数*/</div><div class="line">    u4  methodsSize;          /* DexMethodAnnotationsItem 的个数*/</div><div class="line">    u4  parametersSize;       /* DexParameterAnnotationsItem 的个数*/</div><div class="line">    /* followed by DexFieldAnnotationsItem[fieldsSize] */</div><div class="line">    /* followed by DexMethodAnnotationsItem[methodsSize] */</div><div class="line">    /* followed by DexParameterAnnotationsItem[parametersSize] */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="annotation-set-item"><a href="#annotation-set-item" class="headerlink" title="annotation_set_item"></a>annotation_set_item</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;annotation_set_item&quot;.</div><div class="line"> */</div><div class="line">struct DexAnnotationSetItem &#123;</div><div class="line">    u4  size;               /* DexAnnotationItem 的个数*/</div><div class="line">    u4  entries[1];         /* DexAnnotationItem 的内容*/</div><div class="line">&#125;;</div><div class="line">/*</div><div class="line"> * Direct-mapped &quot;annotation_item&quot;.</div><div class="line"> *</div><div class="line"> * NOTE: this structure is byte-aligned.</div><div class="line"> */</div><div class="line">struct DexAnnotationItem &#123;</div><div class="line">    u1  visibility;     /* 可见性 */</div><div class="line">    u1  annotation[1];  /* 以 encoded_annotation 格式编码 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p><strong>visibility 定义:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VISIBILITY_BUILD</td>
+<td>0x00</td>
+<td>编译时可见</td>
+</tr>
+<tr>
+<td>VISIBILITY_RUNTIME</td>
+<td>0x01</td>
+<td>运行时可见</td>
+</tr>
+<tr>
+<td>VISIBILITY_SYSTEM</td>
+<td>0x02</td>
+<td>运行时可见, 但是只对系统可见，用户代码不可见</td>
+</tr>
+</tbody>
+</table>
+<p><strong>encoded_annotation 格式定义：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>type_idx</td>
+<td>uleb128</td>
+<td>注解类型. 必须是类类型.</td>
+</tr>
+<tr>
+<td>size</td>
+<td>uleb128</td>
+<td>注解中 name-value 键值对的个数.</td>
+</tr>
+<tr>
+<td>elements</td>
+<td>annotation_element[size]</td>
+<td>注解的元素（不是偏移）. 元素需按 string_id 的索引升序排列.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>annotation_element格式：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name_idx</td>
+<td>uleb128</td>
+<td>代表元素名称，是指向 stringIds 的索引 .</td>
+</tr>
+<tr>
+<td>value</td>
+<td>encoded_value</td>
+<td>元素值</td>
+</tr>
+</tbody>
+</table>
+<p><strong>encoded_value格式：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(value_arg &lt;&lt; 5) &#124; value_type</td>
+<td>ubyte</td>
+<td>表示后面 value 的类型， 可选高三位 clarifying argument .下面详述. value_arg 表示 value 的长度(size - 1), 比如 0 表示 value 需要 1字节, 7 表示 value 需要8字节，不过还是有例外，下面详述.</td>
+</tr>
+<tr>
+<td>value</td>
+<td>ubyte[]</td>
+<td>值，不同的类型有不同的解码方式, 通常是小端存储。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>value 的格式：</strong></p>
+<table>
+<thead>
+<tr>
+<th>类型名</th>
+<th>类型值</th>
+<th>value_arg Format</th>
+<th>value Format</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VALUE_BYTE</td>
+<td>0x00</td>
+<td>必须是0</td>
+<td>ubyte[1]</td>
+<td>有符号1字节整形值</td>
+</tr>
+<tr>
+<td>VALUE_SHORT</td>
+<td>0x02</td>
+<td>size - 1 (0…1)</td>
+<td>ubyte[size]</td>
+<td>有符号4字节整型值，符号扩展</td>
+</tr>
+<tr>
+<td>VALUE_CHAR</td>
+<td>0x03</td>
+<td>size - 1 (0…1)</td>
+<td>ubyte[size]</td>
+<td>无符号4字节整型值，0扩展</td>
+</tr>
+<tr>
+<td>VALUE_INT</td>
+<td>0x04</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>有符号4字节整型值，符号扩展</td>
+</tr>
+<tr>
+<td>VALUE_LONG</td>
+<td>0x06</td>
+<td>size - 1 (0…7)</td>
+<td>ubyte[size]</td>
+<td>有符号8字节整型值，符号扩展</td>
+</tr>
+<tr>
+<td>VALUE_FLOAT</td>
+<td>0x10</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>4字节位模式，0扩展为右侧，以 IEEE754 32位浮点类型解码</td>
+</tr>
+<tr>
+<td>VALUE_DOUBLE</td>
+<td>0x11</td>
+<td>size - 1 (0…7)</td>
+<td>ubyte[size]</td>
+<td>8字节位模式，0扩展为右侧，以 IEEE754 64位浮点类型解码</td>
+</tr>
+<tr>
+<td>VALUE_STRING</td>
+<td>0x17</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>无符号(0扩展)4字节整形,解码为指向string_ids的索引，代表字符串</td>
+</tr>
+<tr>
+<td>VALUE_TYPE</td>
+<td>0x18</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>符号(0扩展)4字节整形,解码为指向type_ids的索引，代表类型或类</td>
+</tr>
+<tr>
+<td>VALUE_FIELD</td>
+<td>0x19</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>符号(0扩展)4字节整形,解码为指向field_ids的索引，代表字段</td>
+</tr>
+<tr>
+<td>VALUE_METHOD</td>
+<td>0x1a</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>符号(0扩展)4字节整形,解码为指向method_ids的索引，代表方法</td>
+</tr>
+<tr>
+<td>VALUE_ENUM</td>
+<td>0x1b</td>
+<td>size - 1 (0…3)</td>
+<td>ubyte[size]</td>
+<td>无符号(0扩展)4字节整形,解码为指向field_ids的索引，代表枚举常量</td>
+</tr>
+<tr>
+<td>VALUE_ARRAY</td>
+<td>0x1c</td>
+<td>必须是0</td>
+<td>encoded_array</td>
+<td>数组，格式为encoded_array format.</td>
+</tr>
+<tr>
+<td>VALUE_ANNOTATION</td>
+<td>0x1d</td>
+<td>必须是0</td>
+<td>encoded_annotation</td>
+<td>子注解, 格式为encoded_annotation format.</td>
+</tr>
+<tr>
+<td>VALUE_NULL</td>
+<td>0x1e</td>
+<td>必须是0</td>
+<td>(none)</td>
+<td>null</td>
+</tr>
+<tr>
+<td>VALUE_BOOLEAN</td>
+<td>0x1f</td>
+<td>boolean (0…1)</td>
+<td>(none)</td>
+<td>一比特的值， 0 代表 false ， 1 代表 true.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="field-annotations-item"><a href="#field-annotations-item" class="headerlink" title="field_annotations_item"></a>field_annotations_item</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;field_annotations_item&quot;.</div><div class="line"> */</div><div class="line">struct DexFieldAnnotationsItem &#123;</div><div class="line">    u4  fieldIdx;</div><div class="line">    u4  annotationsOff;             /* 指向 DexAnnotationSetItem 的文件偏移*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="method-annotations-item"><a href="#method-annotations-item" class="headerlink" title="method_annotations_item"></a>method_annotations_item</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;method_annotations_item&quot;.</div><div class="line"> */</div><div class="line">struct DexMethodAnnotationsItem &#123;</div><div class="line">    u4  methodIdx;</div><div class="line">    u4  annotationsOff;             /* 指向 DexAnnotationSetItem 的文件偏移 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="parameter-annotations-item"><a href="#parameter-annotations-item" class="headerlink" title="parameter_annotations_item"></a>parameter_annotations_item</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;parameter_annotations_item&quot;.</div><div class="line"> */</div><div class="line">struct DexParameterAnnotationsItem &#123;</div><div class="line">    u4  methodIdx;</div><div class="line">    u4  annotationsOff;             /* 指向 DexAnnotationSetRefList 的文件偏移*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;annotation_set_ref_list&quot;.</div><div class="line"> */</div><div class="line">struct DexAnnotationSetRefList &#123;</div><div class="line">    u4  size;</div><div class="line">    DexAnnotationSetRefItem list[1];</div><div class="line">&#125;;</div><div class="line">/*</div><div class="line"> * Direct-mapped &quot;annotation_set_ref_item&quot;.</div><div class="line"> */</div><div class="line">struct DexAnnotationSetRefItem &#123;</div><div class="line">    u4  annotationsOff;             /* offset to DexAnnotationSetItem */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="常量定义"><a href="#常量定义" class="headerlink" title="常量定义"></a>常量定义</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/* annotation constants */</div><div class="line">enum &#123;</div><div class="line">    kDexVisibilityBuild         = 0x00,     /* annotation visibility */</div><div class="line">    kDexVisibilityRuntime       = 0x01,</div><div class="line">    kDexVisibilitySystem        = 0x02,</div><div class="line">    kDexAnnotationByte          = 0x00,</div><div class="line">    kDexAnnotationShort         = 0x02,</div><div class="line">    kDexAnnotationChar          = 0x03,</div><div class="line">    kDexAnnotationInt           = 0x04,</div><div class="line">    kDexAnnotationLong          = 0x06,</div><div class="line">    kDexAnnotationFloat         = 0x10,</div><div class="line">    kDexAnnotationDouble        = 0x11,</div><div class="line">    kDexAnnotationString        = 0x17,</div><div class="line">    kDexAnnotationType          = 0x18,</div><div class="line">    kDexAnnotationField         = 0x19,</div><div class="line">    kDexAnnotationMethod        = 0x1a,</div><div class="line">    kDexAnnotationEnum          = 0x1b,</div><div class="line">    kDexAnnotationArray         = 0x1c,</div><div class="line">    kDexAnnotationAnnotation    = 0x1d,</div><div class="line">    kDexAnnotationNull          = 0x1e,</div><div class="line">    kDexAnnotationBoolean       = 0x1f,</div><div class="line">    kDexAnnotationValueTypeMask = 0x1f,     /* low 5 bits */</div><div class="line">    kDexAnnotationValueArgShift = 5,</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="classDataOff"><a href="#classDataOff" class="headerlink" title="classDataOff"></a>classDataOff</h2><p>指向 class_data_item 的文件偏移，如果此类没有数据(如接口)，值为0.<br>除了 DexCode 之外的结构是定义在 /dalvik/libdex/DexCLass.h 文件中的，并且采用的是 uleb128 编码方式。与之前不同</p>
+<h3 id="class-data-item-定义"><a href="#class-data-item-定义" class="headerlink" title="class_data_item 定义"></a>class_data_item 定义</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">/* expanded form of class_data_item. Note: If a particular item is</div><div class="line"> * absent (e.g., no static fields), then the corresponding pointer</div><div class="line"> * is set to NULL. */</div><div class="line">struct DexClassData &#123;</div><div class="line">    DexClassDataHeader header;          /* 字段与方法的个数 */</div><div class="line">    DexField*          staticFields;    /* 静态字段结构 */</div><div class="line">    DexField*          instanceFields;    /* 实例字段结构 */</div><div class="line">    DexMethod*         directMethods;    /* 直接方法结构 */</div><div class="line">    DexMethod*         virtualMethods;    /* 虚方法结构 */</div><div class="line">&#125;;</div><div class="line">/* expanded form of a class_data_item header */</div><div class="line">struct DexClassDataHeader &#123;</div><div class="line">    u4 staticFieldsSize;    /*静态字段个数*/</div><div class="line">    u4 instanceFieldsSize;  /*实例字段的个数*/</div><div class="line">    u4 directMethodsSize;   /*直接方法的个数*/</div><div class="line">    u4 virtualMethodsSize;  /*虚方法的个数*/</div><div class="line">&#125;;</div><div class="line">/* expanded form of encoded_field */</div><div class="line">struct DexField &#123;</div><div class="line">    u4 fieldIdx;    /*指向 DexFieldId 的索引 */</div><div class="line">    u4 accessFlags; /* 访问标识 */</div><div class="line">&#125;;</div><div class="line">/* expanded form of encoded_method */</div><div class="line">struct DexMethod &#123;</div><div class="line">    u4 methodIdx;    /* 指向 DexMethodId 的索引 */</div><div class="line">    u4 accessFlags;  /* 访问标识 */</div><div class="line">    u4 codeOff;      /* 指向 DexCode 的文件偏移，如果方法是abstract或者native的，值为0*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="code-item"><a href="#code-item" class="headerlink" title="code_item"></a>code_item</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;code_item&quot;.</div><div class="line"> *</div><div class="line"> * The &quot;catches&quot; table is used when throwing an exception,</div><div class="line"> * &quot;debugInfo&quot; is used when displaying an exception stack trace or</div><div class="line"> * debugging. An offset of zero indicates that there are no entries.</div><div class="line"> */</div><div class="line">struct DexCode &#123;</div><div class="line">    u2  registersSize;      /* 使用的寄存器个数 */</div><div class="line">    u2  insSize;            /* 参数个数 */</div><div class="line">    u2  outsSize;           /* 调用其他方法时使用的寄存器个数 */</div><div class="line">    u2  triesSize;          /* Try 的个数*/</div><div class="line">    u4  debugInfoOff;       /* 调试信息(行号和局部变量信息)的文件偏移，没有的话值为0，结构为 debug_info_item*/</div><div class="line">    u4  insnsSize;          /* 指令个数，以2字节为单位*/</div><div class="line">    u2  insns[1];           /* 指令数组，指令含义参考dalvik字节码格式*/</div><div class="line">    /* 2字节用于对齐(try的结构是以4字节对齐的，只有triesSize不为0且insnsSize为奇数的时候此值才会出现) */</div><div class="line">    /* try_item[triesSize] DexTry 结构，指示哪里有异常，怎样处理；数组中的元素必须没有重叠和覆盖 */</div><div class="line">    /* try/catch 中 handler 的个数 */</div><div class="line">    /* catch_handler_item[handlersSize] DexCatchHandler结构*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="debug-info-item"><a href="#debug-info-item" class="headerlink" title="debug_info_item"></a>debug_info_item</h4><p>每个 debug_info_item 以一个变长的 header 开始(长度取决于方法的参数个数)，接着是操作码（用来修改状态机器码的值），最后是一个结束字节 <code>DBG_END_SEQUENCE</code>。</p>
+<p><strong>状态机器码</strong> 包含5个寄存器，同时也追踪着每个寄存器中最后一个局部变量的名字和类型，为 DBG_RESTART_LOCAL 做准备。<br><code>address</code>寄存器代表两字节指令的偏移地址，在每个 debug_info 序列里以0开始，单调递增；<br><code>line</code>寄存器代表下一条指令的行数，它在 header 中被初始化，可能会加减变化但绝不会小于 1；<br><code>source_file</code>寄存器代表行数所在的源文件，它的类型是 class_def_item 中的 source_file_idx；<br><code>prologue_end</code> 和 <code>epilogue_begin</code> 是布尔类型的标识(初始值为false)，代表下一条指令是不是函数入口或者函数结束。</p>
+<p><strong>header 的格式：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>line_start</td>
+<td>uleb128</td>
+<td>line 寄存器的初始值，不代表真实的入口</td>
+</tr>
+<tr>
+<td>parameters_size</td>
+<td>uleb128</td>
+<td>参数名字的个数. 如果是实例方法的话，不包括this.</td>
+</tr>
+<tr>
+<td>parameter_names</td>
+<td>uleb128p1[parameters_size]</td>
+<td>方法的参数名的字符串索引. NO_INDEX 表示相关参数没有名字. 类型描述符和签名同方法的类型描述符和签名.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>debug_info 中操作的值：</strong></p>
+<table>
+<thead>
+<tr>
+<th>名字</th>
+<th>值</th>
+<th>格式</th>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DBG_END_SEQUENCE</td>
+<td>0x00</td>
+<td></td>
+<td>(none)</td>
+<td>代表调试信息的终止</td>
+</tr>
+<tr>
+<td>DBG_ADVANCE_PC</td>
+<td>0x01</td>
+<td>uleb128  addr_diff</td>
+<td>addr_diff: 地址寄存器加上此值</td>
+<td>使address寄存器指向下一个地址</td>
+</tr>
+<tr>
+<td>DBG_ADVANCE_LINE</td>
+<td>0x02</td>
+<td>sleb128 line_diff</td>
+<td>line_diff: line寄存器加上此值</td>
+<td>使line寄存器指向新的一行</td>
+</tr>
+<tr>
+<td>DBG_START_LOCAL</td>
+<td>0x03</td>
+<td>uleb128  register_num，uleb128p1 name_idx，uleb128p1 type_idx</td>
+<td>register_num: 某个寄存器，name_idx: 指向string的索引，type_idx: 指向type的索引</td>
+<td>在当前地址引入一个局部变量. name_idx 或 type_idx 可能是 NO_INDEX，代表此值未知.</td>
+</tr>
+<tr>
+<td>DBG_START_LOCAL_EXTENDED</td>
+<td>0x04</td>
+<td>uleb128 register_num，uleb128p1 name_idx，uleb128p1 type_idx，uleb128p1 sig_idx</td>
+<td>register_num: 某个寄存器，name_idx: 指向string的索引，type_idx: 指向type的索引，sig_idx: 指向string的索引，表示类型签名</td>
+<td>在当前地址引入一个带有类型签名的局部变量. name_idx 或 type_idx、sig_idx 可能是 NO_INDEX，代表此值未知.”dalvik.annotation.Signature” 有关于处理签名的说明.</td>
+</tr>
+<tr>
+<td>DBG_END_LOCAL</td>
+<td>0x05</td>
+<td>uleb128 register_num</td>
+<td>register_num: 某个寄存器</td>
+<td>代表当前地址的局部变量超出范围</td>
+</tr>
+<tr>
+<td>DBG_RESTART_LOCAL</td>
+<td>0x06</td>
+<td>uleb128 register_num</td>
+<td>register_num: 重新赋值的寄存器</td>
+<td>在当前地址重新引入一个局部变量.名字和类型同上一个局部变量.</td>
+</tr>
+<tr>
+<td>DBG_SET_PROLOGUE_END</td>
+<td>0x07</td>
+<td></td>
+<td>(none)</td>
+<td>设置 prologue_end 状态寄存器, 表示下一个入口点应该被视作方法开始的结束(可设置方法断点的合适地方). prologue_end寄存器的值可以被任何&gt;=0x0a的特殊操作码清空.</td>
+</tr>
+<tr>
+<td>DBG_SET_EPILOGUE_BEGIN</td>
+<td>0x08</td>
+<td></td>
+<td>(none)</td>
+<td>设置epilogue_begin状态寄存器, 表示下一个入口点应该被视作方法结束的开始(在方法结束之前使其挂起的合适地方). epilogue_begin寄存器的值可以被任何&gt;=0x0a的特殊操作码清空.</td>
+</tr>
+<tr>
+<td>DBG_SET_FILE</td>
+<td>0x09</td>
+<td>uleb128p1 name_idx</td>
+<td>name_idx: 指向string的索引，表示源文件名; NO_INDEX 表示未知</td>
+<td>表面接下来的行号入口都与这个文件相关, 而不是 code_item 指定的默认名字.</td>
+</tr>
+<tr>
+<td>Special Opcodes</td>
+<td>0x0a…0xff</td>
+<td></td>
+<td>(none)</td>
+<td>line、address寄存器加减, 开启新的入口点, 清空 prologue_end、 epilogue_begin寄存器. 公式如下.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Special Opcodes：</strong></p>
+<p>使 line、address 寄存器小幅度变化/开启一个新的入口点. 范围是 0x0a ~ 0xff .</p>
+<p>DBG_FIRST_SPECIAL = 0x0a  // 最小的特殊操作码<br>DBG_LINE_BASE   = -4      // 最小的行号增量<br>DBG_LINE_RANGE  = 15      // 代表行号的变化值</p>
+<p>公式：<br>adjusted_opcode = opcode - DBG_FIRST_SPECIAL<br>line += DBG_LINE_BASE + (adjusted_opcode % DBG_LINE_RANGE)<br>address += (adjusted_opcode / DBG_LINE_RANGE)</p>
+<h4 id="try-item"><a href="#try-item" class="headerlink" title="try_item"></a>try_item</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;try_item&quot;.</div><div class="line"> */</div><div class="line">struct DexTry &#123;</div><div class="line">    u4  startAddr;          /* 异常起始地址, 2个字节为单位 */</div><div class="line">    u2  insnCount;          /* 指令个数, 2个字节为单位，最后一个指令为 startAddr + insnCount - 1 */</div><div class="line">    u2  handlerOff;         /* 以 handler 列表为起始的 指向异常对应的 handler 的偏移*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="catch-handler-item"><a href="#catch-handler-item" class="headerlink" title="catch_handler_item"></a>catch_handler_item</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Catch handler entry, used while iterating over catch_handler_items.</div><div class="line"> */</div><div class="line">struct DexCatchHandler &#123;</div><div class="line">    u4          typeIdx;    /* catch 到的异常的类型索引，指向 typeIds */</div><div class="line">    u4          address;    /* handler 的地址 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="番外-关于-catch-handler-list"><a href="#番外-关于-catch-handler-list" class="headerlink" title="番外 - 关于 catch_handler_list"></a>番外 - 关于 catch_handler_list</h4><p>catch_handler_list 在源码中没有定义，下面的表格是其格式：</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>size</td>
+<td>uleb128</td>
+<td>handler 列表的个数</td>
+</tr>
+<tr>
+<td>list</td>
+<td>encoded_catch_handler[handlers_size]</td>
+<td>handler 列表</td>
+</tr>
+</tbody>
+</table>
+<p>单个 catch_handler 的格式：</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>size</td>
+<td>sleb128</td>
+<td>列表中 catch 到的类型的个数. 如果不是正数，则handler列表中含有可以捕获到所有异常的handler. 比如 0 表示没有指定异常的类型，只有一个所有异常handler. 2 表示有两个指定类型的异常. -1 有一个指定类型的异常和一个可以捕获到所有异常的handler.</td>
+</tr>
+<tr>
+<td>handlers</td>
+<td>DexCatchHandler[abs(size)]</td>
+<td>abs(size) 个handler, 存放的是指定类型的异常.</td>
+</tr>
+<tr>
+<td>catch_all_addr</td>
+<td>uleb128 (optional)</td>
+<td>可以处理所有异常的 handler 的地址. size为0或者负数时此值有效.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="staticValuesOff"><a href="#staticValuesOff" class="headerlink" title="staticValuesOff"></a>staticValuesOff</h2><p>指向 DexEncodedArray 的文件偏移，表示静态字段的初始值，值为0表示没有设定静态字段的初始值，静态字段被初始化为0或者null.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;encoded_array&quot;.</div><div class="line"> *</div><div class="line"> * NOTE: this structure is byte-aligned.</div><div class="line"> */</div><div class="line">struct DexEncodedArray &#123;</div><div class="line">    u1  array[1];                   /* encoded_array 格式的数据 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p><strong>encoded_array 格式：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>size</td>
+<td>uleb128</td>
+<td>数组元素的个数，必须不大于静态字段的个数和对应的field_list的个数，如果是小于，剩余的静态字段按照相应的类型被初始化为0或者null.</td>
+</tr>
+<tr>
+<td>values</td>
+<td>encoded_value[size]</td>
+<td>数组内容</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="手工查找"><a href="#手工查找" class="headerlink" title="手工查找"></a>手工查找</h1><p>classDefsSize：0x02<br>classDefsOff：0x047c</p>
+<p>0x047c ~ 0x04bc</p>
+<h2 id="DexClassDef数据及其解析"><a href="#DexClassDef数据及其解析" class="headerlink" title="DexClassDef数据及其解析"></a>DexClassDef数据及其解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">00000470  .. .. .. .... .. .. ..   .. .. .. .. 05 00 00 00  |------------....|</div><div class="line">00000480  01 00 00 00 0e 00 00 00  00 00 00 00 1f 00 00 00  |................|</div><div class="line">00000490  00 00 00 00 c2 0f 00 00  00 00 00 00 06 00 00 00  |................|</div><div class="line">000004a0  01 00 00 00 02 00 00 00  00 00 00 00 20 00 00 00  |............ ...|</div><div class="line">000004b0  64 0a 00 00 de 0f 00 00  00 00 00 00</div></pre></td></tr></table></figure>
+<p>以第一个为例：</p>
+<ol>
+<li><p><code>classIdx</code>=0x05，即第0x05个typeId，得类类型为 Lcom/shell/NativeApplication;</p>
+</li>
+<li><p><code>accessFlags</code>=0x01，查表得权限 ACC_PUBLIC</p>
+</li>
+<li><p><code>superclassIdx</code>=0x0e，即第0x0e个typeId，得父类类型为 Ljava/lang/Object;</p>
+</li>
+<li><p><code>interfacesOff</code>=0x0000，没有实现接口</p>
+</li>
+<li><p><code>sourceFileIdx</code>=0x1f，即第0x1f个stringId，得源文件名为 NativeApplication.java</p>
+</li>
+<li><p><code>annotationsOff</code>=0x0000，没有注解</p>
+</li>
+<li><p><code>classDataOff</code>=0x0fc2，得DexClassData偏移为0x0fc2</p>
+</li>
+<li><p><code>staticValuesOff</code>=0x0000，没有静态数据的初始值</p>
+</li>
+</ol>
+<h2 id="DexClassData数据及其解析"><a href="#DexClassData数据及其解析" class="headerlink" title="DexClassData数据及其解析"></a>DexClassData数据及其解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">00000fc0  .. .. 00 00 05 00 03 88  80 04 90 18 01 81 80 04  |................|</div><div class="line">00000fd0  b8 18 01 89 02 00 01 89  02 00 01 89 02 00 00 00  |................|</div><div class="line">00000fe0  03 04 08 81 80 04 d0 18  03 02 e8 18 01 09 f4 19  |................|</div></pre></td></tr></table></figure>
+<p>[<strong>注意DexClassData中数字的类型为uleb128</strong>]<br>① <strong>header</strong>：<code>staticFieldsSize</code>=0x00, <code>instanceFieldsSize</code>=0x00, <code>directMethodsSize</code>=0x05, <code>virtualMethodsSize</code>=0x00, 即0个静态字段，0个实例字段，5个直接方法，0个虚方法；</p>
+<p>② <strong>directMethods</strong>：(共5个，以第一个为例)</p>
+<ul>
+<li><code>methodIdx</code>=0x03，即第0x03个methodId，得直接方法为 void com.shell.NativeApplication.<clinit>()</clinit></li>
+<li><code>accessFlags</code>=<code>88 80 04</code>，解码为0x10008，得方法访问权限为 ACC_STATIC 和 ACC_CONSTRUCTOR</li>
+<li><code>codeOff</code>=<code>90 18</code>，解码为0xc10，得 DexCode 偏移为 0xc10</li>
+</ul>
+<h2 id="DexCode数据及其解析"><a href="#DexCode数据及其解析" class="headerlink" title="DexCode数据及其解析"></a>DexCode数据及其解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">00000c10  01 00 00 00 01 00 00 00  7c 0a 00 00 0b 00 00 00  |........|.......|</div><div class="line">00000c20  1a 00 00 00 71 10 20 00  00 00 1a 00 01 00 71 10  |....q. .......q.|</div><div class="line">00000c30  20 00 00 00 0e 00 00 00  01 00 01 00 01 00 00 00  | ...............|</div><div class="line">00000c40  83 0a 00 00 04 00 00 00  70 10 1d 00 00 00 0e 00  |........p.......|</div><div class="line">00000c50  01 00 01 00 01 00 00 00  88 0a 00 00 04 00 00 00  |................|</div><div class="line">00000c60  70 10 00 00 00 00 0e 00  0a 00 04 00 04 00 01 00  |p...............|</div><div class="line">00000c70  8d 0a 00 00 38 00 00 00  6e 10 12 00 09 00 0c 05  |....8...n.......|</div><div class="line">00000c80  6e 10 11 00 05 00 0a 05  39 05 09 00 6e 10 12 00  |n.......9...n...|</div></pre></td></tr></table></figure>
+<ul>
+<li><code>registersSize</code>=0x0001，得寄存器个数为1</li>
+<li><code>insSize</code>=0x0000，得参数个数为0</li>
+<li><code>outsSize</code>=0x0001，调用其他方法使用寄存器个数为1</li>
+<li><code>triesSize</code>=0x0000，try的个数为0</li>
+<li><code>debugInfoOff</code>=0x0a7c，debug信息偏移为0x0a7c</li>
+<li><code>insnsSize</code>=0x0b，即有0xb个2字节指令，在 0x00000c20 ~ 0x00000c35 之间</li>
+<li><code>insns</code>={1a 00 00 00 71 10 20 00 00 00 1a 00 01 00 71 10 20 00 00 00 0e 00}</li>
+</ul>
+<h3 id="debug-info数据及其解析"><a href="#debug-info数据及其解析" class="headerlink" title="debug_info数据及其解析"></a>debug_info数据及其解析</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">00000a70  .. .. .. .. .. .. .. ..  .. .. .. .. 09 00 07 0e  |........\.......|</div><div class="line">00000a80  5a 56 00</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>header:</strong><br>  line_start(09)=0x09，得line寄存器的初始值为0x09；<br>  parameters_size(0x00)=0x00，得参数的名字的个数为0；</li>
+<li><strong>操作码：</strong><br>  <code>0x07</code>:DBG_SET_PROLOGUE_END，方法开始；<br>  <code>0x0e</code>:0x0e-0x0a=0x04,即行号+=DBG_LINE_BASE+(0x04%DBG_LINE_RANGE),地址+=(0x04/DBG_LINE_RANGE),得行号+0,地址+0;<br>  <code>0x5a</code>:0x5a-0x0a=0x50,即行号+=DBG_LINE_BASE+(0x50%DBG_LINE_RANGE),地址+=(0x50/DBG_LINE_RANGE),得行号+1,地址+5;<br>  <code>0x56</code>:0x56-0x0a=0x4c,即行号+=DBG_LINE_BASE+(0x4c%DBG_LINE_RANGE),地址+=(0x4c/DBG_LINE_RANGE),得行号+1,地址+5;<br>  <code>0x00</code>:DBG_END_SEQUENCE，调试结束。</li>
+</ul>
+<h3 id="insns-中的指令数据的解析"><a href="#insns-中的指令数据的解析" class="headerlink" title="insns 中的指令数据的解析"></a>insns 中的指令数据的解析</h3><p>在 <a href="https://source.android.com/devices/tech/dalvik/dalvik-bytecode.html" target="_blank" rel="external">Dalvik bytecode</a> 找到 OpCode 的含义及格式，在 <a href="https://source.android.com/devices/tech/dalvik/instruction-formats.html" target="_blank" rel="external">Dalvik Executable instruction formats</a> 找到该格式的表示方式。</p>
+<p><strong>第1条代码：</strong></p>
+<p><strong>1a</strong> ： 含义为 <code>const-string vAA, string@BBBB</code>， 格式为 <code>1a 21c</code><br><strong>21c</strong> : 格式为 <code>AA|op BBBB</code>，表示方式有三种：<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">op vAA, type@BBBB</div><div class="line">op vAA, field@BBBB</div><div class="line">op vAA, string@BBBB</div></pre></td></tr></table></figure></p>
+<p><code>1a</code> 的含义已经为我们指明，我们应该采用第三种。1a 后面的6个字节为 <code>00 00 00</code>，即 AA 是 00，BBBB 是 0000。<br>则可翻译为 <code>const-string v0, string@0000</code>， 找到第0x0个 StringId 对应的字符串 /data/data/com.zyh.lightingbackup/.lib/libexec.so .<br>最终解析为 <code>const-string v0, &quot;/data/data/com.zyh.lightingbackup/.lib/libexec.so&quot;</code></p>
+<p><strong>第2条代码：</strong></p>
+<p><strong>71</strong> ： 含义为 <code>invoke-static</code>，格式为 <code>71 35c</code><br><strong>35c</strong> ： 格式为 <code>A|G|op BBBB F|E|D|C</code> ，表示方式有7种：<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[A=5] op &#123;vC, vD, vE, vF, vG&#125;, meth@BBBB</div><div class="line">[A=5] op &#123;vC, vD, vE, vF, vG&#125;, type@BBBB</div><div class="line">[A=4] op &#123;vC, vD, vE, vF&#125;, kind@BBBB</div><div class="line">[A=3] op &#123;vC, vD, vE&#125;, kind@BBBB</div><div class="line">[A=2] op &#123;vC, vD&#125;, kind@BBBB</div><div class="line">[A=1] op &#123;vC&#125;, kind@BBBB</div><div class="line">[A=0] op &#123;&#125;, kind@BBBB</div></pre></td></tr></table></figure></p>
+<p>71 后面的 A = 1, G = 0，所以应该采用方式 <code>[A=1] op {vC}, kind@BBBB</code>，<br>而 BBBB = 0020, F|E|D|C = 0000，可翻译为 <code>invoke-static {v0}, kind@0020</code>，找到第 0x20 个methodId 对应的函数 void java.lang.System.load(java.lang.String) .<br>最终解析为 <code>invoke-static {v0}, Ljava/lang/System;-&gt;load(Ljava/lang/String;)V</code></p>
+<p>最后我们可以使用 apktool 将 apk 文件反编译，在 /smali/com/shell/NativeApplication.smali 文件中找到 <clinit> 方法，看代码对照！</clinit></p>
+<hr>
+<h1 id="写程序解析"><a href="#写程序解析" class="headerlink" title="写程序解析"></a>写程序解析</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div></pre></td><td class="code"><pre><div class="line">def parseClassdef_Name(f):</div><div class="line">    return DexStruct.DexTypes[struct.unpack(&apos;I&apos;,f.read(4))[0]][&apos;content&apos;]</div><div class="line">def parseClassdef_Accessflag(f):</div><div class="line">    return struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">def parseClassdef_Superclass(f):</div><div class="line">    class_superclass_id = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    if class_superclass_id == -1:</div><div class="line">        return None</div><div class="line">    return DexStruct.DexTypes[class_superclass_id][&apos;content&apos;]</div><div class="line">def parseClassdef_Interface(f):</div><div class="line">    interface_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    if interface_off == 0:</div><div class="line">        return None</div><div class="line">    f.seek(interface_off)</div><div class="line">    type_list_size = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    type_list = []</div><div class="line">    for i in range(type_list_size):</div><div class="line">        type_id = struct.unpack(&apos;H&apos;,f.read(2))[0]</div><div class="line">        type_list.append(DexStruct.DexTypes[type_id][&apos;content&apos;])</div><div class="line">    return type_list</div><div class="line">def parseClassdef_Sourcefile(f):</div><div class="line">    class_sourcefile_id = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    if class_sourcefile_id == -1:</div><div class="line">        return None</div><div class="line">    return DexStruct.DexStrings[class_sourcefile_id][&apos;content&apos;]</div><div class="line">def parseClassdef_Annotations(f):</div><div class="line">    annotations_directory_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    if annotations_directory_off == 0:</div><div class="line">        return None</div><div class="line">    #-----------</div><div class="line">    f.seek(annotations_directory_off)</div><div class="line">    class_Annotations_Off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    field_size = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    method_size = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    parameter_size = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    #---------</div><div class="line">    annotations_directory = None</div><div class="line">    if class_Annotations_Off != 0:</div><div class="line">        # f.seek(class_Annotations_Off)</div><div class="line">        # annotation_set_item_size = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        # for i in range(annotation_set_item_size):</div><div class="line">        #     item_visibility = struct.unpack(&apos;B&apos;,f.read(1))[0]</div><div class="line">        #     item_annotation = struct.unpack(&apos;B&apos;,f.read(1))[0]</div><div class="line">        pass    # 解码暂且略过</div><div class="line">    #--------</div><div class="line">    f.seek(annotations_directory_off+4*4)</div><div class="line">    fieldAnnotation_list = []</div><div class="line">    for i in range(field_size):</div><div class="line">        field = DexStruct.DexFields[struct.unpack(&apos;I&apos;,f.read(4))[0]]</div><div class="line">        field_annotation_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        fieldAnnotation_item = &#123;</div><div class="line">            &apos;field&apos; : field,</div><div class="line">            &apos;annotationsOff&apos; : field_annotation_off,</div><div class="line">        &#125;</div><div class="line">        fieldAnnotation_list.append(fieldAnnotation_item)</div><div class="line">    #--------</div><div class="line">    f.seek(annotations_directory_off+4*4+field_size*8)</div><div class="line">    methodAnnotation_list = []</div><div class="line">    for i in range(method_size):</div><div class="line">        method= DexStruct.DexMethods[struct.unpack(&apos;I&apos;,f.read(4))[0]]</div><div class="line">        method_annotation_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        methodAnnotation_item = &#123;</div><div class="line">            &apos;method&apos; : method,</div><div class="line">            &apos;annotationsOff&apos; : method_annotation_off,</div><div class="line">        &#125;</div><div class="line">        methodAnnotation_list.append(methodAnnotation_item)</div><div class="line">    #--------</div><div class="line">    f.seek(annotations_directory_off+4*4+field_size*8+method_size*8)</div><div class="line">    parameterAnnotation_list = []</div><div class="line">    for i in range(parameter_size):</div><div class="line">        param_method = DexStruct.DexMethods[struct.unpack(&apos;I&apos;,f.read(4))[0]]</div><div class="line">        param_annotation_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        parameterAnnotation_item = &#123;</div><div class="line">            &apos;method&apos; : param_method,</div><div class="line">            &apos;annotationsOff&apos; : param_annotation_off,</div><div class="line">        &#125;</div><div class="line">        parameterAnnotation_list.append(parameterAnnotation_item)</div><div class="line">    tmpDexAnnotationsDirectoryItem = &#123;</div><div class="line">        &apos;classAnnotations&apos; : annotations_directory,</div><div class="line">        &apos;fieldSize&apos; : field_size,</div><div class="line">        &apos;methodSize&apos; : method_size,</div><div class="line">        &apos;parameterSize&apos; : parameter_size,</div><div class="line">        &apos;fieldAnnotation&apos; : fieldAnnotation_list,</div><div class="line">        &apos;methodAnnotation&apos; : methodAnnotation_list,</div><div class="line">        &apos;parameterAnnotaions&apos; : parameterAnnotation_list,</div><div class="line">    &#125;</div><div class="line">    return tmpDexAnnotationsDirectoryItem</div><div class="line">def parseClassdef_ClassData(f):</div><div class="line">    class_data_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    if class_data_off == 0:</div><div class="line">        return None</div><div class="line">    f.seek(class_data_off)</div><div class="line">    #-----</div><div class="line">    header = &#123;</div><div class="line">        &apos;staticFieldsSize&apos; : readuleb128(f),</div><div class="line">        &apos;instanceFieldsSize&apos; :  readuleb128(f),</div><div class="line">        &apos;directMethodsSize&apos; : readuleb128(f),</div><div class="line">        &apos;virtualMethodsSize&apos; : readuleb128(f),</div><div class="line">    &#125;</div><div class="line">    #-----</div><div class="line">    staticFields = []</div><div class="line">    if header[&apos;staticFieldsSize&apos;] != 0:</div><div class="line">        for i in range(header[&apos;staticFieldsSize&apos;]):</div><div class="line">            tmpstaticFields = &#123;</div><div class="line">                &apos;field&apos; : DexStruct.DexFields[readuleb128(f)],</div><div class="line">                &apos;accessFlags&apos; : readuleb128(f)</div><div class="line">            &#125;</div><div class="line">            staticFields.append(tmpstaticFields)</div><div class="line">    #-----------</div><div class="line">    instanceFields = []</div><div class="line">    if header[&apos;instanceFieldsSize&apos;] != 0:</div><div class="line">        for i in range(header[&apos;instanceFieldsSize&apos;]):</div><div class="line">            tmpinstanceFields = &#123;</div><div class="line">                &apos;field&apos; : DexStruct.DexFields[readuleb128(f)],</div><div class="line">                &apos;accessFlags&apos; : readuleb128(f)</div><div class="line">            &#125;</div><div class="line">            instanceFields.append(tmpinstanceFields)</div><div class="line">    #-----</div><div class="line">    directMethods = []</div><div class="line">    if header[&apos;directMethodsSize&apos;] != 0:</div><div class="line">        for i in range(header[&apos;directMethodsSize&apos;]):</div><div class="line">            tmpdirectMethods = &#123;</div><div class="line">                &apos;method&apos; : DexStruct.DexMethods[readuleb128(f)],</div><div class="line">                &apos;accessFlags&apos; : readuleb128(f),</div><div class="line">                &apos;codeOff&apos;: readuleb128(f),</div><div class="line">                ####### dexcode 还没解析</div><div class="line">            &#125;</div><div class="line">            directMethods.append(tmpdirectMethods)</div><div class="line">    #-----</div><div class="line">    virtualMethods = []</div><div class="line">    if header[&apos;virtualMethodsSize&apos;] != 0:</div><div class="line">        for i in range(header[&apos;virtualMethodsSize&apos;]):</div><div class="line">            tmpvirtualMethods = &#123;</div><div class="line">                &apos;method&apos; : DexStruct.DexMethods[readuleb128(f)],</div><div class="line">                &apos;accessFlags&apos; : readuleb128(f),</div><div class="line">                &apos;codeOff&apos; : readuleb128(f)</div><div class="line">                ####### dexcode 还没解析</div><div class="line">            &#125;</div><div class="line">            virtualMethods.append(tmpvirtualMethods)</div><div class="line">    DexClassData = &#123;</div><div class="line">        &apos;DexClassDataHeader&apos; : header,</div><div class="line">        &apos;staticFields&apos; : staticFields,</div><div class="line">        &apos;instanceFields&apos; : instanceFields,</div><div class="line">        &apos;directMethods&apos; : directMethods,</div><div class="line">        &apos;virtualMethods&apos; : virtualMethods,</div><div class="line">    &#125;</div><div class="line">    return DexClassData</div><div class="line">def parseClassdef_StaticValue(f):</div><div class="line">    staticvalue_off = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">    if staticvalue_off == 0:</div><div class="line">        return None</div><div class="line">    return None ## 还没解析 encoded value</div><div class="line">def parseClassdefs(f):</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    此函数基于之前所有的函数结果</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    for i in range(DexStruct.DexHeader[&apos;classDefsSize&apos;]):</div><div class="line">        item_off = i*4*8 + DexStruct.DexHeader[&apos;classDefsOff&apos;]</div><div class="line">        f.seek(item_off)</div><div class="line">        class_name = parseClassdef_Name(f)</div><div class="line">        class_accessflag = parseClassdef_Accessflag(f)</div><div class="line">        class_superclass = parseClassdef_Superclass(f)</div><div class="line">        class_interface = parseClassdef_Interface(f)</div><div class="line">        f.seek(item_off+4*4)</div><div class="line">        class_sourcefile = parseClassdef_Sourcefile(f)</div><div class="line">        class_annotation = parseClassdef_Annotations(f)</div><div class="line">        f.seek(item_off+4*6)</div><div class="line">        class_classdata = parseClassdef_ClassData(f)</div><div class="line">        f.seek(item_off+4*7)</div><div class="line">        class_staticvalue = parseClassdef_StaticValue(f)</div><div class="line">        tmpDexClassDef = &#123;</div><div class="line">            &apos;class&apos; : class_name,</div><div class="line">            &apos;accessFlags&apos; : class_accessflag,</div><div class="line">            &apos;superclass&apos; : class_superclass,</div><div class="line">            &apos;interfaces&apos; : class_interface,</div><div class="line">            &apos;sourceFile&apos; : class_sourcefile,</div><div class="line">            &apos;annotations&apos; : class_annotation,</div><div class="line">            &apos;classData&apos; : class_classdata,</div><div class="line">            &apos;staticValue&apos; : class_staticvalue,</div><div class="line">        &#125;</div><div class="line">        DexStruct.DexClassDefs.append(tmpDexClassDef)</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://source.android.com/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik Executable format</a></p>
+<p><a href="http://www.ituring.com.cn/book/1131" target="_blank" rel="external">《Android 软件安全与逆向分析》</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/21/parse-dex-file-part-classdefs/">http://kiya.studio/2015/11/21/parse-dex-file-part-classdefs/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/26/smali-grammar-iterator-switch/" id="art-left" class="art-right">
+                <span class="next-title">
+                    smali 语法 - iterator & switch-case & try-catch<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/20/parse-dex-file-part-protos-fields-methods/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>解析 dex 文件结构 - 索引区和数据区（二） - Protos & Fields & Methods
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">解析 dex 文件结构 - 索引区和数据区（三） - ClassDefs</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#结构"><span class="toc-text">结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#classIdx"><span class="toc-text">classIdx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#accessFlags"><span class="toc-text">accessFlags</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#superclassIdx"><span class="toc-text">superclassIdx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#interfacesOff"><span class="toc-text">interfacesOff</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sourceFileIdx"><span class="toc-text">sourceFileIdx</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#annotationsOff"><span class="toc-text">annotationsOff</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#annotations-directory-item"><span class="toc-text">annotations_directory_item</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#annotation-set-item"><span class="toc-text">annotation_set_item</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#field-annotations-item"><span class="toc-text">field_annotations_item</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#method-annotations-item"><span class="toc-text">method_annotations_item</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#parameter-annotations-item"><span class="toc-text">parameter_annotations_item</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常量定义"><span class="toc-text">常量定义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#classDataOff"><span class="toc-text">classDataOff</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#class-data-item-定义"><span class="toc-text">class_data_item 定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#code-item"><span class="toc-text">code_item</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#debug-info-item"><span class="toc-text">debug_info_item</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#try-item"><span class="toc-text">try_item</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#catch-handler-item"><span class="toc-text">catch_handler_item</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#番外-关于-catch-handler-list"><span class="toc-text">番外 - 关于 catch_handler_list</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#staticValuesOff"><span class="toc-text">staticValuesOff</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#手工查找"><span class="toc-text">手工查找</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#DexClassDef数据及其解析"><span class="toc-text">DexClassDef数据及其解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DexClassData数据及其解析"><span class="toc-text">DexClassData数据及其解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DexCode数据及其解析"><span class="toc-text">DexCode数据及其解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#debug-info数据及其解析"><span class="toc-text">debug_info数据及其解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#insns-中的指令数据的解析"><span class="toc-text">insns 中的指令数据的解析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#写程序解析"><span class="toc-text">写程序解析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

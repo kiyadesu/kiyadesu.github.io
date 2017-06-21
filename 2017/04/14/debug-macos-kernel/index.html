@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 翻译 - 用 VirtualBox 调试 macOS 内核 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2017年4月14日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                翻译 - 用 VirtualBox 调试 macOS 内核
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/translation/">translation</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><strong>重大更新</strong>：awalton 在 Hacker News 上的讨论中提到：VMWare 里可以设置 CPUID 标志来禁用 SMAP，只需要在 vmx 文件中加上cpuid.7.ebx = “———–0——————–”.<a id="more"></a></p>
+<hr>
+<p>上年，我给我的老 MBP 升级了2016年的 Skylake Intel 处理器。我在调试一个内核漏洞时，发现我的 VMWare 开启了“SMAP”(防止超级用户访问)机制。我找不到怎么关闭 SMAP，还好 VirtualBox 目前好像不支持 SMAP？</p>
+<p>这篇文章会手把手教你如何用 VirtualBox 进行 macOS 内核的源码级调试。虽然这些步骤都是在 VirtualBox上进行的，但在 VMWare 上也是通用的，甚至更简单。</p>
+<h1 id="安装-VirtualBox-和-Sierra"><a href="#安装-VirtualBox-和-Sierra" class="headerlink" title="安装 VirtualBox 和 Sierra"></a>安装 VirtualBox 和 Sierra</h1><p>如果你还没在 VirtualBox 上安装 macOS 镜像，你可以复用 VMWare 的 vmdk，也可以装个新的。重新安装系统需要 ISO 镜像，下面的命令可以将从<a href="https://itunes.apple.com/us/app/macos-sierra/id1127487414?ls=1&amp;mt=12" target="_blank" rel="external">Mac app store</a>下载的 Sierra 转成 ISO。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">$ hdiutil attach /Applications/Install\ macOS\ Sierra.app/Contents/SharedSupport/InstallESD.dmg -noverify -nobrowse -mountpoint /Volumes/installesd</div><div class="line">$ hdiutil create -o /tmp/Sierra -size 8g -type SPARSE -layout SPUD -fs HFS+J</div><div class="line">$ hdiutil attach /tmp/Sierra.sparseimage -noverify -nobrowse -mountpoint /Volumes/install</div><div class="line">$ asr restore -source /Volumes/installesd/BaseSystem.dmg -target /Volumes/install -noprompt -noverify -erase</div><div class="line">$ rm /Volumes/OS\ X\ Base\ System/System/Installation/Packages</div><div class="line">$ cp -rp /Volumes/installesd/Packages /Volumes/OS\ X\ Base\ System/System/Installation/</div><div class="line">$ cp -rp /Volumes/installesd/BaseSystem.dmg /Volumes/OS\ X\ Base\ System/BaseSystem.dmg</div><div class="line">$ cp -rp /Volumes/installesd/BaseSystem.chunklist /Volumes/OS\ X\ Base\ System/BaseSystem.chunklist</div><div class="line">$ hdiutil detach /Volumes/installesd</div><div class="line">$ hdiutil detach /Volumes/OS\ X\ Base\ System/</div><div class="line">$ hdiutil resize -sectors min /tmp/Sierra.sparseimage</div><div class="line">$ hdiutil convert /tmp/Sierra.sparseimage -format UDTO -o /tmp/Sierra</div><div class="line">$ rm /tmp/Sierra.sparseimage</div><div class="line">$ mv /tmp/Sierra.cdr /tmp/Sierra.iso</div></pre></td></tr></table></figure>
+<h2 id="网络设置"><a href="#网络设置" class="headerlink" title="网络设置"></a>网络设置</h2><p>如果你用了桥接，可以跳过这部分。</p>
+<p>如果用的是 NAT，需要为 KDP 开启端口转发。点击“网络”，选择“高级” -&gt; “端口转发”，将 localhost 41139/UDP 转发到虚拟机的 41139/UDP，就能够访问到虚拟机的 41139 端口了。</p>
+<h1 id="安装-XCode"><a href="#安装-XCode" class="headerlink" title="安装 XCode"></a>安装 XCode</h1><p>在你的主机上安装 XCode，通过 App store 安装最简单。 可以直接打开 XCode，也可以执行 <code>sudo xcodebuild -license accept</code> 接受 XCode license。</p>
+<h1 id="安装内核调试组件-KDK"><a href="#安装内核调试组件-KDK" class="headerlink" title="安装内核调试组件(KDK)"></a>安装内核调试组件(KDK)</h1><p>根据我们要调试的 macOS 版本从 Apple 开发者中心安装 KDK ，这里我的是10.12 build 16A323.</p>
+<p>KDK 的安装目录是<code>/Library/Developer/KDKs</code>，提供的内核版本、符号、内核扩展都有 RELEASE、DEVELOPMENT、DEBUG 三种版本。不同之处在于 DEVELOPMENT 和 DEBUG 版比 RELEASE 版多了些断言和错误检查，DEBUG 版的最丰富。</p>
+<p>注意：被调试的系统不需要安装 KDK。</p>
+<h1 id="修改-nvram-boot-args"><a href="#修改-nvram-boot-args" class="headerlink" title="修改 nvram boot-args"></a>修改 nvram boot-args</h1><p>为了能够调试虚拟机，需要设置虚拟机上 nvram 中的 debug 项。除了 debug 的值外其他值也能被我们所用。下面是一些因垂斯挺的选项：</p>
+<ul>
+<li>-v：以 verbose 模式启动系统。</li>
+<li>kcsuffix：填写后缀以指定启动的内核。</li>
+<li>pmuflags：貌似大家都推荐把这项值设为1。然而 Apple’s Kernel Programming Guide 已经明确指出管理电源的看门狗定时器“只在台式机、笔记本的 G4 版本和台式机的 G5 版本及之前有作用”，其他的看门狗定时器“只在 OS X Server 中启用”。所以，虽然设置了也不影响，但这个选项真没什么卵用。</li>
+<li>debug：允许远程内核调试。 Apple docs 里有列出可用的标志。我常用的是<code>DB_LOG_PI_SCRN | DB_ARP | DB_NMI</code>。另外，<code>control + option + command + shift + escape</code> 可以触发不可屏蔽中断（NMI），继而引发调试器中断，超级方便。这对组合键跟 host key 的组合键冲突的时候用起来很难受，所以我把 host key 重新绑定成<code>command + right</code>了。</li>
+</ul>
+<h2 id="修改-nvram"><a href="#修改-nvram" class="headerlink" title="修改 nvram"></a>修改 nvram</h2><p>在 VMware 里，可用这样修改 nvram：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo nvram boot-args=&quot;-v debug=0x144&quot;</div></pre></td></tr></table></figure></p>
+<p>在 virtualbox 里没那么简单，因为一重启修改的值就没了。还好从 virtualbox 手册的 3.13.2 看到了希望：</p>
+<blockquote>
+<p>不能在运行的虚拟机内部操作 EFI 变量了（如：在Mac OS X 虚拟机里运行 nvram 来设置“boot-args”不管用了）。不过，可以通过给虚拟机发送附加数据”VBoxInternal2/EfiBootArgs” 来设置“boot-args”。…</p>
+</blockquote>
+<p>因此，我们需要关闭虚拟机，在主机上运行命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ VBoxManage list vms # 列出下条命令使用的 UUID</div><div class="line">&quot;macOS 10.12.0&quot; &#123;9ad936f8-9360-44a6-ba3e-c4d92b4243e8&#125;</div><div class="line">$ VBoxManage setextradata 9ad936f8-9360-44a6-ba3e-c4d92b4243e8 VBoxInternal2/EfiBootArgs &quot;-v debug=0x144&quot;</div></pre></td></tr></table></figure></p>
+<h1 id="交换内核"><a href="#交换内核" class="headerlink" title="交换内核"></a>交换内核</h1><p>前面我提到可以指定<code>kcsuffix</code>选项以调试不同版本的内核。内核文件在虚拟机的<code>/System/Library/Kernels</code>目录，然而这个目录受“系统完整性保护”机制保护（SIP）。所以要想使用 KDK 或者自己编译的内核，必须启动进入 recovery，把目标内核拷进<code>/System/Library/Kernels</code>目录，使 kextcache 失效，然后重新启动。</p>
+<h2 id="启动进入-recovery"><a href="#启动进入-recovery" class="headerlink" title="启动进入 recovery"></a>启动进入 recovery</h2><p>在 VMware 里，<code>cmd + R</code>就能进入 recovery 模式。virtualbox 要多几步。</p>
+<p>启动虚拟机时，按住<code>F12</code>，然后选择<code>Boot Manager -&gt; EFI Internal Shell</code>，就会看到 EFI Shell 的欢迎界面。输入命令进入 recovery：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">FS2:\com.apple.recovery.boot\boot.efi</div></pre></td></tr></table></figure></p>
+<p>进入 recovery 的界面，打开终端，操作目标内核，并将 kextcache 设置为无效。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"># mv /path/to/kernels/kernel.development /System/Library/Kernels</div><div class="line"># kextcache -invalidate /Volumes/Macintosh\ HD</div><div class="line"># reboot</div></pre></td></tr></table></figure></p>
+<p>如果需要禁用 SIP，在重启之前执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># csrutil disable</div><div class="line">Successfully disabled System Integrity Protection. Please restart the machine for the changes to take effect.</div></pre></td></tr></table></figure></p>
+<h1 id="源码调试"><a href="#源码调试" class="headerlink" title="源码调试"></a>源码调试</h1><p>下载要调试的版本的 XNU 源码。调试时，LLDB 会去 <code>/Library/Caches/com.apple.xbs/Sources/xnu/xnu-...</code>目录寻找内核源码，所以可以把下载的源码放这个目录，也可以建一个符号链接指向源码目录。还有个方法是 设置 LLDB 的<code>target.source-map</code>变量：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">lldb&gt; settings set target.source-map /Library/Caches/com.apple.xbs/Sources/xnu/xnu-3789.1.32 /Users/kedy/Downloads/xnu-3789.1.32</div></pre></td></tr></table></figure>
+<p>早一些的 macOS 版本比如 Yosemite 就只能把源码放在 <code>/SourceCache/xnu/</code>里。</p>
+<h1 id="安装-LLDB"><a href="#安装-LLDB" class="headerlink" title="安装 LLDB"></a>安装 LLDB</h1><p>终于到调试器了。下面会举例用的是 RELEASE 内核。</p>
+<p>为了在 Sierra KDK 里用 XNU LLDB 宏，执行<code>pip install macholib</code>安装<code>macholib</code>模块。粘贴执行加载内核文件时提示我们要执行的命令。（如下）</p>
+<p>触发 NMI 后（或者等待设置了<code>DB_HALT</code>的调试器暂停启动进程时），执行<code>kdp-remote &lt;ip&gt;</code>连接到调试进程（若使用的是 NAT 端口转发，ip 是 localhost）。（如下）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">$ lldb /Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel</div><div class="line">(lldb) target create &quot;/Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel&quot;</div><div class="line">warning: &apos;kernel&apos; contains a debug script. To run this script in this debug session:</div><div class="line"></div><div class="line">    command script import &quot;/Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel.dSYM/Contents/Resources/DWARF/../Python/kernel.py&quot;</div><div class="line"></div><div class="line">To run all discovered debug scripts in this session:</div><div class="line"></div><div class="line">    settings set target.load-script-from-symbol-file true</div><div class="line"></div><div class="line">Current executable set to &apos;/Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel&apos; (x86_64).</div><div class="line">(lldb) command script import &quot;/Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel.dSYM/Contents/Resources/DWARF/../Python/kernel.py&quot;</div><div class="line">Loading kernel debugging from /Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel.dSYM/Contents/Resources/DWARF/../Python/kernel.py</div><div class="line">LLDB version lldb-370.0.40</div><div class="line">  Swift-3.1</div><div class="line">settings set target.process.python-os-plugin-path &quot;/Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel.dSYM/Contents/Resources/DWARF/../Python/lldbmacros/core/operating_system.py&quot;</div><div class="line">settings set target.trap-handler-names hndl_allintrs hndl_alltraps trap_from_kernel hndl_double_fault hndl_machine_check _fleh_prefabt _ExceptionVectorsBase _ExceptionVectorsTable _fleh_undef _fleh_dataabt _fleh_irq _fleh_decirq _fleh_fiq_generic _fleh_dec</div><div class="line">command script import &quot;/Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel.dSYM/Contents/Resources/DWARF/../Python/lldbmacros/xnu.py&quot;</div><div class="line">xnu debug macros loaded successfully. Run showlldbtypesummaries to enable type summaries.</div><div class="line"></div><div class="line"></div><div class="line">(lldb) kdp-remote 192.168.149.184</div><div class="line">Version: Darwin Kernel Version 15.2.0: Fri Nov 13 19:56:56 PST 2015; root:xnu-3248.20.55~2/RELEASE_X86_64; UUID=17EA3101-D2E4-31BF-BDA9-931F51049F93; stext=0xffffff8007a00000</div><div class="line">Kernel UUID: 17EA3101-D2E4-31BF-BDA9-931F51049F93</div><div class="line">Load Address: 0xffffff8007a00000</div><div class="line">Kernel slid 0x7800000 in memory.</div><div class="line">Loaded kernel file /Library/Developer/KDKs/KDK_10.11.2_15C50.kdk/System/Library/Kernels/kernel</div><div class="line">Target arch: x86_64</div><div class="line">Instantiating threads completely from saved state in memory.</div><div class="line">Loading 82 kext modules warning: Can&apos;t find binary/dSYM for com.apple.kec.corecrypto (491718F5-B509-31DC-92B5-6BAC95E3F494)</div><div class="line">.warning: Can&apos;t find binary/dSYM for com.apple.kec.pthread (0888BA0A-49EE-394A-AEB1-1E5C6838A1F2)</div><div class="line"></div><div class="line">(omitted...)</div><div class="line"></div><div class="line">. done.</div><div class="line">kernel was compiled with optimization - stepping may behave oddly; variables may not be available.</div><div class="line">Process 1 stopped</div><div class="line">* thread #2, name = &apos;0xffffff800db8b000&apos;, queue = &apos;0x0&apos;, stop reason = signal SIGSTOP</div><div class="line">    frame #0: 0xffffff8007bd655e kernel`Debugger(message=&lt;unavailable&gt;) at model_dep.c:1020 [opt]</div><div class="line">   1017</div><div class="line">   1018		doprnt_hide_pointers = old_doprnt_hide_pointers;</div><div class="line">   1019		__asm__(&quot;int3&quot;);</div><div class="line">-&gt; 1020		hw_atomic_sub(&amp;debug_mode, 1);</div><div class="line">   1021	&#125;</div><div class="line">   1022</div><div class="line">   1023	char *</div><div class="line">(lldb)</div></pre></td></tr></table></figure>
+<p>瞧，macOS 内核源码调试这就开始了！</p>
+<hr>
+<p>原文链接: <a href="https://klue.github.io/blog/2017/04/macos_kernel_debugging_vbox/" target="_blank" rel="external">Securing Browsers Through Isolation Versus Mitigation</a></p>
+<p>本文首发于<a href="http://bbs.pediy.com/thread-217023.htm" target="_blank" rel="external">看雪</a>。</p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2017/04/14/debug-macos-kernel/">http://kiya.studio/2017/04/14/debug-macos-kernel/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2017/05/08/detect-frida/" id="art-left" class="art-right">
+                <span class="next-title">
+                    翻译 - 多种特征检测 Frida<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2017/03/10/chromeVSie/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>翻译 - “隔离”与“缓解” - Chrome、Edge 在浏览器防护上的终极对决！
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">翻译 - 用 VirtualBox 调试 macOS 内核</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#安装-VirtualBox-和-Sierra"><span class="toc-text">安装 VirtualBox 和 Sierra</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#网络设置"><span class="toc-text">网络设置</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装-XCode"><span class="toc-text">安装 XCode</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装内核调试组件-KDK"><span class="toc-text">安装内核调试组件(KDK)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#修改-nvram-boot-args"><span class="toc-text">修改 nvram boot-args</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#修改-nvram"><span class="toc-text">修改 nvram</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#交换内核"><span class="toc-text">交换内核</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#启动进入-recovery"><span class="toc-text">启动进入 recovery</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#源码调试"><span class="toc-text">源码调试</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装-LLDB"><span class="toc-text">安装 LLDB</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> Python爬虫 - 登录csdn · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月22日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                Python爬虫 - 登录csdn
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/Python/">Python</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>使用<code>urllib2</code>、<code>BeautifulSoup</code>和<code>CookieJar</code>实现登录.</p>
+<a id="more"></a>
+<p>使用charles抓包找到post的login网址: <code>https://passport.csdn.net/account/login</code></p>
+<p>再来看看post的参数:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/22/16/26/16" alt=""></p>
+<p>哎呀这里的密码竟然是明文..</p>
+<p>username、password和_eventId好说,只是lt和execution在哪里获得呢?</p>
+<p>我们来看一下紧挨着的GET请求返回的html代码,这里竟然还有注释哇哇:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/22/16/29/43" alt=""></p>
+<p>好,那么现在总结一下 <strong>步骤</strong>:</p>
+<ol>
+<li>对<code>https://passport.csdn.net/account/login</code>进行get请求,在html代码中获得lt和execution;</li>
+<li>表单创建</li>
+<li>带上POST表单,进行POST请求</li>
+</ol>
+<p><strong>代码如下:</strong></p>
+<p>获取 lt 和 execution:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">cookie = cookielib.MozillaCookieJar(&apos;cookie.txt&apos;)   # MozillaCookieJar可保存cookie</div><div class="line">cookie_handler = urllib2.HTTPCookieProcessor(cookie)</div><div class="line">opener = urllib2.build_opener(cookie_handler)</div><div class="line"># prepare for login</div><div class="line">response = opener.open(&apos;https://passport.csdn.net/account/login&apos;)</div><div class="line">data = response.read()</div><div class="line">lt = &quot;&quot;</div><div class="line">execution = &quot;&quot;</div><div class="line">bs = BeautifulSoup(response.read(),&quot;lxml&quot;)</div><div class="line">for input in bs.form.find_all(&apos;input&apos;):</div><div class="line">    if input.get(&apos;name&apos;) == &apos;lt&apos;:</div><div class="line">        lt = input.get(&apos;value&apos;)</div><div class="line">    if input.get(&apos;name&apos;) == &apos;execution&apos;:</div><div class="line">        execution = input.get(&apos;value&apos;)</div></pre></td></tr></table></figure>
+<p><strong>表单</strong>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">post_data = urllib.urlencode(&#123;</div><div class="line">    &apos;username&apos; : &apos;xxxx&apos;,</div><div class="line">    &apos;password&apos; : &apos;xxxx&apos;,</div><div class="line">    &apos;lt&apos; : lt,</div><div class="line">    &apos;execution&apos; : execution,</div><div class="line">    &apos;_eventId&apos; : &apos;submit&apos;</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+<p><strong>POST地址</strong>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">login_url = &apos;https://passport.csdn.net/account/login&apos;</div></pre></td></tr></table></figure>
+<p><strong>POST</strong>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">request = urllib2.Request(url = login_url,data=post_data)</div><div class="line">try:</div><div class="line">    response = opener.open(request)</div><div class="line">except urllib2.HTTPError as e:</div><div class="line">    print e.read()</div></pre></td></tr></table></figure>
+<p><strong>GET其他网址验证</strong>:</p>
+<p>注意这里的request请求需要带上headers,否则会报<code>403 forbidden</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">headers_data = &#123;</div><div class="line">    &apos;User-Agent&apos; :	&apos;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0&apos;</div><div class="line">&#125;</div><div class="line">request = urllib2.Request(url = &apos;http://blog.csdn.net/attach_114&apos;,headers=headers_data)</div><div class="line">print opener.open(request).read()</div></pre></td></tr></table></figure>
+<p><strong>完整代码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">#!/usr/bin/env python</div><div class="line">#coding:utf-8</div><div class="line">import urllib</div><div class="line">import urllib2</div><div class="line">import cookielib</div><div class="line">from bs4 import BeautifulSoup</div><div class="line">from pass_csdn import username,password</div><div class="line">cookie = cookielib.MozillaCookieJar(&apos;cookie.txt&apos;)</div><div class="line">cookie_handler = urllib2.HTTPCookieProcessor(cookie)</div><div class="line">opener = urllib2.build_opener(cookie_handler)</div><div class="line">def login():</div><div class="line">    # prepare for login</div><div class="line">    response = opener.open(&apos;https://passport.csdn.net/account/login&apos;)</div><div class="line">    lt = &quot;&quot;</div><div class="line">    execution = &quot;&quot;</div><div class="line">    bs = BeautifulSoup(response.read(),&quot;lxml&quot;)</div><div class="line">    for input in bs.form.find_all(&apos;input&apos;):</div><div class="line">        if input.get(&apos;name&apos;) == &apos;lt&apos;:</div><div class="line">            lt = input.get(&apos;value&apos;)</div><div class="line">        if input.get(&apos;name&apos;) == &apos;execution&apos;:</div><div class="line">            execution = input.get(&apos;value&apos;)</div><div class="line">    post_data = urllib.urlencode(&#123;</div><div class="line">        &apos;username&apos; : username,</div><div class="line">        &apos;password&apos; : password,</div><div class="line">        &apos;lt&apos; : lt,</div><div class="line">        &apos;execution&apos; : execution,</div><div class="line">        &apos;_eventId&apos; : &apos;submit&apos;</div><div class="line">    &#125;)</div><div class="line">    headers_data = &#123;</div><div class="line">        &apos;User-Agent&apos; :	&apos;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0&apos;</div><div class="line">    &#125;</div><div class="line">    login_url_with_jsession = &apos;https://passport.csdn.net/account/login&apos;</div><div class="line">    request = urllib2.Request(url = login_url_with_jsession,data=post_data)</div><div class="line">    try:</div><div class="line">        response = opener.open(request)</div><div class="line">    except urllib2.HTTPError as e:</div><div class="line">        print e.read()</div><div class="line">if __name__ == &apos;__main__&apos;:</div><div class="line">    login()</div></pre></td></tr></table></figure>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/22/csdn-login/">http://kiya.studio/2015/12/22/csdn-login/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/23/hook-call-function-in-so/" id="art-left" class="art-right">
+                <span class="next-title">
+                    hook - Android ARM下的的so注入<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/21/hook-syscall/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>hook - 拦截系统调用
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">Python爬虫 - 登录csdn</a></li>
+            
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

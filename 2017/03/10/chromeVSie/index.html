@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 翻译 - “隔离”与“缓解” - Chrome、Edge 在浏览器防护上的终极对决！ · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2017年3月10日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                翻译 - “隔离”与“缓解” - Chrome、Edge 在浏览器防护上的终极对决！
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/translation/">translation</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>昨天微软发布了一篇关于“<a href="https://blogs.windows.com/msedgedev/2017/02/23/mitigating-arbitrary-native-code-execution/" target="_blank" rel="external">新旧隔离机制</a>”的文章[<em>译者注</em>:隔离任意 native 代码的执行]，我个人非常赞同他们给 Edge 整上这个机制，但外面有些个反应简直夸张的不真实。<a id="more"></a>来看看 Dan Guido 的 Twitter (对不住了 Dan ~😉):</p>
+<blockquote>
+<p>毫无争议, Edge 一跃超过 Chrome 成为了最安全的浏览器！ <a href="https://t.co/JeE08LHBBv" target="_blank" rel="external">https://t.co/JeE08LHBBv</a> ——<a href="https://twitter.com/dguido/status/834846901191204864" target="_blank" rel="external">@dguido</a></p>
+</blockquote>
+<p>在这件事上，我认为对比 Chrome 来反观微软这次的动作，弄清楚浏览器的世界里发生了什么更为重要。当然，作为 Chrome 安全的工程指导我可能会偏心。但是，我的工作要求我客观的评价各种安全机制从而指导我的团队的努力方向，所以理论上我要作出的结论还是挺“清白”的。</p>
+<p><img src="http://bmob-cdn-1754.b0.upaiyun.com/2017/03/10/801c119140181489806cb2d2ed2d8216.jpeg" alt="EvsC"></p>
+<h2 id="缓解远程代码执行-RCE"><a href="#缓解远程代码执行-RCE" class="headerlink" title="缓解远程代码执行(RCE)"></a>缓解远程代码执行(RCE)</h2><p>对于前端的远程代码执行，微软可是下了大功夫。它试图通过防止攻击者获得可靠的代码而打破漏洞利用的第一环，如果成功的话就可以完全阻止攻击者。但最后仍然会演变成猫捉老鼠的游戏，缓解虽然可以消耗攻击者更多精力，却不能从根本上阻止漏洞利用。</p>
+<p>个人来说，我认为微软此次的着眼点仅仅是放在了 IE 和 Edge 最常受到的攻击类型上，“让数据说话”也的确不失为一种合逻辑的策略。这样的话就有一大堆新的 RCE 缓解技术，连同着其与 chrome 类似技术的对比，我在下面列了写值得注意的几项:</p>
+<ul>
+<li><p>内存回收<br>通过回收 DOM 对象、在 free 操作时作缓解，内存回收降低了可利用的 use-after-free 漏洞出现的可能性。这能与 Chrome 的 <a href="https://chromium.googlesource.com/chromium/src/+/master/third_party/WebKit/Source/platform/heap/BlinkGCAPIReference.md" target="_blank" rel="external">use of Oilpan</a> 类似，通过回收 DOM 对象、分块分配内存，采用不同的缓解措施，来对抗发生中的 use-after-free 利用。总的来说，内存回收只是 Chrome 在这块儿的一个小特点，相对来说 Chrome 没有那么多可利用的漏洞，这局打平。</p>
+</li>
+<li><p>执行流保护(CFG)</p>
+</li>
+</ul>
+<p>CFG 提供完整的执行流表，在“预防直接执行非法路径”上作了增强，Edge 在内部代码和系统库都用了 CFG。而Chrome 只在系统 DLL 用了 CFG， 另一方面不是 Chrome 内部而是用在了 Clang/LLVM  工具链上，使得我们可以使用 Clang 的 CFI 检查，非常好地契合了 Chrome 的需求。CFI/CFG 是未经过实际检验的技术，未来还可能出现重大的弱点和设计缺陷，总的来说是 Edge 占了上风。</p>
+<ul>
+<li>JavaScript JIT 加强</li>
+</ul>
+<p>微软在“防止漏洞利用时利用 JIT ”方面做了很多工作，其中最创新的莫过于将 JIT 移出进程，不让沙盒中的进程直接创建可执行页面。攻击者必须完整编译 RCE 成 ROP 链，这可要费大工夫了。无可否认，虽然 v8 要推出 JavaScript 解释器（ignition）和 JIT 的替代品（turbofan），Chrome 的性能会大幅提升，但是 Chrome 当前的 JIT 缓解措施还是比微软弱。这方面 Edge 遥遥领先了 Chrome。</p>
+<h2 id="安全隔离机制"><a href="#安全隔离机制" class="headerlink" title="安全隔离机制"></a>安全隔离机制</h2><p>微软在 RCE 缓解方面比 Chrome 投入更多，Chrome 更专注于在浏览网页时定义和加强持续可用的隔离边界。像微软一样，Chrome 也是受暴露的漏洞类型驱动的。然而，两家是有不同的理念和实施约束的，通过长期观察，我们发现隔离机制反而是更有效的策略，跨平台也更方便。</p>
+<p>首先，从安全机制的长期有效性来看，我们在 Chrome 上发现，随着时间的推移，底层 OS 平台倾向于提升安全隔离原语。比如说 Linux 的衍生系统会使用 <a href="https://en.wikipedia.org/wiki/Seccomp" target="_blank" rel="external">seccomp-bpf 机制</a>，修改系统调用表，Windows 系统会使用<a href="https://msdn.microsoft.com/en-us/library/bb625957.aspx" target="_blank" rel="external">integrity level(IL)</a>， 锁定 win32k 上的进程缓解策略。在安全隔离方面，我们现在有能力利用这些操作系统作出的安全上的改进。</p>
+<p>说到可移植性，拿微软最近的 JIT 加强来说，它依赖于 Windows 10 上 Edge 的新特性，并且受限于微软的签名文件。现在这种 OS 限制已经不常见，工程师们也可以找到替代方法解决，但是考虑到这项功能涉及修改主架构，必须确定这对其他平台是否友好，或者解释说是安全上作了重大改进，然而这两种说法都不现实。</p>
+<blockquote>
+<p>比起 Edge， Chrome 的渲染器处在更强有力的沙箱保护中。</p>
+</blockquote>
+<p>Chrome 在创建更强的隔离原语（如 Chrome 的渲染器比 Edge 处在更强的沙箱保护中）和扩展其应用方面（如 GPU 沙盒、网络沙盒）做出了更大努力。</p>
+<p>这方面我们的王牌是今年推出的<a href="https://www.chromium.org/developers/design-documents/site-isolation" target="_blank" rel="external">站点隔离项目</a>，站点隔离是数十年的工程成果，为 web 源加上限制，从而阻止渲染器沙盒 RCE 操作其他 web 源。这比现今其他任何浏览器的安全保证都更强壮有力。</p>
+<h2 id="这篇文章的点在哪？"><a href="#这篇文章的点在哪？" class="headerlink" title="这篇文章的点在哪？"></a>这篇文章的点在哪？</h2><p>浏览器安全是个复杂的话题。所以我想为 Chrome 现在的决策作一些说明，以及为什么我认为这些决策仍然可以捍卫 Chrome 在各个平台作为最安全浏览器的地位（事实证明）。</p>
+<p>现在问题是有一些现象把安全研究降低成简单地划划清单，或者是互相比较安全特征/CVE 的游戏，这些东西对评估真实的安全没一点用处。浏览器的架构是软件里最复杂的，背后的决策对我们也是不透明的。我确实认为我们做了正确的决定，优先解决着 Chrome 最要紧的问题。我承认如果我负责的是 Edge 的安全，我会针对不同的用户拿出不同的数据，最后做出个不一样的结论。</p>
+<h2 id="以我们的共同点结束如何？"><a href="#以我们的共同点结束如何？" class="headerlink" title="以我们的共同点结束如何？"></a>以我们的共同点结束如何？</h2><p>微软的博客里关于 Edge 如何防止第三方代码注入这点非常有意思，这也是所有浏览器大头的点。第三方应用使用不当操作插入代码不仅会造成稳定性问题和性能问题，也妨害着浏览器安全。我一直说我们为什么一直不能在 Chrome 沙盒里启用 Lowbox Token（App 容器安全限制）和 CSRSS 限制，因为那时第三方的反病毒程序会造成 Chrome 崩溃。</p>
+<p>很高兴看到微软利落的切入了 Edge，为阻止第三方注入开了先河。Chrome 和 Firefox 今年也准备部署类似的方案，在这一点上为了最好的帮助用户我们达成了结盟。</p>
+<p><img src="http://bmob-cdn-1754.b0.upaiyun.com/2017/03/10/6ed3e9394075934e805505708887b01b.jpeg" alt=""></p>
+<hr>
+<p>原文链接: <a href="https://medium.com/@justin.schuh/securing-browsers-through-isolation-versus-mitigation-15f0baced2c2#.l2srshz32" target="_blank" rel="external">Securing Browsers Through Isolation Versus Mitigation</a></p>
+<p>本文首发于<a href="http://bbs.pediy.com/thread-216267.htm" target="_blank" rel="external">看雪</a>。</p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2017/03/10/chromeVSie/">http://kiya.studio/2017/03/10/chromeVSie/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2017/04/14/debug-macos-kernel/" id="art-left" class="art-right">
+                <span class="next-title">
+                    翻译 - 用 VirtualBox 调试 macOS 内核<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2016/08/31/compile-lua-5-3-3/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>编译 lua 5.3.3 源码
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">翻译 - “隔离”与“缓解” - Chrome、Edge 在浏览器防护上的终极对决！</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#缓解远程代码执行-RCE"><span class="toc-text">缓解远程代码执行(RCE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安全隔离机制"><span class="toc-text">安全隔离机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#这篇文章的点在哪？"><span class="toc-text">这篇文章的点在哪？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#以我们的共同点结束如何？"><span class="toc-text">以我们的共同点结束如何？</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

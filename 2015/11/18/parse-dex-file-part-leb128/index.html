@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 解析 dex 文件结构 - LEB128 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月18日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                解析 dex 文件结构 - LEB128
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>dex 文件中用到的数据类型有:</p>
+<a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>编码格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>byte</td>
+<td>8位有符号整数</td>
+</tr>
+<tr>
+<td>ubyte</td>
+<td>8位无符号整数</td>
+</tr>
+<tr>
+<td>short</td>
+<td>16位有符号整数，小端存储</td>
+</tr>
+<tr>
+<td>ushort</td>
+<td>16位无符号整数，小端存储</td>
+</tr>
+<tr>
+<td>int</td>
+<td>32位有符号整数，小端存储</td>
+</tr>
+<tr>
+<td>uint</td>
+<td>32位无符号整数，小端存储</td>
+</tr>
+<tr>
+<td>long</td>
+<td>64位有符号整数，小端存储</td>
+</tr>
+<tr>
+<td>ulong</td>
+<td>64位无符号整数，小端存储</td>
+</tr>
+<tr>
+<td>sleb128</td>
+<td>有符号 LEB128，可变长度</td>
+</tr>
+<tr>
+<td>uleb128</td>
+<td>无符号 LEB128，可变长度</td>
+</tr>
+<tr>
+<td>uleb128p1</td>
+<td>无符号 LEB128 加 1，可变长度</td>
+</tr>
+</tbody>
+</table>
+<p>[<strong>注</strong>] 将一个数编码为 uleb128p1 时需要将 uleb128 加 1，而将一个已经编码好的 uleb128p1 解码为正常数字时需要将 uleb128 减 1。</p>
+<h2 id="LEB128？"><a href="#LEB128？" class="headerlink" title="LEB128？"></a>LEB128？</h2><p>LEB128，全程 <strong>L</strong>ittle-<strong>E</strong>ndian <strong>B</strong>ase <strong>128</strong>，借鉴自 <a href="http://dwarfstd.org/Dwarf3Std.php" target="_blank" rel="external">DWARF3</a> (一种调试文件格式，广泛用于 Unix、Linux等操作系统，可扩展性强) 。在 .dex 文件中，LEB128 仅对 32 位数据编码。</p>
+<p>每个 LEB128 编码的值由 1-5 个字节组成，合在一起表示一个 32 位的值。每个字节的有效位只有7位，最高位作为标记：最后一个字节的最高位设为0，其余设为1 。如果第 5 个字节的最高位为 1，说明这个 dex 文件是无效的。</p>
+<p>sleb128 对最后一个字节的最高位进行了符号扩展(高位全补1，uleb128是高位全补0)，即作为符号位。</p>
+<p>uleb128p1 + 1 就是 uleb128 的值，也就是说在无符号 LEB128 类型中，只有非负数和一个负数(-1 or 0xffffffff)。</p>
+<p>下面是 2 个字节的 LEB128 值 - 图示：</p>
+<table>
+<thead>
+<tr>
+<th>First byte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>bit6</td>
+<td>bit5</td>
+<td>bit4</td>
+<td>bit3</td>
+<td>bit2</td>
+<td>bit1</td>
+<td>bit0</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Second byte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>bit13</td>
+<td>bit12</td>
+<td>bit12</td>
+<td>bit11</td>
+<td>bit10</td>
+<td>bit9</td>
+<td>bit8</td>
+<td>bit7</td>
+</tr>
+</tbody>
+</table>
+<p><strong>官方栗子：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Encoded Sequence</th>
+<th>As sleb128</th>
+<th>As uleb128</th>
+<th>As uleb128p1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>00</td>
+<td>0</td>
+<td>0</td>
+<td>-1</td>
+</tr>
+<tr>
+<td>01</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>7f</td>
+<td>-1</td>
+<td>127</td>
+<td>126</td>
+</tr>
+<tr>
+<td>807f</td>
+<td>-128</td>
+<td>16256</td>
+<td>16255</td>
+</tr>
+</tbody>
+</table>
+<p><strong>解析：</strong></p>
+<table>
+<thead>
+<tr>
+<th>7f</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>二进制</td>
+<td>0111,1111</td>
+</tr>
+<tr>
+<td>有效值</td>
+<td>111,1111</td>
+</tr>
+<tr>
+<td>sleb128</td>
+<td>1111,1111 = - 0000,0000,0000,0001  = -1</td>
+</tr>
+<tr>
+<td>uleb128</td>
+<td>0111,1111 = 127</td>
+</tr>
+<tr>
+<td>uleb128p1</td>
+<td>127-1=126</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>80 7f</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>二进制</td>
+<td>1000,0000,0111,1111</td>
+</tr>
+<tr>
+<td>有效值</td>
+<td>111,1111,000,0000</td>
+</tr>
+<tr>
+<td>sleb128</td>
+<td>1111,1111,1000,0000 = - 0000,0000,1000,0000  = -128</td>
+</tr>
+<tr>
+<td>uleb128</td>
+<td>0011,1111,1000,0000 = 16256</td>
+</tr>
+<tr>
+<td>uleb128p1</td>
+<td>16256-1=16255</td>
+</tr>
+</tbody>
+</table>
+<h2 id="相关源码"><a href="#相关源码" class="headerlink" title="相关源码"></a>相关源码</h2><p>位于 <code>/dalvik/libdex/Leb128.h</code> 文件中。</p>
+<h3 id="读取无符号-LEB128-的源码"><a href="#读取无符号-LEB128-的源码" class="headerlink" title="读取无符号 LEB128 的源码"></a>读取无符号 LEB128 的源码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Reads an unsigned LEB128 value, updating the given pointer to point</div><div class="line"> * just past the end of the read value. This function tolerates</div><div class="line"> * non-zero high-order bits in the fifth encoded byte.</div><div class="line"> */</div><div class="line">DEX_INLINE int readUnsignedLeb128(const u1** pStream) &#123;</div><div class="line">    const u1* ptr = *pStream;</div><div class="line">    int result = *(ptr++);      //取第一个字节</div><div class="line">    if (result &gt; 0x7f) &#123;        //如果大于 0x7f 表示第 1 字节最高位为 1</div><div class="line">        int cur = *(ptr++);     //取第二个字节</div><div class="line">        result = (result &amp; 0x7f) | ((cur &amp; 0x7f) &lt;&lt; 7);     // 两个字节组合，第二个字节为高位</div><div class="line">        if (cur &gt; 0x7f) &#123;        //如果大于 0x7f 表示第 2 字节最高位为 1</div><div class="line">            cur = *(ptr++);      //取第三个字节</div><div class="line">            result |= (cur &amp; 0x7f) &lt;&lt; 14;           //前三个字节组合，第三个字节为高位</div><div class="line">            if (cur &gt; 0x7f) &#123;        //如果大于 0x7f 表示第 3 字节最高位为 1</div><div class="line">                cur = *(ptr++);      //取第四个字节</div><div class="line">                result |= (cur &amp; 0x7f) &lt;&lt; 21;       //前四个字节组合，第四个字节为高位</div><div class="line">                if (cur &gt; 0x7f) &#123;       //如果大于 0x7f 表示第 4 字节最高位为 1</div><div class="line">                    /*</div><div class="line">                     * 这里不检查 ptr 指针是否越界</div><div class="line">                     * 也不检查第五个字节的最高位是否为0</div><div class="line">                     */</div><div class="line">                    cur = *(ptr++);                //取第五个字节</div><div class="line">                    result |= cur &lt;&lt; 28;           //前五个字节组合，第五个字节为高位</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    *pStream = ptr;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="读取有符号-LEB128-的源码"><a href="#读取有符号-LEB128-的源码" class="headerlink" title="读取有符号 LEB128 的源码"></a>读取有符号 LEB128 的源码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Reads a signed LEB128 value, updating the given pointer to point</div><div class="line"> * just past the end of the read value. This function tolerates</div><div class="line"> * non-zero high-order bits in the fifth encoded byte.</div><div class="line"> */</div><div class="line">DEX_INLINE int readSignedLeb128(const u1** pStream) &#123;</div><div class="line">    const u1* ptr = *pStream;</div><div class="line">    int result = *(ptr++);</div><div class="line">    if (result &lt;= 0x7f) &#123;   //第2个字节最高位为0</div><div class="line">        result = (result &lt;&lt; 25) &gt;&gt; 25;  //最高位进行符号扩展</div><div class="line">    &#125; else &#123;</div><div class="line">        int cur = *(ptr++);</div><div class="line">        result = (result &amp; 0x7f) | ((cur &amp; 0x7f) &lt;&lt; 7); //前两个字节组合</div><div class="line">        if (cur &lt;= 0x7f) &#123;   //第2个字节最高位为0</div><div class="line">            result = (result &lt;&lt; 18) &gt;&gt; 18;   //最高位进行符号扩展</div><div class="line">        &#125; else &#123;</div><div class="line">            cur = *(ptr++);</div><div class="line">            result |= (cur &amp; 0x7f) &lt;&lt; 14;   //前3个字节组合</div><div class="line">            if (cur &lt;= 0x7f) &#123;   //第3个字节最高位为0</div><div class="line">                result = (result &lt;&lt; 11) &gt;&gt; 11;   //最高位进行符号扩展</div><div class="line">            &#125; else &#123;</div><div class="line">                cur = *(ptr++);</div><div class="line">                result |= (cur &amp; 0x7f) &lt;&lt; 21;    //前4个字节组合</div><div class="line">                if (cur &lt;= 0x7f) &#123;     //第4个字节最高位为0</div><div class="line">                    result = (result &lt;&lt; 4) &gt;&gt; 4;   //最高位进行符号扩展</div><div class="line">                &#125; else &#123;</div><div class="line">                    cur = *(ptr++);</div><div class="line">                    result |= cur &lt;&lt; 28;    //前5个字节组合</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    *pStream = ptr;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://source.android.com/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik Executable format</a></p>
+<p><a href="http://www.ituring.com.cn/book/1131" target="_blank" rel="external">《Android 软件安全与逆向分析》</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/18/parse-dex-file-part-leb128/">http://kiya.studio/2015/11/18/parse-dex-file-part-leb128/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/19/tools-010-editor/" id="art-left" class="art-right">
+                <span class="next-title">
+                    号称 Edit Everything 的 010 Editor<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/18/parse-dex-file-part-map-list/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>解析 dex 文件结构 - map_list
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">解析 dex 文件结构 - LEB128</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#引言"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LEB128？"><span class="toc-text">LEB128？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#相关源码"><span class="toc-text">相关源码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#读取无符号-LEB128-的源码"><span class="toc-text">读取无符号 LEB128 的源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读取有符号-LEB128-的源码"><span class="toc-text">读取有符号 LEB128 的源码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 使用 Github Pages + Hexo + 多说 搭建博客全过程 - 基础篇 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月10日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                使用 Github Pages + Hexo + 多说 搭建博客全过程 - 基础篇
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/instruction/">instruction</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>看了很多博客，最后发现官方文档才是最可靠的！谨记！<br>本文只是自己尝试过程的记录，并非全部搭建方法。<br>&lt; 假设 git 已安装，Github 已注册 &gt;</p>
+<blockquote>
+<p>搭建环境：<br>os: Ubuntu 14.04.3 LTS<br>node: 4.2.2<br>hexo: 3.1.1<br>hexo theme: NexT<br>git: 1.9.1</p>
+</blockquote>
+<a id="more"></a>
+<hr>
+<h2 id="Step-1-安装-Node-js"><a href="#Step-1-安装-Node-js" class="headerlink" title="Step 1 安装 Node.js"></a>Step 1 安装 Node.js</h2><ul>
+<li>从<a href="https://nodejs.org/en/download/" target="_blank" rel="external">官网</a>下载系统对应的源码</li>
+<li>依次执行以下命令解压编译安装<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">tar -xzvf node-v4.2.2.tar.gz</div><div class="line">make</div><div class="line">sudo make install</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h2 id="Step-2-安装-Hexo"><a href="#Step-2-安装-Hexo" class="headerlink" title="Step 2 安装 Hexo"></a>Step 2 安装 Hexo</h2><ul>
+<li>执行以下命令<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm install -g hexo</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h2 id="Step-3-搭建本地博客"><a href="#Step-3-搭建本地博客" class="headerlink" title="Step 3 搭建本地博客"></a>Step 3 搭建本地博客</h2><ul>
+<li><p>初始化一枚目录存放博客, 进入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hexo init blog</div><div class="line">cd blog</div></pre></td></tr></table></figure>
+</li>
+<li><p>执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm install</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>此时一个默认主题默认配置的 Hexo 博客就搭建完成了</p>
+<ul>
+<li><p>安装 Hexo 关于启动服务器的插件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm install hexo-server --save</div></pre></td></tr></table></figure>
+</li>
+<li><p>启动服务器, 本地查看效果, 如果不指定端口，默认为4000</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo server</div></pre></td></tr></table></figure>
+</li>
+<li><p>打开 <a href="http://localhost:4000" target="_blank" rel="external">http://localhost:4000</a> 查看效果</p>
+</li>
+<li>使用 <strong>Ctrl+c</strong> 停止服务</li>
+</ul>
+<hr>
+<h2 id="Step-4-主题和配置"><a href="#Step-4-主题和配置" class="headerlink" title="Step 4 主题和配置"></a>Step 4 主题和配置</h2><p>在 <a href="https://hexo.io/themes/" target="_blank" rel="external">https://hexo.io/themes/</a> 选择某个喜欢的主题，以 NexT 为例，假设当前目录为 “blog”。</p>
+<ul>
+<li>前往<a href="https://github.com/iissnan/hexo-theme-next/releases" target="_blank" rel="external">NexT主题发布页面</a>下载主题的压缩包<br>(这是 Next 的稳定版本，我试用了最新版本，有一些问题故转为稳定版本)</li>
+<li>解压并将目录更名为next</li>
+<li>将 next 移动至 <strong>blog/themes/</strong> 目录下</li>
+<li>将 blog 目录下的 <strong>_config.yml</strong> 文件中的 theme 属性值改为 next</li>
+<li>此时主题更换成功，可启动 server 验证效果</li>
+<li>对于 _config.yml 中的其他属性可根据情况自行修改，基本的有<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">title: 网站大标题</div><div class="line">subtitle: 网站小标题</div><div class="line">description: 你对于自己的描述</div><div class="line">author: 昵称</div><div class="line">avatar: 头像 (如:/images/avatar.jpg, images目录位于source目录下)</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h2 id="Step-5-Github-的操作"><a href="#Step-5-Github-的操作" class="headerlink" title="Step 5 Github 的操作"></a>Step 5 Github 的操作</h2><ul>
+<li>新建仓库名为 <strong>github用户名.github.io</strong><br>进入仓库，点击右侧 settings，在 Github Pages 标签下可看到  <em>Your site is published at <a href="http://你的用户名.github.io" target="_blank" rel="external">http://你的用户名.github.io</a>.</em> 这句话。 这时便可直接访问，如我的就是 <a href="http://kiya-z.github.io" target="_blank" rel="external">kiya-z.github.io</a>.</li>
+</ul>
+<hr>
+<h2 id="Step-6-将博客部署到Github"><a href="#Step-6-将博客部署到Github" class="headerlink" title="Step 6 将博客部署到Github"></a>Step 6 将博客部署到Github</h2><ul>
+<li><p>安装 hexo 关于 git 的组件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm install hexo-deployer-git --save</div></pre></td></tr></table></figure>
+</li>
+<li><p>在_config.yml 中为 git 添加配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">deploy:</div><div class="line">    type: git</div><div class="line">    repository: 你的仓库地址(https://github.com/用户名/用户名.github.io.git)</div><div class="line">    branch: master</div></pre></td></tr></table></figure>
+</li>
+<li><p>执行(每次修改都要执行这些命令才能在github pages看到效果)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hexo generate</div><div class="line">hexo deploy</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>输入 github 的用户名和密码，部署完成之后访问你的如 <a href="http://kiya-z.github.io" target="_blank" rel="external">kiya-z.github.io</a> 的网址即可看到和本地一样的效果。</p>
+<hr>
+<h2 id="Step-7-关于写博客"><a href="#Step-7-关于写博客" class="headerlink" title="Step 7 关于写博客"></a>Step 7 关于写博客</h2><ul>
+<li><p>新建博客</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo new &quot;文章名&quot;</div></pre></td></tr></table></figure>
+</li>
+<li><p>使用编辑器写好文章后执行生成+部署(那两个～)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hexo generate</div><div class="line">hexo deploy</div></pre></td></tr></table></figure>
+</li>
+<li><p>删除文章<br>直接删掉 <em>source/_post</em> 下对应文章的文件，然后重新生成+部署即可。有时可能要多刷新几次才能看到效果。</p>
+</li>
+</ul>
+<hr>
+<h2 id="Step-8-评论系统"><a href="#Step-8-评论系统" class="headerlink" title="Step 8 评论系统"></a>Step 8 评论系统</h2><ul>
+<li>登录 <a href="http://duoshuo.com/" target="_blank" rel="external">http://duoshuo.com/</a> 点击我要安装，创建站点。站点地址是 Github Pages 的地址，多说域名自己填写。</li>
+<li>由于 NexT 主题已经支持了多说，我们不需要添加其他代码，只需要在 <strong>_config.yml</strong> 中添加一个名为 <strong>duoshuo_shortname</strong> 的字段，其值为<strong>多说域名中自己填写的那部分</strong>，并不是全部多说域名。</li>
+</ul>
+<hr>
+<blockquote>
+<p>结语：欢迎指正交流。Aha～</p>
+</blockquote>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/10/use-Github-Pages-Hexo-duoshuo-to-set-up-a-blog-basic-steps/">http://kiya.studio/2015/11/10/use-Github-Pages-Hexo-duoshuo-to-set-up-a-blog-basic-steps/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/11/Python-a-murder-about-interface-and-polymorphism/" id="art-left" class="art-right">
+                <span class="next-title">
+                    Python 之 接口和多态引发的血案<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">使用 Github Pages + Hexo + 多说 搭建博客全过程 - 基础篇</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-1-安装-Node-js"><span class="toc-text">Step 1 安装 Node.js</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-2-安装-Hexo"><span class="toc-text">Step 2 安装 Hexo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-3-搭建本地博客"><span class="toc-text">Step 3 搭建本地博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-4-主题和配置"><span class="toc-text">Step 4 主题和配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-5-Github-的操作"><span class="toc-text">Step 5 Github 的操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-6-将博客部署到Github"><span class="toc-text">Step 6 将博客部署到Github</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-7-关于写博客"><span class="toc-text">Step 7 关于写博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-8-评论系统"><span class="toc-text">Step 8 评论系统</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

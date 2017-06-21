@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> Python 之 接口和多态引发的血案 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月11日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                Python 之 接口和多态引发的血案
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/Python/">Python</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <h1 id="事故发生地"><a href="#事故发生地" class="headerlink" title="事故发生地"></a>事故发生地</h1><p>在学习<a href="http://www.maiziedu.com/course/python/545-7480/" target="_blank" rel="external"> Python 面向对象视频 之 鸭子类型与多态 </a>时看到这样两句话不得其解：</p>
+<blockquote>
+<p>非动态语言必须通过继承和接口实现多态<br>动态语言不需要实现接口</p>
+</blockquote>
+<a id="more"></a>
+<hr>
+<h1 id="菜鸟的问题"><a href="#菜鸟的问题" class="headerlink" title="菜鸟的问题"></a>菜鸟的问题</h1><p>(非动态语言以 Java 为例，动态语言以 Python 为例)</p>
+<ol>
+<li>接口和多态是什么关系？</li>
+<li>Python 为什么没有接口？没有接口怎么实现接口对应的设计模式</li>
+<li>Python 为什么没有重载？</li>
+<li>Python 的多态是什么样的？</li>
+</ol>
+<hr>
+<h2 id="接口和多态是什么关系？"><a href="#接口和多态是什么关系？" class="headerlink" title="接口和多态是什么关系？"></a>接口和多态是什么关系？</h2><p>  在我的理解中，多态具有两种形式，重载和重写：</p>
+<blockquote>
+<p><strong>重载</strong>：<em>在同一个类中</em>，相同的方法名对应着不同的方法实现，其区别在于他们需要的参数和返回值不同。<br><strong>重写</strong>：<em>用于父类和子类间</em>，子类重写父类的方法，只是对应的方法实现不同，其方法名和参数都相同。</p>
+</blockquote>
+<p>这样看来，重写是基于继承的。那么接口呢？好像除了强制要求子类实现某些方法，我不知道还有什么别的作用。<br>正因如此，接口只是一个规范。在多个类都实现一个接口的时候他的作用就体现出来了，我们不需要知道在某个类中这个方法的具体实现，只需要这个类中有这个方法而我们可以直接调用就可以了。有了这样一个统一的标准，我们就不必担心同样功能的方法被起了各种各样的名字了。<br>所以，我觉得可以用这么一句话回答这个问题，<strong>接口不是实现多态的，而是基于多态的，有了多态接口才能发挥作用</strong>。</p>
+<hr>
+<h2 id="Python-为什么没有接口？没有接口怎么实现接口对应的设计模式"><a href="#Python-为什么没有接口？没有接口怎么实现接口对应的设计模式" class="headerlink" title="Python 为什么没有接口？没有接口怎么实现接口对应的设计模式"></a>Python 为什么没有接口？没有接口怎么实现接口对应的设计模式</h2><p>接口的作用就是规范，规范参数类型，返回值等等，从而使相同的调用能够实现不同的效果；并且接口也是为了用来弥补语言自己表达能力的不足，如：Java 只支持单继承，为了使类拥有更多的特性，使用了多实现来弥补。静态的语言必须全部都规定好才能正确使用。<br>而在 Python  中，变量是没有类型的，不需要事先规定，不管调用者传入什么类型的对象，被调用者就会认为那就是我所需要的对象(鸭子类型)，如果在运行时传入的对象不具备需要的属性或方法，程序会直接报错。需要实现这个方法的话，就照实现就是了，返回和形参不限制类型，比如：在创建了类的实例后，动态地给该实例加上一个函数属性。这就是动态类型的优势。<br>这种风格被称为“<strong>鸭子类型</strong>”：</p>
+<blockquote>
+<p>在这种风格中，一个对象有效的语义，不是由继承自特定的类或实现特定的接口，而是由”当前方法和属性的集合”决定。<br>在我想成为鸭子的时候，不是我必须真的是个鸭子，而是我的行为表现的像是个鸭子，那我就是个鸭子</p>
+</blockquote>
+<p>相关概念 - “<strong>鸭子测试</strong>”：</p>
+<blockquote>
+<p>“当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子。”<br>“换言之，不要检查它是不是一个鸭子：检查它像不像一个鸭子地叫，等等。取决于你需要哪个像鸭子的行为的子集来使用语言。”</p>
+</blockquote>
+<hr>
+<h2 id="Python-为什么没有重载？"><a href="#Python-为什么没有重载？" class="headerlink" title="Python 为什么没有重载？"></a>Python 为什么没有重载？</h2><blockquote>
+<p>函数重载主要是为了解决两个问题：</p>
+<ol>
+<li>可变参数类型。</li>
+<li>可变参数个数。</li>
+</ol>
+</blockquote>
+<p>另外，一个基本的设计原则是，仅仅当两个函数除了参数类型和参数个数不同以外，其功能是完全相同的，此时才使用函数重载，如果两个函数的功能其实不同，那么不应当使用重载，而应当使用一个名字不同的函数。<br><em>对于情况 1</em>，函数功能相同，但是参数类型不同，Python 如何处理？答案是根本不需要处理，因为 python 可以接受任何类型的参数，如果函数的功能相同，那么不同的参数类型在 Python 中很可能是相同的代码，没有必要做成两个不同函数。<br><em>对于情况 2</em> ，函数功能相同，但参数个数不同，Python 如何处理？大家知道，答案就是缺省参数。对那些缺少的参数设定为缺省参数即可解决问题。因为你假设函数功能相同，那么那些缺少的参数终归是需要用的。<br>好了，鉴于情况 1 跟 情况 2 都有了解决方案，Python 自然就不需要函数重载了。</p>
+<hr>
+<h2 id="Python-的多态是什么样的？"><a href="#Python-的多态是什么样的？" class="headerlink" title="Python 的多态是什么样的？"></a>Python 的多态是什么样的？</h2><p>多态即多种形态，在运行时确定其状态，在编译阶段无法确定其类型，这就是多态。<br>1）Python是解释性语言。不进行预编译，因此它就只在运行时确定其状态；<br>2）Python中变量是弱类型的。在定义时不用指明其类型，它会根据需要在运行时确定变量的类型。</p>
+<hr>
+<blockquote>
+<p>结语：一些粗浅之语，有长进再补充。</p>
+</blockquote>
+<hr>
+<h1 id="Reference："><a href="#Reference：" class="headerlink" title="Reference："></a>Reference：</h1><p><a href="http://www.zhihu.com/question/20111251" target="_blank" rel="external"> Java 中的接口有什么作用？</a><br><a href="http://www.zhihu.com/question/20685467" target="_blank" rel="external"> Python 里没有接口，如何写设计模式？</a><br><a href="http://www.zhihu.com/question/20053359" target="_blank" rel="external">为什么 Python  不支持函数重载？</a><br><a href="http://www.cnblogs.com/dolphin0520/archive/2013/04/03/2997499.html" target="_blank" rel="external"> Python面向对象编程(二)</a><br><a href="https://zh.wikipedia.org/wiki/%E9%B8%AD%E5%AD%90%E7%B1%BB%E5%9E%8B" target="_blank" rel="external">鸭子类型</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/11/Python-a-murder-about-interface-and-polymorphism/">http://kiya.studio/2015/11/11/Python-a-murder-about-interface-and-polymorphism/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/12/Android-security-tools/" id="art-left" class="art-right">
+                <span class="next-title">
+                    Android 安全工具包（持续更新）<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/10/use-Github-Pages-Hexo-duoshuo-to-set-up-a-blog-basic-steps/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>使用 Github Pages + Hexo + 多说 搭建博客全过程 - 基础篇
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">Python 之 接口和多态引发的血案</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#事故发生地"><span class="toc-text">事故发生地</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#菜鸟的问题"><span class="toc-text">菜鸟的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#接口和多态是什么关系？"><span class="toc-text">接口和多态是什么关系？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-为什么没有接口？没有接口怎么实现接口对应的设计模式"><span class="toc-text">Python 为什么没有接口？没有接口怎么实现接口对应的设计模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-为什么没有重载？"><span class="toc-text">Python 为什么没有重载？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-的多态是什么样的？"><span class="toc-text">Python 的多态是什么样的？</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference："><span class="toc-text">Reference：</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

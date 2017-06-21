@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 使用ida调试dex文件 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月11日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                使用ida调试dex文件
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/debug/">debug</a>
+                    
+                        <a href="/tags/ida/">ida</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <h2 id="反编译apk文件"><a href="#反编译apk文件" class="headerlink" title="反编译apk文件"></a>反编译apk文件</h2><a id="more"></a>
+<h2 id="dex文件拖入ida-等待分析完毕"><a href="#dex文件拖入ida-等待分析完毕" class="headerlink" title="dex文件拖入ida,等待分析完毕"></a>dex文件拖入ida,等待分析完毕</h2><h2 id="设置调试选项"><a href="#设置调试选项" class="headerlink" title="设置调试选项"></a>设置调试选项</h2><h3 id="菜单栏-Debugger-gt-Debugger-options…"><a href="#菜单栏-Debugger-gt-Debugger-options…" class="headerlink" title="菜单栏 Debugger -&gt; Debugger options…"></a>菜单栏 Debugger -&gt; Debugger options…</h3><p>勾选如下:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/22/02" alt=""></p>
+<p>点击<code>Set specific options</code>,填入包名和启动activity:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/23/22" alt=""></p>
+<p>包名和主activity名在<code>Androidmanifest.xml</code>文件中.</p>
+<h3 id="菜单栏-Debugger-gt-Process-options"><a href="#菜单栏-Debugger-gt-Process-options" class="headerlink" title="菜单栏 Debugger -&gt; Process options"></a>菜单栏 Debugger -&gt; Process options</h3><p>修改端口为8700</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/25/01" alt=""></p>
+<p>8700在<code>ddms</code>中可以看到：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/26/05" alt=""></p>
+<h2 id="根据需要下断点"><a href="#根据需要下断点" class="headerlink" title="根据需要下断点"></a>根据需要下断点</h2><h2 id="点绿色三角，启动调试"><a href="#点绿色三角，启动调试" class="headerlink" title="点绿色三角，启动调试"></a>点绿色三角，启动调试</h2><p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/28/39" alt=""></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/29/06" alt=""></p>
+<p>这时候可能出现错误：</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/27/46" alt=""></p>
+<p>这是因为8700端口和<code>monitor</code>的冲突了,关掉<code>ddms</code>即可.</p>
+<p>可能出现:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/16/13/38/13" alt=""></p>
+<p>这是因为<code>AndroidManifest.xml</code>中没有<code>android:debuggable=&quot;true&quot;</code>选项,加上重新编译即可.</p>
+<h2 id="触发断点"><a href="#触发断点" class="headerlink" title="触发断点"></a>触发断点</h2><p>在app上操作以触发断点,断下之后勾选菜单栏中 <strong>Debugger -&gt; Use source-level debugging</strong>.</p>
+<p>这时候就可以开始调试咯。</p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/11/ida-dynamic-debug-dex/">http://kiya.studio/2015/12/11/ida-dynamic-debug-dex/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/11/ida-dynamic-debug-so/" id="art-left" class="art-right">
+                <span class="next-title">
+                    使用ida调试so文件<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/07/arm-instruction-exercises-1/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>arm指令练习篇章一
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">使用ida调试dex文件</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#反编译apk文件"><span class="toc-text">反编译apk文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dex文件拖入ida-等待分析完毕"><span class="toc-text">dex文件拖入ida,等待分析完毕</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置调试选项"><span class="toc-text">设置调试选项</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#菜单栏-Debugger-gt-Debugger-options…"><span class="toc-text">菜单栏 Debugger -> Debugger options…</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#菜单栏-Debugger-gt-Process-options"><span class="toc-text">菜单栏 Debugger -> Process options</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#根据需要下断点"><span class="toc-text">根据需要下断点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#点绿色三角，启动调试"><span class="toc-text">点绿色三角，启动调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#触发断点"><span class="toc-text">触发断点</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

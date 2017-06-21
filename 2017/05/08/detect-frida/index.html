@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 翻译 - 多种特征检测 Frida · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2017年5月8日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                翻译 - 多种特征检测 Frida
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/translation/">translation</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>Frida 在逆向工程狮中很受欢迎，你基本可以在运行时访问到你能想到的任何东西，内存地址、native 函数、Java 实例对象等。在 OWASP 的移动测试指南里就提到了 Frida。<a id="more"></a>但是啊，每出来个好用的注入工具，都会有反注入、反反注入、反反反注入、反…注入。这篇文章要介绍的是 Android APP 检测 Frida 的方法。</p>
+<h2 id="检查-Frida-的痕迹"><a href="#检查-Frida-的痕迹" class="headerlink" title="检查 Frida 的痕迹"></a>检查 Frida 的痕迹</h2><p>一种简易方法是检测 Frida 的运行痕迹，也适用于同类工具的检测，比如包文件、二进制文件、库文件、进程、临时文件等等。本例中针对的对象是 fridaserver，它通过 TCP 对外与 frida 通信，此时可以用 Java 遍历运行的进程列表从而检查 fridaserver 是否在运行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">public boolean checkRunningProcesses() &#123;</div><div class="line"></div><div class="line">  boolean returnValue = false;</div><div class="line"></div><div class="line">  // Get currently running application processes</div><div class="line">  List&lt;RunningServiceInfo&gt; list = manager.getRunningServices(300);</div><div class="line"></div><div class="line">  if(list != null)&#123;</div><div class="line">    String tempName;</div><div class="line">    for(int i=0;i&lt;list.size();++i)&#123;</div><div class="line">      tempName = list.get(i).process;</div><div class="line"></div><div class="line">      if(tempName.contains(&quot;fridaserver&quot;)) &#123;</div><div class="line">        returnValue = true;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  return returnValue;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>若 Frida 运行在默认配置时此法有效，若是遇到个笨拙的脚本小子，在第一步就能绊倒他。绕过也是相当简单，只需重命名 fridaserver，我们得找个更好的方法。</p>
+<p>fridaserver 默认的 TCP 端口是 27047，可以检查这个端口是否开放。native 代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">boolean is_frida_server_listening() &#123;</div><div class="line">    struct sockaddr_in sa;</div><div class="line"></div><div class="line">    memset(&amp;sa, 0, sizeof(sa));</div><div class="line">    sa.sin_family = AF_INET;</div><div class="line">    sa.sin_port = htons(27047);</div><div class="line">    inet_aton(&quot;127.0.0.1&quot;, &amp;(sa.sin_addr));</div><div class="line"></div><div class="line">    int sock = socket(AF_INET , SOCK_STREAM , 0);</div><div class="line"></div><div class="line">    if (connect(sock , (struct sockaddr*)&amp;sa , sizeof sa) != -1) &#123;</div><div class="line">      /* Frida server detected. Do something… */</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>同样，这也得要求 fridaserver 是默认配置运行，命令行指定参数就可以改变它的监听端口，绕过也太不麻烦了。不过我们可以用’ nmap -sV’ 找到开放端口来改善这个方法。因为 fridaserver 使用 D-Bus 协议通信，我们为每个开放的端口发送 D-Bus 的认证消息，哪个端口回复了哪个就是 fridaserver。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Mini-portscan to detect frida-server on any local port.</div><div class="line"> */</div><div class="line"></div><div class="line">for(i = 0 ; i &lt;= 65535 ; i++) &#123;</div><div class="line"></div><div class="line">    sock = socket(AF_INET , SOCK_STREAM , 0);</div><div class="line">    sa.sin_port = htons(i);</div><div class="line"></div><div class="line">    if (connect(sock , (struct sockaddr*)&amp;sa , sizeof sa) != -1) &#123;</div><div class="line"></div><div class="line">        __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,  &quot;FRIDA DETECTION [1]: Open Port: %d&quot;, i);</div><div class="line"></div><div class="line">        memset(res, 0 , 7);</div><div class="line"></div><div class="line">        // send a D-Bus AUTH message. Expected answer is “REJECT&quot;</div><div class="line"></div><div class="line">        send(sock, &quot;\x00&quot;, 1, NULL);</div><div class="line">        send(sock, &quot;AUTH\r\n&quot;, 6, NULL);</div><div class="line"></div><div class="line">        usleep(100);</div><div class="line"></div><div class="line">        if (ret = recv(sock, res, 6, MSG_DONTWAIT) != -1) &#123;</div><div class="line"></div><div class="line">            if (strcmp(res, &quot;REJECT&quot;) == 0) &#123;</div><div class="line">               /* Frida server detected. Do something… */</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    close(sock);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们现在好像有了个非常好用的方法了呢，但是还存在问题。Frida 提供不需要 fridaserver 运行的模式！怎么检测？！</p>
+<p>Frida 的各个模式都是用来注入的，我们可以利用的点就是 frida 运行时映射到内存的库。最直接的是挨个检查加载的库。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">char line[512];</div><div class="line">FILE* fp;</div><div class="line"></div><div class="line">fp = fopen(&quot;/proc/self/maps&quot;, &quot;r&quot;);</div><div class="line"></div><div class="line">if (fp) &#123;</div><div class="line">    while (fgets(line, 512, fp)) &#123;</div><div class="line">        if (strstr(line, &quot;frida&quot;)) &#123;</div><div class="line">            /* Evil library is loaded. Do something… */</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    fclose(fp);</div><div class="line"></div><div class="line">    &#125; else &#123;</div><div class="line">       /* Error opening /proc/self/maps. If this happens, something is off. */</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这段代码检测名字含有“frida”的库，表明上有用，实际上：</p>
+<ul>
+<li><p>还记得为什么检测名字是“fridaserver”的方法为什么不可靠吧？这里也是一样，稍微改一下 frida 就能重命名代理库名。</p>
+</li>
+<li><p>这段代码依赖的是标准库的<code>fopen()</code>和<code>strstr()</code>函数，可笑的是，我们竟想用能被 frida 轻而易举就 hook 的函数来检测 frida ！</p>
+</li>
+</ul>
+<p>问题1可以用经典的病毒扫描法解决，在内存中扫描 frida 的库特征 “gadgets”。我选择字符串 “LIBFRIDA”，它在所有 frida-gadget 和 frida-agent 的版本中都有出现。下面的代码扫描了在 <code>/proc/sel/maps</code> 里找到的所有的可执行段，为了简洁我放了部分代码，完整的在 <a href="https://github.com/b-mueller/frida-detection-demo/blob/master/AntiFrida/app/src/main/cpp/native-lib.cpp" target="_blank" rel="external">https://github.com/b-mueller/frida-detection-demo/blob/master/AntiFrida/app/src/main/cpp/native-lib.cpp</a> 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">static char keyword[] = &quot;LIBFRIDA&quot;;</div><div class="line">num_found = 0;</div><div class="line"></div><div class="line">int scan_executable_segments(char * map) &#123;</div><div class="line">    char buf[512];</div><div class="line">    unsigned long start, end;</div><div class="line"></div><div class="line">    sscanf(map, &quot;%lx-%lx %s&quot;, &amp;start, &amp;end, buf);</div><div class="line"></div><div class="line">    if (buf[2] == &apos;x&apos;) &#123;</div><div class="line">        return (find_mem_string(start, end, (char*)keyword, 8) == 1);</div><div class="line">    &#125; else &#123;</div><div class="line">        return 0;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">void scan() &#123;</div><div class="line"></div><div class="line">    if ((fd = my_openat(AT_FDCWD, &quot;/proc/self/maps&quot;, O_RDONLY, 0)) &gt;= 0) &#123;</div><div class="line"></div><div class="line">    while ((read_one_line(fd, map, MAX_LINE)) &gt; 0) &#123;</div><div class="line">        if (scan_executable_segments(map) == 1) &#123;</div><div class="line">            num_found++;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (num_found &gt; 1) &#123;</div><div class="line"></div><div class="line">        /* Frida Detected */</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注意 <code>my_openat()</code> 等函数，它们并非平常的 libc 库函数，是自定义实现的，但是功能和 libc 中的一样，设置了系统调用的参数，执行了软中断。因为直接调用公共 API 并不可靠，这样不容易被 hook。完整的实现在 <a href="https://github.com/b-mueller/frida-detection-demo/blob/master/AntiFrida/app/src/main/cpp/syscall.S" target="_blank" rel="external">https://github.com/b-mueller/frida-detection-demo/blob/master/AntiFrida/app/src/main/cpp/syscall.S</a> 。下面是 my_openat 的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">#include &quot;bionic_asm.h&quot;</div><div class="line"></div><div class="line">.text</div><div class="line">    .globl my_openat</div><div class="line">    .type my_openat,function</div><div class="line">my_openat:</div><div class="line">    .cfi_startproc</div><div class="line">    mov ip, r7</div><div class="line">    .cfi_register r7, ip</div><div class="line">    ldr r7, =__NR_openat</div><div class="line">    swi #0</div><div class="line">    mov r7, ip</div><div class="line">    .cfi_restore r7</div><div class="line">    cmn r0, #(4095 + 1)</div><div class="line">    bxls lr</div><div class="line">    neg r0, r0</div><div class="line">    b __set_errno_internal</div><div class="line">    .cfi_endproc</div><div class="line"></div><div class="line">    .size my_openat, .-my_openat;</div></pre></td></tr></table></figure>
+<p>到这里总算是有效的方法了，只用 frida 的话也不容易绕过，加了混淆更难。即使这样，依然有很多办法可以绕过，直接能想到的就是打补丁、hook 系统调用。但是记住，逆向工程永远胜利！</p>
+<p>想要试验，可以在这里 <a href="https://github.com/b-mueller/frida-detection-demo/" target="_blank" rel="external">https://github.com/b-mueller/frida-detection-demo/</a> 下载 Android studio 工程。frida 注入时的运行结果如下：</p>
+<p><img src="https://vp-web.s3.amazonaws.com/uploads/ckeditor/pictures/73/content_fridadetection.jpg" alt=""></p>
+<hr>
+<p>原文链接：<a href="http://www.vantagepoint.sg/blog/90-the-jiu-jitsu-of-detecting-frida" target="_blank" rel="external">http://www.vantagepoint.sg/blog/90-the-jiu-jitsu-of-detecting-frida</a></p>
+<p>本文首发于<a href="http://bbs.pediy.com/thread-217482.htm" target="_blank" rel="external">看雪</a>。</p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2017/05/08/detect-frida/">http://kiya.studio/2017/05/08/detect-frida/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2017/06/21/android-gdb/" id="art-left" class="art-right">
+                <span class="next-title">
+                    gdb 调试 Android app<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2017/04/14/debug-macos-kernel/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>翻译 - 用 VirtualBox 调试 macOS 内核
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">翻译 - 多种特征检测 Frida</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#检查-Frida-的痕迹"><span class="toc-text">检查 Frida 的痕迹</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

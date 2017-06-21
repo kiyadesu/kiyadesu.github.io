@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 在android手机上运行C程序 - hello arm! · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月2日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                在android手机上运行C程序 - hello arm!
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/ndk/">ndk</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>为了学习arm指令集，当然要先写段 hello arm 试验咯。</p>
+<a id="more"></a>
+<h1 id="写段-hello-arm"><a href="#写段-hello-arm" class="headerlink" title="写段 hello arm"></a>写段 hello arm</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">        printf(&quot;hello arm!\n&quot;);</div><div class="line">        return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="编译方式"><a href="#编译方式" class="headerlink" title="编译方式"></a>编译方式</h1><p>这里有两种手动编译方式：gcc和ndk-build.</p>
+<h2 id="使用gcc"><a href="#使用gcc" class="headerlink" title="使用gcc"></a>使用gcc</h2><h3 id="配置交叉编译环境"><a href="#配置交叉编译环境" class="headerlink" title="配置交叉编译环境"></a>配置交叉编译环境</h3><p>因为我们要编译出在android手机上运行的程序，必须要为gcc提供android的平台文件和指令集。<br>而ndk中自带了gcc等一系列工具，所以现在直接调用即可。没有ndk的话需要先行下载。<br>为<code>～/.bashrc</code>配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">#android-ndk-gcc</div><div class="line">export NDKROOT=/media/d/android-sdk-linux/android-sdk-linux/ndk-bundle</div><div class="line">export SYSROOT=$NDKROOT/platforms/android-21/arch-arm</div><div class="line">export NDKTOOL=$NDKROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin</div><div class="line">alias ndk-gcc=&apos;$NDKTOOL/arm-linux-androideabi-gcc-4.9 --sysroot=$SYSROOT&apos;</div><div class="line">alias ndk-objdump=&apos;$NDKTOOL/arm-linux-androideabi-objdump&apos;</div></pre></td></tr></table></figure>
+<p>其中<br><code>NDKROOT</code>是ndk的主目录;<br><code>SYSROOT</code>是所选的指令集,这里是arm;<br><code>NDKTOOL</code>是ndk的工具链目录;<br><code>ndk-gcc</code>是为后面一串命令起的别名，这样使用时就不用一遍一遍的输参数了;<br><code>ndk-objdump</code>是可以反汇编arm程序的工具,与ndk-gcc在ndk的同一目录下.</p>
+<p>配置完成后可执行<code>source ~./bashrc</code>使立即生效,<code>echo $ndk-gcc</code>查看是否设置成功。</p>
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>执行<code>ndk-gcc -o hello-arm hello-arm.c</code>直接生成可执行文件。<br>执行<code>ndk-gcc -S hello-arm.s hello-arm.c</code>生成arm汇编文件。<br>其他选项执行<code>ndk-gcc --help</code>查看帮助。</p>
+<h2 id="使用ndk-build"><a href="#使用ndk-build" class="headerlink" title="使用ndk-build"></a>使用ndk-build</h2><h3 id="配置ndk-build环境"><a href="#配置ndk-build环境" class="headerlink" title="配置ndk-build环境"></a>配置ndk-build环境</h3><p>如果是单独下的ndk,这时候系统找不到ndk-build命令,需要将其路径加入path中.<br>ndk-build在ndk根目录下。</p>
+<h3 id="新建Android工程"><a href="#新建Android工程" class="headerlink" title="新建Android工程"></a>新建Android工程</h3><p>执行<code>android list</code>查看已安装的sdk版本;<br>执行<code>android create project -t 1 -p ~/Desktop/helloarm -a MainActivity</code>在桌面创建一个新工程.<br>其中:<br><code>-t</code>表示新工程目标sdk;<br><code>-p</code>表示工程的路径;<br><code>-a</code>表示默认activity的名称.<br>其他选项可执行<code>android create project -h</code>查看.</p>
+<h3 id="配置jni目录"><a href="#配置jni目录" class="headerlink" title="配置jni目录"></a>配置jni目录</h3><p>在工程根目录下新建一个<code>jni</code>目录,将<code>hello-arm.c</code>拷贝至此目录.<br>新建脚本文件名为<code>Android.mk</code>,这是ndk-build需要的工程编译脚本,描述了编译程序的各种选项和依赖.<br>内容如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">LOCAL_PATH := $(call my-dir)</div><div class="line">include $(CLEAR_VARS)</div><div class="line">LOCAL_ARM_MODE := arm</div><div class="line">LOCAL_MODULE := hello-arm</div><div class="line">LOCAL_SRC_FILES := hello-arm.c</div><div class="line">include $(BUILD_EXECUTABLE)</div></pre></td></tr></table></figure>
+<p>其中:<br><code>LOCAL_PATH</code>表示本工程源码的路径, <code>my-dir</code>表示Android.mk的路径;<br><code>CLEAR_VARS</code>让编译器清除已经定义过的宏,避免在编译多个模块时发生错误,因为这些宏是全局的,必须重新设置;<br><code>LOCAL_ARM_MODE</code>指定程序使用的ARM指令模式;<br><code>LOCAL_MODULE</code>指定生成的模块名,如果生成的是共享库,模块名会变为libhello-arm.so;<br><code>LOCAL_SRC_FILES</code>指定源文件列表;<br><code>BUILD_EXECUTABLE</code>表示生成的文件是可执行的,其他选项有<code>BUILD_SHARED_LIBRARY</code>(生成动态库),<code>BUILD_STATIC_LIBRARY</code>(生成静态库).</p>
+<h3 id="编译-1"><a href="#编译-1" class="headerlink" title="编译"></a>编译</h3><p>在工程根目录下执行<code>ndk-build</code>,编译完成后的文件在<code>libs/armeabi</code>目录下.</p>
+<h1 id="执行"><a href="#执行" class="headerlink" title="执行"></a>执行</h1><p>执行<code>adb push hello-arm /data/local</code>push到手机上(我用的是genymotion虚拟机),</p>
+<p>执行<code>/data/local/hello-arm</code></p>
+<h2 id="出现第一个错误"><a href="#出现第一个错误" class="headerlink" title="出现第一个错误"></a>出现第一个错误</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sh: ./hello arm: not executable: magic 7F45</div></pre></td></tr></table></figure>
+<p>这是因为程序指令集和手机指令集不一致造成的。</p>
+<p>写一段java代码编译成dex,看看手机是什么架构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">class GetCPU</div><div class="line">&#123;</div><div class="line">    public static void main(String[] args)</div><div class="line">    &#123;</div><div class="line">        String arch = System.getProperty(&quot;os.arch&quot;);</div><div class="line">        System.out.println(arch);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行<code>javac GetCPU.java</code> 和 <code>dx --dex --output=GetCPU.dex GetCPU.class</code> 编译成dex文件,<br>push到手机上的 /data/local/目录, 执行<code>dalvikvm -cp /data/local/GetCPU.dex GetCPU</code>:<br>果然是intel的..</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@vbox86p:/data/local #dalvikvm -cp /data/local/GetCPU.dex GetCPU  </div><div class="line">i686</div></pre></td></tr></table></figure>
+<p>换了一个arm架构的手机(真机):<br>先执行了GetCPU.dex确认指令集：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@aio_otfp:/data/local # dalvikvm -cp /data/local/GetCPU.dex GetCPU         </div><div class="line">aarch64</div></pre></td></tr></table></figure>
+<p>现在可以执行 <code>/data/local/hello-arm</code>了.</p>
+<h2 id="出现第二个错误！"><a href="#出现第二个错误！" class="headerlink" title="出现第二个错误！"></a>出现第二个错误！</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sh: ./hello-arm: can&apos;t execute: Permission denied</div></pre></td></tr></table></figure>
+<p>这是因为没有执行权限，加上执行权限！777！再次执行！</p>
+<h2 id="出现第三个错误！"><a href="#出现第三个错误！" class="headerlink" title="出现第三个错误！"></a>出现第三个错误！</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">error: only position independent executables (PIE) are supported.</div></pre></td></tr></table></figure>
+<p>这次是因为没有静态编译，重新编译，加上静态选项：</p>
+<p><code>ndk-gcc --static hello-world.c -o hello-arm</code></p>
+<p>颤颤巍巍的再次执行…<br>终于出现了 ——————— hello arm!</p>
+<h1 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h1><p><a href="http://ticktick.blog.51cto.com/823160/1692489" target="_blank" rel="external">如何在命令行下使用Android NDK交叉编译工具</a></p>
+<p><a href="http://blog.csdn.net/smfwuxiao/article/details/6587709" target="_blank" rel="external">Android NDK 工具链的使用方法（Standalone Toolchain）</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/02/run-first-c-program-on-android-phone/">http://kiya.studio/2015/12/02/run-first-c-program-on-android-phone/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/05/arm-introduction/" id="art-left" class="art-right">
+                <span class="next-title">
+                    Arm 架构简介<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/02/compile-android-sourcecode-4-4-4-r2/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>ubuntu 14.04编译运行android 4.4.4_r2源码
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">在android手机上运行C程序 - hello arm!</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#写段-hello-arm"><span class="toc-text">写段 hello arm</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#编译方式"><span class="toc-text">编译方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#使用gcc"><span class="toc-text">使用gcc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#配置交叉编译环境"><span class="toc-text">配置交叉编译环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编译"><span class="toc-text">编译</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用ndk-build"><span class="toc-text">使用ndk-build</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#配置ndk-build环境"><span class="toc-text">配置ndk-build环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#新建Android工程"><span class="toc-text">新建Android工程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置jni目录"><span class="toc-text">配置jni目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编译-1"><span class="toc-text">编译</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#执行"><span class="toc-text">执行</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#出现第一个错误"><span class="toc-text">出现第一个错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#出现第二个错误！"><span class="toc-text">出现第二个错误！</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#出现第三个错误！"><span class="toc-text">出现第三个错误！</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Refernece"><span class="toc-text">Refernece</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

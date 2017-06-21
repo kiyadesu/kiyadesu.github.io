@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> smali 语法 - iterator & switch-case & try-catch · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月26日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                smali 语法 - iterator & switch-case & try-catch
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/smali/">smali</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <blockquote>
+<p>本文环境<br><code>java version &quot;1.7.0_75&quot;</code><br><code>dx version 1.11</code><br><code>baksmali 2.1.0</code></p>
+</blockquote>
+<a id="more"></a>
+<h1 id="iterator"><a href="#iterator" class="headerlink" title="iterator"></a>iterator</h1><p>（for 和 while-do 两种形式）</p>
+<h2 id="java-代码"><a href="#java-代码" class="headerlink" title="java 代码"></a>java 代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">import java.util.*;</div><div class="line">class HeyIterator</div><div class="line">&#123;</div><div class="line">    static void iter_for()</div><div class="line">    &#123;</div><div class="line">        ArrayList al = new ArrayList();</div><div class="line">        al.add(&quot;C&quot;);</div><div class="line">        for( Iterator itr = al.iterator(); itr.hasNext(); )&#123;</div><div class="line">            System.out.print(itr.next());</div><div class="line">        &#125;</div><div class="line">        Iterator itr2 = al.iterator();</div><div class="line">        while(itr2.hasNext()) &#123;</div><div class="line">            System.out.print(itr2.next());</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="smali-代码"><a href="#smali-代码" class="headerlink" title="smali 代码"></a>smali 代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">.class LHeyIterator;</div><div class="line">.super Ljava/lang/Object;</div><div class="line">.source &quot;HeyIterator.java&quot;</div><div class="line"># direct methods</div><div class="line">.method constructor &lt;init&gt;()V</div><div class="line">    .registers 1</div><div class="line">    .prologue</div><div class="line">    .line 3</div><div class="line">    invoke-direct &#123;p0&#125;, Ljava/lang/Object;-&gt;&lt;init&gt;()V</div><div class="line">    return-void</div><div class="line">.end method</div><div class="line">.method static iter_for()V</div><div class="line">    .registers 4</div><div class="line">    .prologue</div><div class="line">    .line 7</div><div class="line">    new-instance v0, Ljava/util/ArrayList;</div><div class="line">    invoke-direct &#123;v0&#125;, Ljava/util/ArrayList;-&gt;&lt;init&gt;()V</div><div class="line">    .line 8</div><div class="line">    const-string v1, &quot;C&quot;</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/util/ArrayList;-&gt;add(Ljava/lang/Object;)Z</div><div class="line">    .line 10    //得到迭代器</div><div class="line">    invoke-virtual &#123;v0&#125;, Ljava/util/ArrayList;-&gt;iterator()Ljava/util/Iterator;</div><div class="line">    move-result-object v1</div><div class="line">    :goto_e     //判断是否有下一个元素</div><div class="line">    invoke-interface &#123;v1&#125;, Ljava/util/Iterator;-&gt;hasNext()Z</div><div class="line">    move-result v2</div><div class="line">    if-eqz v2, :cond_1e</div><div class="line">    .line 11</div><div class="line">    sget-object v2, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    invoke-interface &#123;v1&#125;, Ljava/util/Iterator;-&gt;next()Ljava/lang/Object;</div><div class="line">    move-result-object v3</div><div class="line">    invoke-virtual &#123;v2, v3&#125;, Ljava/io/PrintStream;-&gt;print(Ljava/lang/Object;)V</div><div class="line">    goto :goto_e    //跳至循环头部</div><div class="line">//--------------分割线---------------------</div><div class="line">    .line 14</div><div class="line">    :cond_1e    //得到迭代器</div><div class="line">    invoke-virtual &#123;v0&#125;, Ljava/util/ArrayList;-&gt;iterator()Ljava/util/Iterator;</div><div class="line">    move-result-object v0</div><div class="line">    .line 15</div><div class="line">    :goto_22    //判断是否有下一个元素</div><div class="line">    invoke-interface &#123;v0&#125;, Ljava/util/Iterator;-&gt;hasNext()Z</div><div class="line">    move-result v1</div><div class="line">    if-eqz v1, :cond_32</div><div class="line">    .line 16</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    invoke-interface &#123;v0&#125;, Ljava/util/Iterator;-&gt;next()Ljava/lang/Object;</div><div class="line">    move-result-object v2</div><div class="line">    invoke-virtual &#123;v1, v2&#125;, Ljava/io/PrintStream;-&gt;print(Ljava/lang/Object;)V</div><div class="line">    goto :goto_22   //跳至循环头部</div><div class="line">    .line 18</div><div class="line">    :cond_32</div><div class="line">    return-void</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<p><strong>两种方式完全一样啊</strong></p>
+<hr>
+<h1 id="switch"><a href="#switch" class="headerlink" title="switch"></a>switch</h1><h2 id="java-代码-1"><a href="#java-代码-1" class="headerlink" title="java 代码"></a>java 代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">import java.util.*;</div><div class="line">class HeySwitch</div><div class="line">&#123;</div><div class="line">    static void func()</div><div class="line">    &#123;</div><div class="line">        int a = 10;</div><div class="line">        //连续的case</div><div class="line">        switch(a)&#123;</div><div class="line">            case 0:</div><div class="line">                System.out.println(0);</div><div class="line">            case 1:</div><div class="line">                System.out.println(1);</div><div class="line">            case 2:</div><div class="line">                System.out.println(2);</div><div class="line">            case 3:</div><div class="line">                System.out.println(3);</div><div class="line">        &#125;</div><div class="line">        //不连续的case</div><div class="line">        switch(a)&#123;</div><div class="line">            case 0:</div><div class="line">                System.out.println(0);</div><div class="line">            case 32:</div><div class="line">                System.out.println(32);</div><div class="line">            case 64:</div><div class="line">                System.out.println(64);</div><div class="line">            case 128:</div><div class="line">                System.out.println(128);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="smali-代码-1"><a href="#smali-代码-1" class="headerlink" title="smali 代码"></a>smali 代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div></pre></td><td class="code"><pre><div class="line">.class LHeySwitch;</div><div class="line">.super Ljava/lang/Object;</div><div class="line">.source &quot;HeySwitch.java&quot;</div><div class="line"># direct methods</div><div class="line">.method constructor &lt;init&gt;()V</div><div class="line">    .registers 1</div><div class="line">    .prologue</div><div class="line">    .line 3</div><div class="line">    invoke-direct &#123;p0&#125;, Ljava/lang/Object;-&gt;&lt;init&gt;()V</div><div class="line">    return-void</div><div class="line">.end method</div><div class="line">.method static func()V</div><div class="line">    .registers 4</div><div class="line">    .prologue</div><div class="line">    const/4 v3, 0x0</div><div class="line">    .line 7</div><div class="line">    const/16 v0, 0xa</div><div class="line">    .line 8     //第一个switch的packed矩阵，指令格式 packed-switch vAA, +BBBBBBBB</div><div class="line">    packed-switch v0, :pswitch_data_3e</div><div class="line">    .line 19</div><div class="line">    :goto_6     //第二个switch的sparse矩阵，指令格式 sparse-switch vAA, +BBBBBBBB</div><div class="line">    sparse-switch v0, :sswitch_data_4a</div><div class="line">    .line 30</div><div class="line">    :goto_9         //函数结束</div><div class="line">    return-void</div><div class="line">//------------分割线-----------</div><div class="line">    .line 10</div><div class="line">    :pswitch_a</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    invoke-virtual &#123;v1, v3&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    .line 12</div><div class="line">    :pswitch_f</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const/4 v2, 0x1</div><div class="line">    invoke-virtual &#123;v1, v2&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    .line 14</div><div class="line">    :pswitch_15</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const/4 v2, 0x2</div><div class="line">    invoke-virtual &#123;v1, v2&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    .line 16</div><div class="line">    :pswitch_1b</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const/4 v2, 0x3</div><div class="line">    invoke-virtual &#123;v1, v2&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    goto :goto_6</div><div class="line">    //------------分割线-----------</div><div class="line">    .line 21</div><div class="line">    :sswitch_22</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    invoke-virtual &#123;v0, v3&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    .line 23</div><div class="line">    :sswitch_27</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const/16 v1, 0x20</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    .line 25</div><div class="line">    :sswitch_2e</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const/16 v1, 0x40</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    .line 27</div><div class="line">    :sswitch_35</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const/16 v1, 0x80</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/io/PrintStream;-&gt;println(I)V</div><div class="line">    goto :goto_9</div><div class="line">//------------分割线-----------</div><div class="line">    .line 8</div><div class="line">    nop</div><div class="line">    :pswitch_data_3e    //第一个矩阵</div><div class="line">    .packed-switch 0x0  //初始值为0，依次递增</div><div class="line">        :pswitch_a</div><div class="line">        :pswitch_f</div><div class="line">        :pswitch_15</div><div class="line">        :pswitch_1b</div><div class="line">    .end packed-switch</div><div class="line">    .line 19</div><div class="line">    :sswitch_data_4a    //第二个矩阵</div><div class="line">    .sparse-switch      //没有规定初始值，而是每个值对应相应的代码</div><div class="line">        0x0 -&gt; :sswitch_22</div><div class="line">        0x20 -&gt; :sswitch_27</div><div class="line">        0x40 -&gt; :sswitch_2e</div><div class="line">        0x80 -&gt; :sswitch_35</div><div class="line">    .end sparse-switch</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<h3 id="switch-指令格式"><a href="#switch-指令格式" class="headerlink" title="switch 指令格式"></a>switch 指令格式</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">packed-switch vAA, +BBBBBBBB</div><div class="line">sparse-switch vAA, +BBBBBBBB</div></pre></td></tr></table></figure>
+<p><code>AA</code> 表示要判断的值<br><code>BBBB</code> 表示相应 switch-payload 的偏移</p>
+<h3 id="两种-switch-payload-的格式"><a href="#两种-switch-payload-的格式" class="headerlink" title="两种 switch-payload 的格式"></a>两种 switch-payload 的格式</h3><p><strong>(1) packed-switch-payload format</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ident</td>
+<td>ushort = 0x0100</td>
+<td>固定值</td>
+</tr>
+<tr>
+<td>size</td>
+<td>ushort</td>
+<td>入口的个数</td>
+</tr>
+<tr>
+<td>first_key</td>
+<td>int</td>
+<td>第一个switch的值（最小的）</td>
+</tr>
+<tr>
+<td>targets</td>
+<td>int[]</td>
+<td>每个case相对于switch指令的偏移，而非此矩阵</td>
+</tr>
+</tbody>
+</table>
+<p><strong>(2) sparse-switch-payload format</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ident</td>
+<td>ushort = 0x0200</td>
+<td>固定值</td>
+</tr>
+<tr>
+<td>size</td>
+<td>ushort</td>
+<td>入口的个数</td>
+</tr>
+<tr>
+<td>keys</td>
+<td>int[]</td>
+<td>case的值，从低到高</td>
+</tr>
+<tr>
+<td>targets</td>
+<td>int[]</td>
+<td>每个case相对于switch指令的偏移，而非此矩阵</td>
+</tr>
+</tbody>
+</table>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>由<a href="https://source.android.com/devices/tech/dalvik/dalvik-bytecode.html" target="_blank" rel="external">官方文档</a>可得<br><code>packed-switch</code> 的 opcode 为 <code>2b</code>，<code>sparse-switch</code> 的 opcode 为 <code>2c</code> .<br>在16进制编辑器中搜索 <code>2b</code>，可得两条 switch 的位置(0x146, 0x14c)，从 smali 代码中也能看出他们是相邻的。（当然这一步可用ida直接搜索packed-swtch更方便）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">00000140  .. .. .. .. .. .. 2b 00  3b 00 00 00 2c 00 44 00  |......+.;...,.D.|</div><div class="line">00000150  00 00</div></pre></td></tr></table></figure></p>
+<p>第一条翻译为：<code>packed-switch v0,146h+2*3bh</code>,得矩阵的偏移为 0x1bc.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">000001b0  .. .. .. .. .. .. .. .. .. .. .. ..  00 01 04 00  |..n ....(.......|</div><div class="line">000001c0  00 00 00 00 07 00 00 00  0c 00 00 00 12 00 00 00  |................|</div><div class="line">000001d0  18 00 00 00</div></pre></td></tr></table></figure></p>
+<p><code>ident</code>: 0x0100<br><code>size</code>: 0x04<br><code>first_key</code>: 0x0<br><code>targets</code>: 0x07, 0x0c, 0x12, 0x18<br>如：0x146+2*0x07=0x154 即为 case 0 对应的代码地址。</p>
+<p>第二条翻译为：<code>sparse-switch v0,14ch+2*44h</code>,得矩阵的偏移为 0x1d4.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">000001d0  .. .. .. .. 00 02 04 00  00 00 00 00 20 00 00 00  |............ ...|</div><div class="line">000001e0  40 00 00 00 80 00 00 00  1c 00 00 00 21 00 00 00  |@...........!...|</div><div class="line">000001f0  28 00 00 00 2f 00 00 00</div></pre></td></tr></table></figure></p>
+<p><code>ident</code>: 0x0200<br><code>size</code>: 0x04<br><code>keys</code>: 0x00, 0x02, 0x04, 0x08<br><code>targets</code>: 0x1c, 0x21, 0x28, 0x2f<br>如：0x14c+2*0x1c=0x184 即为 case 0 对应的代码地址。</p>
+<hr>
+<h1 id="try"><a href="#try" class="headerlink" title="try"></a>try</h1><h2 id="java-代码："><a href="#java-代码：" class="headerlink" title="java 代码："></a>java 代码：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">import java.util.*;</div><div class="line">class HeyTry</div><div class="line">&#123;</div><div class="line">    public static void func()</div><div class="line">    &#123;</div><div class="line">        try&#123;</div><div class="line">            int a = 10/0;</div><div class="line">        &#125;</div><div class="line">        catch(ArithmeticException e)&#123;   //共有三个这样的异常</div><div class="line">            System.out.println(&quot;zero error.&quot;);</div><div class="line">        &#125;</div><div class="line">        try&#123;</div><div class="line">            int a = 0;</div><div class="line">            int b = 10/a;</div><div class="line">        &#125;</div><div class="line">        catch(ArithmeticException e)&#123;</div><div class="line">            System.out.println(&quot;zero error.&quot;);</div><div class="line">        &#125;</div><div class="line">        catch(Exception e)&#123;</div><div class="line">            System.out.println(e);</div><div class="line">        &#125;</div><div class="line">        try&#123;</div><div class="line">            int a = 0;</div><div class="line">            try&#123;</div><div class="line">                int b = 10/a;</div><div class="line">            &#125;</div><div class="line">            catch(ArithmeticException e)&#123;</div><div class="line">                System.out.println(&quot;zero error.&quot;);</div><div class="line">            &#125;</div><div class="line">            int[] ar = &#123;0,0&#125;;</div><div class="line">            int c = ar[2];</div><div class="line">        &#125;</div><div class="line">        catch(Exception e)&#123;</div><div class="line">            System.out.println(e);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="smali-代码："><a href="#smali-代码：" class="headerlink" title="smali 代码："></a>smali 代码：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div></pre></td><td class="code"><pre><div class="line">.class LHeyTry;</div><div class="line">.super Ljava/lang/Object;</div><div class="line">.source &quot;HeyTry.java&quot;</div><div class="line"># direct methods</div><div class="line">.method constructor &lt;init&gt;()V</div><div class="line">    .registers 1</div><div class="line">    .prologue</div><div class="line">    .line 3</div><div class="line">    invoke-direct &#123;p0&#125;, Ljava/lang/Object;-&gt;&lt;init&gt;()V</div><div class="line">    return-void</div><div class="line">.end method</div><div class="line">.method public static func()V</div><div class="line">    .registers 2</div><div class="line">    .prologue</div><div class="line">    .line 8</div><div class="line">    const/16 v0, 0xa</div><div class="line">    :try_start_2    //try开始</div><div class="line">    div-int/lit8 v0, v0, 0x0</div><div class="line">    :try_end_4      //try结束，紧跟着的是catch</div><div class="line">    .catch Ljava/lang/ArithmeticException; &#123;:try_start_2 .. :try_end_4&#125; :catch_18</div><div class="line">    .line 15</div><div class="line">    :goto_4</div><div class="line">    const/4 v0, 0x0     //原本是try内部的常量定义被挪到了外面</div><div class="line">    .line 16</div><div class="line">    const/16 v1, 0xa</div><div class="line">    :try_start_7</div><div class="line">    div-int v0, v1, v0</div><div class="line">    :try_end_9</div><div class="line">    .catch Ljava/lang/ArithmeticException; &#123;:try_start_7 .. :try_end_9&#125; :catch_21</div><div class="line">    .catch Ljava/lang/Exception; &#123;:try_start_7 .. :try_end_9&#125; :catch_2a</div><div class="line">    .line 26</div><div class="line">    :goto_9</div><div class="line">    const/4 v0, 0x0</div><div class="line">    .line 28</div><div class="line">    const/16 v1, 0xa</div><div class="line">    :try_start_c</div><div class="line">    div-int v0, v1, v0</div><div class="line">    :try_end_e      //原本是内外层关系的两个catch被放在了一起</div><div class="line">    .catch Ljava/lang/ArithmeticException; &#123;:try_start_c .. :try_end_e&#125; :catch_31</div><div class="line">    .catch Ljava/lang/Exception; &#123;:try_start_c .. :try_end_e&#125; :catch_3a</div><div class="line">    .line 34</div><div class="line">    :goto_e</div><div class="line">    const/4 v0, 0x2</div><div class="line">    :try_start_f</div><div class="line">    new-array v0, v0, [I</div><div class="line">    fill-array-data v0, :array_42   //fill-array-data-payload</div><div class="line">    .line 35</div><div class="line">    const/4 v1, 0x2</div><div class="line">    aget v0, v0, v1</div><div class="line">    :try_end_17</div><div class="line">    .catch Ljava/lang/Exception; &#123;:try_start_f .. :try_end_17&#125; :catch_3a</div><div class="line">    .line 40</div><div class="line">    :goto_17</div><div class="line">    return-void</div><div class="line">    .line 10</div><div class="line">    :catch_18       //同样的异常代码没有被优化</div><div class="line">    move-exception v0</div><div class="line">    .line 11</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const-string v1, &quot;zero error.&quot;</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/io/PrintStream;-&gt;println(Ljava/lang/String;)V</div><div class="line">    goto :goto_4</div><div class="line">    .line 18</div><div class="line">    :catch_21</div><div class="line">    move-exception v0</div><div class="line">    .line 19</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const-string v1, &quot;zero error.&quot;</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/io/PrintStream;-&gt;println(Ljava/lang/String;)V</div><div class="line">    goto :goto_9</div><div class="line">    .line 21</div><div class="line">    :catch_2a</div><div class="line">    move-exception v0</div><div class="line">    .line 22</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    invoke-virtual &#123;v1, v0&#125;, Ljava/io/PrintStream;-&gt;println(Ljava/lang/Object;)V</div><div class="line">    goto :goto_9</div><div class="line">    .line 30</div><div class="line">    :catch_31</div><div class="line">    move-exception v0</div><div class="line">    .line 31</div><div class="line">    :try_start_32</div><div class="line">    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    const-string v1, &quot;zero error.&quot;</div><div class="line">    invoke-virtual &#123;v0, v1&#125;, Ljava/io/PrintStream;-&gt;println(Ljava/lang/String;)V</div><div class="line">    :try_end_39</div><div class="line">    .catch Ljava/lang/Exception; &#123;:try_start_32 .. :try_end_39&#125; :catch_3a</div><div class="line">    goto :goto_e</div><div class="line">    .line 37</div><div class="line">    :catch_3a</div><div class="line">    move-exception v0</div><div class="line">    .line 38</div><div class="line">    sget-object v1, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;</div><div class="line">    invoke-virtual &#123;v1, v0&#125;, Ljava/io/PrintStream;-&gt;println(Ljava/lang/Object;)V</div><div class="line">    goto :goto_17</div><div class="line">    .line 34</div><div class="line">    nop</div><div class="line">    :array_42   //fill-array-data-payload</div><div class="line">    .array-data 4</div><div class="line">        0x0</div><div class="line">        0x0</div><div class="line">    .end array-data</div><div class="line">.end method</div></pre></td></tr></table></figure>
+<h3 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h3><p>try 代码块以两个标号为界，<code>:try_start_数字</code> 和 <code>:try_end_数字</code>，（不晓得这一段的数字为什么没有规律）。<br>紧接着是 catch 的格式：<br><code>.catch 异常类 {try起始标号 .. try结束标号} catch代码标号</code><br>java 并没有对重复的 catch 代码进行优化，但是变量的定义被挪到了 try 之外。<br>嵌套的 try-catch 被分成了单个的 try-catch .</p>
+<h3 id="try-在-dex-中的存在"><a href="#try-在-dex-中的存在" class="headerlink" title="try 在 dex 中的存在"></a>try 在 dex 中的存在</h3><p>关于try-catch是如何在dex文件中存在的参考<a href="http://kiya-z.github.io/2015/11/21/parse-dex-file-part-classdefs/" target="_blank" rel="external">解析 dex 文件结构 - 索引区和数据区（三） - ClassDefs</a> .</p>
+<p><strong>下面是手动查找：</strong></p>
+<p>前期准备:<br>classDefsSize: 0x1<br>classDefsOff: 0x128<br>directMethodsSize: 0x2<br>func函数的codeOff: 0x160<br>DexCode.triesSize: 0x05<br>try-catch 地址: 0x204,数据如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">00000200  .. .. .. .. 02 00 00 00  02 00 01 00 07 00 00 00  |................|</div><div class="line">00000210  02 00 04 00 0c 00 00 00  02 00 09 00 0f 00 00 00  |................|</div><div class="line">00000220  08 00 0e 00 32 00 00 00  07 00 0e 00 04 01 02 18  |....2...........|</div><div class="line">00000230  02 02 21 03 2a 02 02 31  03 3a 01 03 3a</div></pre></td></tr></table></figure></p>
+<p>首先是0x5个DexTry,</p>
+<table>
+<thead>
+<tr>
+<th>startAddr</th>
+<th>insnCount</th>
+<th>handlerOff</th>
+<th>对应的异常和handler(由下表所得)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x02</td>
+<td>0x02</td>
+<td>0x01</td>
+<td>0号handler: 抓到 ArithmeticException</td>
+</tr>
+<tr>
+<td>0x07</td>
+<td>0x02</td>
+<td>0x04</td>
+<td>1号handler: 抓到 ArithmeticException和Exception</td>
+</tr>
+<tr>
+<td>0x0c</td>
+<td>0x02</td>
+<td>0x09</td>
+<td>2号handler: 抓到 ArithmeticException和Exception</td>
+</tr>
+<tr>
+<td>0x0f</td>
+<td>0x08</td>
+<td>0x0e</td>
+<td>3号handler: 抓到 Exception</td>
+</tr>
+<tr>
+<td>0x32</td>
+<td>0x07</td>
+<td>0x0e</td>
+<td>3号handler: 抓到 Exception</td>
+</tr>
+</tbody>
+</table>
+<p>[<em>注</em>]这里的handleroff是以handler_list为起始的偏移</p>
+<p><code>catch_handler列表个数</code>: 0x04<br>下面是0x04个catch_handler：</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>size</th>
+<th>typeId</th>
+<th>addr</th>
+<th>catch_all_addr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x0</td>
+<td>0x01</td>
+<td>0x02(java.lang.ArithmeticException)</td>
+<td>0x18</td>
+<td>-</td>
+</tr>
+<tr>
+<td>0x1</td>
+<td>0x02</td>
+<td>0x02(java.lang.ArithmeticException)</td>
+<td>0x21</td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td>-</td>
+<td>0x03(java.lang.Exception)</td>
+<td>0x2a</td>
+<td>-</td>
+</tr>
+<tr>
+<td>0x2</td>
+<td>0x02</td>
+<td>0x02(java.lang.ArithmeticException)</td>
+<td>0x31</td>
+<td>-</td>
+</tr>
+<tr>
+<td>-</td>
+<td>-</td>
+<td>0x03(java.lang.Exception)</td>
+<td>0x3a</td>
+<td>-</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>0x01</td>
+<td>0x03(java.lang.Exception)</td>
+<td>0x3a</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><strong>下面是使用 dexdump 的数据：</strong><br>可用来验证结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">Processing &apos;HeyTry.dex&apos;...</div><div class="line">Opened &apos;HeyTry.dex&apos;, DEX version &apos;035&apos;</div><div class="line">Class #0            -</div><div class="line">  Class descriptor  : &apos;LHeyTry;&apos;</div><div class="line">  Access flags      : 0x0000 ()</div><div class="line">  Superclass        : &apos;Ljava/lang/Object;&apos;</div><div class="line">  Interfaces        -</div><div class="line">  Static fields     -</div><div class="line">  Instance fields   -</div><div class="line">  Direct methods    -</div><div class="line">    #0              : (in LHeyTry;)</div><div class="line">      name          : &apos;&lt;init&gt;&apos;</div><div class="line">      type          : &apos;()V&apos;</div><div class="line">      access        : 0x10000 (CONSTRUCTOR)</div><div class="line">      code          -</div><div class="line">      registers     : 1</div><div class="line">      ins           : 1</div><div class="line">      outs          : 1</div><div class="line">      insns size    : 4 16-bit code units</div><div class="line">      catches       : (none)</div><div class="line">      positions     :</div><div class="line">        0x0000 line=3</div><div class="line">      locals        :</div><div class="line">        0x0000 - 0x0004 reg=0 this LHeyTry;</div><div class="line">    #1              : (in LHeyTry;)</div><div class="line">      name          : &apos;func&apos;</div><div class="line">      type          : &apos;()V&apos;</div><div class="line">      access        : 0x0009 (PUBLIC STATIC)</div><div class="line">      code          -</div><div class="line">      registers     : 2</div><div class="line">      ins           : 0</div><div class="line">      outs          : 2</div><div class="line">      insns size    : 74 16-bit code units  //共74条指令</div><div class="line">      catches       : 5     //五个catch</div><div class="line">        0x0002 - 0x0004     //startAddr + insnCount</div><div class="line">          Ljava/lang/ArithmeticException; -&gt; 0x0018</div><div class="line">        0x0007 - 0x0009</div><div class="line">          Ljava/lang/ArithmeticException; -&gt; 0x0021</div><div class="line">          Ljava/lang/Exception; -&gt; 0x002a</div><div class="line">        0x000c - 0x000e</div><div class="line">          Ljava/lang/ArithmeticException; -&gt; 0x0031</div><div class="line">          Ljava/lang/Exception; -&gt; 0x003a</div><div class="line">        0x000f - 0x0017</div><div class="line">          Ljava/lang/Exception; -&gt; 0x003a</div><div class="line">        0x0032 - 0x0039</div><div class="line">          Ljava/lang/Exception; -&gt; 0x003a</div><div class="line">      positions     :</div><div class="line">        0x0000 line=8</div><div class="line">        0x0004 line=15</div><div class="line">        0x0005 line=16</div><div class="line">        0x0009 line=26</div><div class="line">        0x000a line=28</div><div class="line">        0x000e line=34</div><div class="line">        0x0014 line=35</div><div class="line">        0x0017 line=40</div><div class="line">        0x0018 line=10</div><div class="line">        0x0019 line=11</div><div class="line">        0x0021 line=18</div><div class="line">        0x0022 line=19</div><div class="line">        0x002a line=21</div><div class="line">        0x002b line=22</div><div class="line">        0x0031 line=30</div><div class="line">        0x0032 line=31</div><div class="line">        0x003a line=37</div><div class="line">        0x003b line=38</div><div class="line">        0x0041 line=34</div><div class="line">      locals        :</div><div class="line">  Virtual methods   -</div><div class="line">  source_file_idx   : 1 (HeyTry.java)</div></pre></td></tr></table></figure></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/26/smali-grammar-iterator-switch/">http://kiya.studio/2015/11/26/smali-grammar-iterator-switch/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/27/smali-grammar-special-classes/" id="art-left" class="art-right">
+                <span class="next-title">
+                    smali 语法 - 内部类和注解类<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/21/parse-dex-file-part-classdefs/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>解析 dex 文件结构 - 索引区和数据区（三） - ClassDefs
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">smali 语法 - iterator & switch-case & try-catch</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#iterator"><span class="toc-text">iterator</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#java-代码"><span class="toc-text">java 代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#smali-代码"><span class="toc-text">smali 代码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#switch"><span class="toc-text">switch</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#java-代码-1"><span class="toc-text">java 代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#smali-代码-1"><span class="toc-text">smali 代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#switch-指令格式"><span class="toc-text">switch 指令格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#两种-switch-payload-的格式"><span class="toc-text">两种 switch-payload 的格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#验证"><span class="toc-text">验证</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#try"><span class="toc-text">try</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#java-代码："><span class="toc-text">java 代码：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#smali-代码："><span class="toc-text">smali 代码：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#格式"><span class="toc-text">格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#try-在-dex-中的存在"><span class="toc-text">try 在 dex 中的存在</span></a></li></ol></li></ol></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 反调试方法二 - 抢占ptrace · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月18日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                反调试方法二 - 抢占ptrace
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/anti-debug/">anti-debug</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <blockquote>
+<p>The ptrace() system call provides a means by which one process (the”tracer”) may observe and control the execution of another process(the “tracee”), and examine and change the tracee’s memory andregisters.  It is primarily used to implement breakpoint debugging and system call tracing.</p>
+</blockquote>
+<p>帮助文档<a href="http://man7.org/linux/man-pages/man2/ptrace.2.html" target="_blank" rel="external">online</a>.</p>
+<a id="more"></a>
+<h1 id="ptrace"><a href="#ptrace" class="headerlink" title="ptrace"></a>ptrace</h1><p><code>ptrace</code>可以让一个进程监视和控制另一个进程的执行,并且修改被监视进程的内存、寄存器等,主要应用于断点调试和系统调用跟踪.</p>
+<p>函数原型:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">long ptrace(int request, pid_t pid, void * addr, void * data)</div></pre></td></tr></table></figure></p>
+<p>其中,request代表请求类型,pid代表被调试进程的pid.</p>
+<blockquote>
+<p>ptrace建立跟踪关系的两种方式:</p>
+<ol>
+<li>fork:<br>利用fork+execve执行被测试的程序，子进程在执行execve之前调用ptrace(PTRACE_TRACEME)，建立了与父进程(debugger)的跟踪关系。</li>
+<li>attach: debugger可以调用ptrace(PTRACE_ATTACH，pid,…)，建立自己与进程号为pid的进程间的跟踪关系。<br>即利用PTRACE_ATTACH，使自己变成被调试程序的父进程(用ps可以看到)。用attach建立起来的跟踪关系，可以调用ptrace(PTRACE_DETACH，pid,…)来解除。注意attach进程时的权限问题，如一个非root权限的进程是不能attach到一个root进程上的。</li>
+</ol>
+</blockquote>
+<p>有信号发生时,被调试进程就会暂停下来,并且通知调试进程.调试进程可以调用waitpid()获得被调试进程暂停位置的相关信息.<br>在被调试进程暂停的期间,调试进程可以各种ptrace request来对被调试进程进行操作,查看、修改、使之继续运行、忽略该信号甚至发送信号.</p>
+<h1 id="部分ptrace-request"><a href="#部分ptrace-request" class="headerlink" title="部分ptrace request"></a>部分ptrace request</h1><h2 id="PTRACE-TRACEME"><a href="#PTRACE-TRACEME" class="headerlink" title="PTRACE_TRACEME"></a>PTRACE_TRACEME</h2><p>将当前进程切换到停止状态。它通常总是与 fork/exec 一起使用。对于每一个进程，PTRACE_TRACEME 只能被调用一次。</p>
+<h2 id="PTRACE-ATTACH"><a href="#PTRACE-ATTACH" class="headerlink" title="PTRACE_ATTACH"></a>PTRACE_ATTACH</h2><p>根据pid将被调试进程附加到调试进程上,PTRACE_ATTACH向被调试进程发送SIGSTOP信号使之停下.<br>但是在<code>ptrace(PTRACE_ATTACH,pid,0,0)</code>执行完毕时被调试进程可能还没有暂停,可以使用<code>waitpid()</code>等待其停下.</p>
+<h2 id="PTRACE-DETACH"><a href="#PTRACE-DETACH" class="headerlink" title="PTRACE_DETACH"></a>PTRACE_DETACH</h2><p>将被调试进程与调试进程分离,使被调试进程正常运行.</p>
+<h2 id="PTRACE-SYSCALL"><a href="#PTRACE-SYSCALL" class="headerlink" title="PTRACE_SYSCALL"></a>PTRACE_SYSCALL</h2><p>使被调试进程继续运行,但是在下一个系统调用的入口处或出口处停下,或者是执行完一条指令后停下.<br>例如,调试进程可以监视被调试进程系统调用入口处的参数,接着再使用SYSCALL,监视系统调用的返回值.</p>
+<h2 id="wait"><a href="#wait" class="headerlink" title="wait"></a>wait</h2><p>wait函数会延迟父进程的执行，直到被调试的进程切换为停止状态或者终止为止.</p>
+<h1 id="反调试"><a href="#反调试" class="headerlink" title="反调试"></a>反调试</h1><p>ptrace被广泛用于反调试,因为一个进程只能被ptrace一次,如果事先调用了ptrace方法,那就可以防止别人调试我们的程序.</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试程序:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">#include&lt;stdlib.h&gt;</div><div class="line">#include&lt;sys/ptrace.h&gt;</div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">    ptrace(PTRACE_TRACEME);</div><div class="line">    while(1)&#123;</div><div class="line">        printf(&quot;Hello Ptrace!\n&quot;);</div><div class="line">        sleep(1);</div><div class="line">    &#125;</div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>编译:<code>gcc -g -o hello-ptrace hello-ptrace.c</code></p>
+<p>运行:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/18/16/07/45" alt=""></p>
+<p>另开命令行调试:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/18/15/59/52" alt=""></p>
+<h2 id="检测"><a href="#检测" class="headerlink" title="检测"></a>检测</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">#include&lt;sys/ptrace.h&gt;</div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">    if(-1 == ptrace(PTRACE_TRACEME))</div><div class="line">    &#123;</div><div class="line">        printf(&quot;Debugger!\n&quot;);</div><div class="line">        return 1;</div><div class="line">    &#125;</div><div class="line">    printf(&quot;Hello Ptrace!\n&quot;);</div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="反反调试"><a href="#反反调试" class="headerlink" title="反反调试"></a>反反调试</h1><p><code>ptrace</code>用户态源码(位于bionic/libc/bionic/ptrace.c):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">long ptrace(int request, pid_t pid, void * addr, void * data)</div><div class="line">&#123;</div><div class="line">    switch (request) &#123;</div><div class="line">        case PTRACE_PEEKUSR:</div><div class="line">        case PTRACE_PEEKTEXT:</div><div class="line">        case PTRACE_PEEKDATA:</div><div class="line">        &#123;</div><div class="line">            long word;</div><div class="line">            long ret;</div><div class="line">            ret = __ptrace(request, pid, addr, &amp;word);</div><div class="line">            if (ret == 0) &#123;</div><div class="line">                return word;</div><div class="line">            &#125; else &#123;</div><div class="line">                // __ptrace will set errno for us</div><div class="line">                return -1;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        default:</div><div class="line">             return __ptrace(request, pid, addr, data);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>0表示成功,-1表示错误.</p>
+<ul>
+<li><p>单个应用可在ptrace下断点.</p>
+</li>
+<li><p>定制ROM,可以将ptrace源代码修改为<code>如果是自己的pid调用ptrace,返回-1;否则返回0</code>.</p>
+</li>
+</ul>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://www.xuebuyuan.com/706076.html" target="_blank" rel="external">Android ptrace简介</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/18/ptrace-basis/">http://kiya.studio/2015/12/18/ptrace-basis/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/21/hook-syscall/" id="art-left" class="art-right">
+                <span class="next-title">
+                    hook - 拦截系统调用<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/16/unshell-basic/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>脱壳基础 dvmDexFileOpenPartial
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">反调试方法二 - 抢占ptrace</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ptrace"><span class="toc-text">ptrace</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#部分ptrace-request"><span class="toc-text">部分ptrace request</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#PTRACE-TRACEME"><span class="toc-text">PTRACE_TRACEME</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PTRACE-ATTACH"><span class="toc-text">PTRACE_ATTACH</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PTRACE-DETACH"><span class="toc-text">PTRACE_DETACH</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PTRACE-SYSCALL"><span class="toc-text">PTRACE_SYSCALL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wait"><span class="toc-text">wait</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#反调试"><span class="toc-text">反调试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#检测"><span class="toc-text">检测</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#反反调试"><span class="toc-text">反反调试</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

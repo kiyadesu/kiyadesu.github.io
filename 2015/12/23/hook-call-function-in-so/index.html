@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> hook - Android ARM下的的so注入 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月23日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                hook - Android ARM下的的so注入
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/hook/">hook</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>本文是对<a href="http://www.weibo.com/zhengmin1989" target="_blank" rel="external">大犇蒸米spark</a>的<a href="http://drops.wooyun.org/tips/9300" target="_blank" rel="external">安卓动态调试七种武器之离别钩 – Hooking</a>的实践记录以及知识整理!原文请戳<a href="http://drops.wooyun.org/tips/9300" target="_blank" rel="external">链接</a>.</p>
+<a id="more"></a>
+<p><strong>被测试代码:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">#include&lt;stdlib.h&gt;</div><div class="line"></div><div class="line">int count = 0;</div><div class="line"></div><div class="line">void print()</div><div class="line">&#123;</div><div class="line">	printf(&quot;hello,%d\n&quot;,count);</div><div class="line">        sleep(1);</div><div class="line">&#125;</div><div class="line"></div><div class="line">int main(int argc, char const *argv[])</div><div class="line">&#123;</div><div class="line">	while(1)&#123;</div><div class="line">		print();</div><div class="line">		count++;</div><div class="line">	&#125;</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注入方法都是通过ptrace实现的.<br>本文代码在<a href="https://github.com/kiya-z/Android/tree/master/hook" target="_blank" rel="external">github</a>.</p>
+<h1 id="调用系统so库中的函数"><a href="#调用系统so库中的函数" class="headerlink" title="调用系统so库中的函数"></a>调用系统so库中的函数</h1><p>目标函数是<code>libc.so</code>中的<code>sleep</code>函数.<br>正常情况是每输出一次暂停一秒,现在我们让它暂停10秒.</p>
+<h2 id="总体思路"><a href="#总体思路" class="headerlink" title="总体思路"></a>总体思路</h2><ul>
+<li>获取目标进程sleep函数地址</li>
+<li>在目标进程内执行sleep函数</li>
+</ul>
+<h2 id="如何获取函数地址"><a href="#如何获取函数地址" class="headerlink" title="如何获取函数地址"></a>如何获取函数地址</h2><ul>
+<li><p><strong>已知条件</strong>: 本进程的基址、目标进程的基址、本进程中sleep函数的地址(当然,这些已知条件也是需要获得的 :p)<br><code>/proc/&lt;pid&gt;/maps</code>文件中存储的是进程内存映射详情,我们可以在这个文件中查询进程中so的基址;<br><code>sleep</code>函数在本进程中的地址直接可以获得(<code>void*</code>)</p>
+</li>
+<li><p><strong>求解</strong>: 目标进程中sleep函数地址</p>
+</li>
+<li><p><strong>计算</strong>: 本进程sleep地址 - 本进程基址 + 目标进程基址</p>
+</li>
+</ul>
+<h3 id="获取so库的加载基址"><a href="#获取so库的加载基址" class="headerlink" title="获取so库的加载基址"></a>获取so库的加载基址</h3><p>打开<code>/proc/&lt;pid&gt;/maps</code>文件找到基址.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">void* get_module_base(int pid, const char* module_name)</div><div class="line">&#123;</div><div class="line">    FILE *f;		//文件指针</div><div class="line">    long addr = 0;	//模块地址</div><div class="line">    char filename[32];	//maps路径</div><div class="line">    char *pch;</div><div class="line">    char line[1024];	//每行</div><div class="line">    if(pid == 0)&#123;</div><div class="line">        snprintf(filename, sizeof(filename), &quot;/proc/self/maps&quot;);</div><div class="line">    &#125; else &#123;</div><div class="line">        snprintf(filename, sizeof(filename), &quot;/proc/%d/maps&quot;, pid);</div><div class="line">    &#125;</div><div class="line">    f = fopen(filename, &quot;r&quot;);</div><div class="line">    if(f != NULL)&#123;</div><div class="line">        while(fgets(line,sizeof(line),f))&#123;</div><div class="line">           if(strstr(line, module_name)) &#123;  //找到该行是否含有module_name</div><div class="line">               pch = strtok(line,&quot;-&quot;);  //分割出基址字符串</div><div class="line">               addr = strtoul(pch,NULL,0x10); //转换为16进制数</div><div class="line">               if(addr == 0x8000)   //32位linux程序中默认的text加载地址为0x08408000,64位的改为0x00400000,此时计算base地址就没什么用了</div><div class="line">                   addr = 0;</div><div class="line">               break;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        fclose(f);</div><div class="line">    &#125;</div><div class="line">    return (void*)addr;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="计算目标进程中sleep函数地址"><a href="#计算目标进程中sleep函数地址" class="headerlink" title="计算目标进程中sleep函数地址"></a>计算目标进程中sleep函数地址</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">long get_remote_addr(int target_pid, const char* module_name, void* local_addr)</div><div class="line">&#123;</div><div class="line">    void* local_handle = get_module_base(0,module_name);</div><div class="line">    void* remote_handle = get_module_base(target_pid,module_name);</div><div class="line"></div><div class="line">    printf(&quot;local_handle:%p  remote_handle:%p\n&quot;, local_handle, remote_handle);</div><div class="line"></div><div class="line">    //计算公式</div><div class="line">    long remote_addr = (long)((uint32_t)local_addr - (uint32_t)local_handle + (uint32_t)remote_handle);</div><div class="line"></div><div class="line">    printf(&quot;remote_addr:%p\n&quot;, remote_addr);</div><div class="line">    return remote_addr;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="如何执行sleep函数"><a href="#如何执行sleep函数" class="headerlink" title="如何执行sleep函数"></a>如何执行sleep函数</h2><ul>
+<li>设置函数参数,如果参数个数小于等于4,参数按顺序放入R0~R4寄存器中;如果参数个数大于4,多余的部分需要入栈.</li>
+<li>设置pc寄存器的值,设置当前指令集标志位.</li>
+<li>应用以上寄存器的修改使之生效.</li>
+<li>等待函数执行.</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">//目标进程id,参数地址,参数个数,寄存器地址</div><div class="line">int ptrace_call(int pid, long addr, long *params, uint32_t params_num, struct pt_regs* regs)</div><div class="line">&#123;</div><div class="line">    uint32_t i;</div><div class="line">    for (i = 0; i &lt; params_num &amp;&amp; i &lt; 4; i++) &#123;     //设置少于4个的参数</div><div class="line">        regs-&gt;uregs[i] = params[i];</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    //设置多于4个的参数</div><div class="line">    if (i &lt; params_num) &#123;</div><div class="line">        regs-&gt;ARM_sp -= (params_num - i) * long_size;    //抬高栈顶指针(分配空间)</div><div class="line">        writeData(pid, (long)regs-&gt;ARM_sp, (char*)&amp;params[i], (params_num - i) * long_size); //写入</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    regs-&gt;ARM_pc = addr;    //设置pc</div><div class="line">    if (regs-&gt;ARM_pc &amp; 1) &#123;     //判断是否是Thumb指令</div><div class="line">        regs-&gt;ARM_pc &amp;= (~1u);  //Thumb的pc最后一位总是0</div><div class="line">        regs-&gt;ARM_cpsr |= CPSR_T_MASK;  //T标志位为1</div><div class="line">    &#125; else &#123;    //arm</div><div class="line">        regs-&gt;ARM_cpsr &amp;= ~CPSR_T_MASK;  //T标志位为0</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    regs-&gt;ARM_lr = 0;   //为了使sleep函数执行完毕后产生“内存访问错误”,这样我们就知道什么时候执行完了</div><div class="line"></div><div class="line">    if(ptrace_setregs(pid,regs)==-1 || ptrace_continue(pid)==-1)&#123;   //目标进程继续执行</div><div class="line">        return -1;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    int stat = 0;                   //WUNTRACED表示如果pid进程进入暂停状态，那么waitpid函数立即返回</div><div class="line">    waitpid(pid,&amp;stat,WUNTRACED);   //等待sleep函数执行,等待过程中本进程暂停执行</div><div class="line">    printf(&quot;%d\n&quot;, stat);</div><div class="line">    while (stat != 0xb7f) &#123;     //0xb7f表示目标进程进入暂停状态</div><div class="line">        printf(&quot;%d\n&quot;, stat);</div><div class="line">        if (ptrace_continue(pid) == -1) &#123;</div><div class="line">            return -1;</div><div class="line">        &#125;</div><div class="line">        waitpid(pid,&amp;stat,WUNTRACED);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="如何注入"><a href="#如何注入" class="headerlink" title="如何注入"></a>如何注入</h2><ul>
+<li>保存寄存器的值</li>
+<li>获得sleep函数地址</li>
+<li>执行sleep函数</li>
+<li>恢复寄存器的值</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">void inject(int pid)</div><div class="line">&#123;</div><div class="line">    struct pt_regs old_regs,regs;</div><div class="line">    long sleep_addr;</div><div class="line">    //保存寄存器</div><div class="line">    ptrace(PTRACE_GETREGS, pid, NULL, &amp;old_regs);</div><div class="line">    memcpy(&amp;regs, &amp;old_regs, sizeof(regs));</div><div class="line"></div><div class="line">    long parameters[1];</div><div class="line">    parameters[0] = 10;</div><div class="line">    sleep_addr = get_remote_addr(pid, &quot;libc.so&quot;, (void*)sleep);</div><div class="line">    ptrace_call(pid,sleep_addr,parameters,1,&amp;regs);</div><div class="line">    //恢复寄存器</div><div class="line">    ptrace(PTRACE_SETREGS, pid, NULL, &amp;old_regs);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="主函数"><a href="#主函数" class="headerlink" title="主函数"></a>主函数</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">#include&lt;string.h&gt;  // strstr,strtok</div><div class="line">#include&lt;stdlib.h&gt;  //strtoul</div><div class="line">#include&lt;stdint.h&gt;  //uint32_t</div><div class="line">#include&lt;unistd.h&gt;  //sleep</div><div class="line">#include&lt;sys/ptrace.h&gt;</div><div class="line">#include&lt;linux/wait.h&gt;    // WUNTRACED</div><div class="line">#include&lt;time.h&gt;</div><div class="line"></div><div class="line">int main(int argc, char* argv[])</div><div class="line">&#123;</div><div class="line">    if(argc != 2)&#123;</div><div class="line">        printf(&quot;usage: %s &lt;pid to be traced&gt;\n&quot;,argv[0]);</div><div class="line">        return 1;</div><div class="line">    &#125;</div><div class="line">    int pid = atoi(argv[1]);</div><div class="line"></div><div class="line">    if(0 != ptrace(PTRACE_ATTACH, pid, NULL, NULL))&#123;</div><div class="line">        printf(&quot;attach failed.&quot;);</div><div class="line">        return 1;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    inject(pid);</div><div class="line"></div><div class="line">    ptrace(PTRACE_DETACH, pid, NULL, NULL);</div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="番外"><a href="#番外" class="headerlink" title="番外"></a>番外</h1><h2 id="proc-lt-pid-gt-文件夹"><a href="#proc-lt-pid-gt-文件夹" class="headerlink" title="/proc/&lt;pid&gt; 文件夹"></a>/proc/&lt;pid&gt; 文件夹</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cmdline</td>
+<td>命令行全名(加参数变量)和 ps 命令中的command 列结果一样</td>
+</tr>
+<tr>
+<td>cwd</td>
+<td>进程的工作目录 和 (pwdx PID) 结果相同</td>
+</tr>
+<tr>
+<td>environ</td>
+<td>进程的环境变量</td>
+</tr>
+<tr>
+<td>exe</td>
+<td>一般是/bin/ 的链接</td>
+</tr>
+<tr>
+<td>fd</td>
+<td>进程打开的文件描述fu .用ls -l 可以查看具体的文件 (可以用lsof -p PID)</td>
+</tr>
+<tr>
+<td>status</td>
+<td>进程的相关状态</td>
+</tr>
+<tr>
+<td>task</td>
+<td>该目录下是进程所包含的线程(note: ps 可以查看线程)</td>
+</tr>
+<tr>
+<td>mounts</td>
+<td>进程挂载点</td>
+</tr>
+<tr>
+<td>maps</td>
+<td>进程内存映射详情</td>
+</tr>
+</tbody>
+</table>
+<h2 id="关于pc寄存器"><a href="#关于pc寄存器" class="headerlink" title="关于pc寄存器"></a>关于pc寄存器</h2><p><a href="https://www.scss.tcd.ie/~waldroj/3d1/arm_arm.pdf" target="_blank" rel="external">arm.pdf</a> 中的<strong>A2.4.3 Register 15 and the program counter</strong>有这样一段话:<br>是关于指令集在pc寄存器上的表现的.</p>
+<blockquote>
+<p>Reading the program counter<br>When an instruction reads the PC, the value read depends on which instruction set it comes from:<br>• For an ARM instruction, the value read is the address of the instruction plus 8 bytes. Bits [1:0] of this<br>value are always zero, because ARM instructions are always word-aligned.<br>• For a Thumb instruction, the value read is the address of the instruction plus 4 bytes. Bit [0] of this<br>value is always zero, because Thumb instructions are always halfword-aligned.</p>
+</blockquote>
+<h2 id="关于CPSR寄存器"><a href="#关于CPSR寄存器" class="headerlink" title="关于CPSR寄存器"></a>关于CPSR寄存器</h2><table>
+<thead>
+<tr>
+<th>31</th>
+<th>30</th>
+<th>29</th>
+<th>28</th>
+<th>27</th>
+<th>26  25</th>
+<th>24</th>
+<th>23 20</th>
+<th>19 16</th>
+<th>15 10</th>
+<th>9</th>
+<th>8</th>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4 0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N</td>
+<td>Z</td>
+<td>C</td>
+<td>V</td>
+<td>Q</td>
+<td>Res</td>
+<td>J</td>
+<td>RESERVED</td>
+<td>GE[3:0]</td>
+<td>RESERVED</td>
+<td>E</td>
+<td>A</td>
+<td>I</td>
+<td>F</td>
+<td>T</td>
+<td>M[4:0]</td>
+</tr>
+</tbody>
+</table>
+<p>其中J和T标记位代表当前指令集:</p>
+<table>
+<thead>
+<tr>
+<th>J</th>
+<th>T</th>
+<th>Instruction set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>ARM</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>Thumb</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>Jazelle</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>RESERVED</td>
+</tr>
+</tbody>
+</table>
+<h2 id="关于waitpid"><a href="#关于waitpid" class="headerlink" title="关于waitpid"></a>关于waitpid</h2><p>详细介绍可看<a href="https://support.sas.com/documentation/onlinedoc/sasc/doc/lr2/wait.htm" target="_blank" rel="external">官方文档</a>.</p>
+<h3 id="参数status"><a href="#参数status" class="headerlink" title="参数status"></a>参数status</h3><p><code>wait</code>函数调用过后,<code>status</code>指针指向可以被宏解析的值,这些宏在ndk目录下<code>platforms/android-21/arch-arm/usr/include/sys/wait.h</code>文件中定义.</p>
+<p>高2字节用于表示导致子进程的退出或暂停状态信号值(<code>WTERMSIG</code>)，低2字节表示子进程是退出(0x0)还是暂停(0x7f)状态(<code>WEXITSTATUS</code>)。<br>如:0xb7f就表示子进程为暂停状态，导致它暂停的信号量为11即<code>sigsegv</code>错误。<br>关于错误代码的文档可看<a href="https://support.sas.com/documentation/onlinedoc/sasc/doc/lr1/lrv1ch5.htm" target="_blank" rel="external">这里</a>,<br>定义在ndk目录下<code>platforms/android-21/arch-arm/usr/include/asm/signal.h</code>中.</p>
+<blockquote>
+<p>其中两个宏:<br>WEXITSTATUS(*statusPtr):<br>if the child process terminates normally, this macro evaluates to the lower 8 bits of the value passed to the exit or _exit function or returned from main.<br>WTERMSIG(*statusPtr)<br>if the child process ends by a signal that was not caught, this macro evaluates to the number of that signal.</p>
+</blockquote>
+<h3 id="参数options"><a href="#参数options" class="headerlink" title="参数options"></a>参数options</h3><p>指定了<code>waitpid</code>的额外行动.选项有:</p>
+<p><strong>WNOHANG</strong>:<br>告诉<code>waitpid</code>不等程序中止立即返回<code>status</code>信息.<br>正常情况是当主进程对子进程使用了<code>waitpid</code>,主进程就会阻塞直到<code>waitpid</code>返回<code>status</code>信息;如果指定了<code>WNOHANG</code>选项,主进程就不会阻塞了.<br>如果还没有可用的<code>status</code>信息,<code>waitpid</code>返回0.</p>
+<p><strong>WUNTRACED</strong>:<br>告诉<code>waitpid</code>，如果子进程进入暂停状态或者已经终止，那么就立即返回<code>status</code>信息,正常情况是紫禁城终止的时候才返回.<br>如果是被ptrace的子进程，那么即使不提供WUNTRACED参数，也会在子进程进入暂停状态的时候立即返回。<br>对于使用<code>ptrace_cont</code>运行的子进程，它会在3种情况下进入暂停状态：①下一次系统调用；②子进程退出；③子进程的执行发生错误。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>程序中的<code>0xb7f</code>就表示子进程进入了暂停状态，且发送的错误信号为11(SIGSEGV)，它表示试图访问未分配给自己的内存, 或试图往没有写权限的内存地址写数据。<br>当子进程执行完注入的函数后，由于我们在前面设置了regs-&gt;ARM_lr = 0，它就会返回到0地址处继续执行，这样就会产生SIGSEGV了.</p>
+<h1 id="调用自定义so库中的函数"><a href="#调用自定义so库中的函数" class="headerlink" title="调用自定义so库中的函数"></a>调用自定义so库中的函数</h1><ul>
+<li>保存当前寄存器的状态</li>
+<li>获取目标程序的mmap, dlopen, dlsym, dlclose函数地址</li>
+<li>调用mmap分配空间保存参数信息</li>
+<li>调用dlopen加载so库</li>
+<li>调用dlsym找到目标函数地址</li>
+<li>执行目标函数</li>
+<li>调用dlclose卸载so库</li>
+<li>恢复寄存器的状态</li>
+</ul>
+<h2 id="保存当前寄存器的状态"><a href="#保存当前寄存器的状态" class="headerlink" title="保存当前寄存器的状态"></a>保存当前寄存器的状态</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">struct pt_regs old_regs,regs;</div><div class="line">ptrace(PTRACE_GETREGS, pid, NULL, &amp;old_regs);</div><div class="line">memcpy(&amp;regs,&amp;old_regs,sizeof(regs));</div></pre></td></tr></table></figure>
+<h2 id="获取目标程序的mmap-dlopen-dlsym-dlclose函数地址"><a href="#获取目标程序的mmap-dlopen-dlsym-dlclose函数地址" class="headerlink" title="获取目标程序的mmap, dlopen, dlsym, dlclose函数地址"></a>获取目标程序的mmap, dlopen, dlsym, dlclose函数地址</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">long mmap_addr,dlopen_addr,dlsym_addr,dlclose_addr;</div><div class="line">mmap_addr = get_remote_addr(pid, libc_path, (void*)mmap);</div><div class="line">dlopen_addr = get_remote_addr(pid, libc_path, (void*)dlopen);</div><div class="line">dlsym_addr = get_remote_addr(pid, libc_path, (void*)dlsym);</div><div class="line">dlclose_addr = get_remote_addr(pid, libc_path, (void*)dlclose);</div></pre></td></tr></table></figure>
+<h2 id="调用mmap分配空间保存参数信息"><a href="#调用mmap分配空间保存参数信息" class="headerlink" title="调用mmap分配空间保存参数信息"></a>调用mmap分配空间保存参数信息</h2><p>mmap的原型如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);</div></pre></td></tr></table></figure></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>addr</td>
+<td>映射的起始地址,为0表示由系统决定映射的起始地址</td>
+</tr>
+<tr>
+<td>length</td>
+<td>映射的长度</td>
+</tr>
+<tr>
+<td>prot</td>
+<td>映射的内存保存属性,不能与文件的打开模式冲突</td>
+</tr>
+<tr>
+<td>flags</td>
+<td>指定映射对象的类型,映射选项和映射页是否可以共享</td>
+</tr>
+<tr>
+<td>fd</td>
+<td>有效的文件描述符,一般是由open()函数返回;其值也可以设置为-1,此时需要指定flags参数中的MAP_ANON,表明进行的是匿名映射</td>
+</tr>
+<tr>
+<td>offset</td>
+<td>被映射对象内容的起点</td>
+</tr>
+</tbody>
+</table>
+<p>这里我们需要的调用语句是<code>mmap(0,0x4000,PROT_READ|PROT_WRITE|PROT_EXEC,MAP_ANONYMOUS|MAP_PRIVATE,0,0)</code>,<br><code>PROT_EXEC</code>表示可执行.<br><code>PROT_READ</code>表示可读.<br><code>PROT_WRITE</code>表示可写.<br><code>MAP_PRIVATE</code>表示建.立一个写入时拷贝的私有映射.内存区域的写入不会影响到原文件.这个标志和以上标志是互斥的,只能使用其中一个.<br><code>MAP_ANONYMOUS</code>表示匿名映射,映射区不与任何文件关联.<br>则:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">long parameters[10];    </div><div class="line">parameters[0] = 0;  //构造参数</div><div class="line">parameters[1] = 0x4000;</div><div class="line">parameters[2] = PROT_READ | PROT_WRITE | PROT_EXEC;</div><div class="line">parameters[3] = MAP_ANONYMOUS | MAP_PRIVATE;</div><div class="line">parameters[4] = 0;</div><div class="line">parameters[5] = 0;</div><div class="line">ptrace_call(pid,mmap_addr,parameters,6,&amp;regs);</div><div class="line">//调用结束后获得r0中保存的返回值</div><div class="line">ptrace(PTRACE_GETREGS,pid,NULL,&amp;regs);</div><div class="line">long mapping_base = regs.ARM_r0;</div></pre></td></tr></table></figure>
+<h2 id="调用dlopen加载so库"><a href="#调用dlopen加载so库" class="headerlink" title="调用dlopen加载so库"></a>调用dlopen加载so库</h2><p><strong>原型:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">void *dlopen(const char *filename, int flags);</div></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>filename</td>
+<td>so库名</td>
+</tr>
+<tr>
+<td>flags</td>
+<td>打开方式</td>
+</tr>
+</tbody>
+</table>
+<p>这里我们需要的调用语句是<code>dlopen(so_path,RTLD_NOW | RTLD_GLOBAL)</code>,<br><code>RTLD_NOW</code>表示需要在dlopen返回前,解析出所有未定义符号,如果解析不出来在dlopen会返回NULL;<br><code>RTLD_GLOBAL</code>表示动态库中定义的符号可被其后打开的其它库解析.<br>则:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">writeData(pid, mapping_base, so_path, strlen(so_path)+1);   //将库名字符串放入目标进程空间</div><div class="line">parameters[0] = mapping_base;</div><div class="line">parameters[1] = RTLD_NOW | RTLD_GLOBAL;</div><div class="line">ptrace_call(pid, dlopen_addr, parameters, 2, &amp;regs);</div><div class="line">ptrace(PTRACE_GETREGS,pid,NULL,&amp;regs);  //调用结束后获得r0中保存的返回值</div><div class="line">long handle = regs.ARM_r0;</div></pre></td></tr></table></figure>
+<h2 id="调用dlsym找到目标函数地址"><a href="#调用dlsym找到目标函数地址" class="headerlink" title="调用dlsym找到目标函数地址"></a>调用dlsym找到目标函数地址</h2><p>原型:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">void *dlsym(void *handle, const char *symbol);</div></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>handle</td>
+<td>so库的基址</td>
+</tr>
+<tr>
+<td>symbol</td>
+<td>函数名地址</td>
+</tr>
+</tbody>
+</table>
+<p>这里我们需要的调用语句是<code>dlsym(handle, function_name)</code>,则:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">writeData(pid, mapping_base, function_name, strlen(function_name)+1);</div><div class="line">parameters[0] = handle;</div><div class="line">parameters[1] = mapping_base;</div><div class="line">ptrace_call(pid, dlsym_addr, parameters, 2, &amp;regs);</div><div class="line">ptrace(PTRACE_GETREGS,pid,NULL,&amp;regs);  //调用结束后获得r0中保存的返回值</div><div class="line">long function_addr = regs.ARM_r0;</div></pre></td></tr></table></figure>
+<h2 id="执行目标函数"><a href="#执行目标函数" class="headerlink" title="执行目标函数"></a>执行目标函数</h2><p>先写段c程序编译为so文件:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line"></div><div class="line">void hello(char *str)</div><div class="line">&#123;</div><div class="line">    printf(&quot;hello %s\n&quot;,str);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>则:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">writeData(pid, mapping_base, function_parameters, strlen(function_parameters)+1);</div><div class="line">parameters[0] = mapping_base;</div><div class="line">ptrace_call(pid, function_addr, parameters, 1, &amp;regs);</div></pre></td></tr></table></figure>
+<h2 id="调用dlclose卸载so库"><a href="#调用dlclose卸载so库" class="headerlink" title="调用dlclose卸载so库"></a>调用dlclose卸载so库</h2><p>原型:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">int dlclose(void *handle);</div></pre></td></tr></table></figure>
+<p>则:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">parameters[0] = handle;</div><div class="line">ptrace_call(pid,dlclose_addr,parameters,1,&amp;regs);</div></pre></td></tr></table></figure>
+<h2 id="恢复寄存器的状态"><a href="#恢复寄存器的状态" class="headerlink" title="恢复寄存器的状态"></a>恢复寄存器的状态</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ptrace(PTRACE_SETREGS,pid,NULL,&amp;old_regs);</div></pre></td></tr></table></figure>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://drops.wooyun.org/tips/9300" target="_blank" rel="external">安卓动态调试七种武器之离别钩 – Hooking</a></p>
+<p><a href="http://blog.csdn.net/jinzhuojun/article/details/9900105" target="_blank" rel="external">Android中的so注入(inject)和挂钩(hook) - For both x86 and arm</a></p>
+<p><a href="http://www.cnblogs.com/wanyuanchun/p/4020756.html" target="_blank" rel="external">Android注入完全剖析</a></p>
+<p><a href="http://segmentfault.com/a/1190000000606904" target="_blank" rel="external">http://segmentfault.com/a/1190000000606904</a></p>
+<p><a href="http://www.sanwho.com/133.html" target="_blank" rel="external">Android下so注入汇总</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/23/hook-call-function-in-so/">http://kiya.studio/2015/12/23/hook-call-function-in-so/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/28/hello-xposed/" id="art-left" class="art-right">
+                <span class="next-title">
+                    第一个 Xposed 模块<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/22/csdn-login/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>Python爬虫 - 登录csdn
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">hook - Android ARM下的的so注入</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#调用系统so库中的函数"><span class="toc-text">调用系统so库中的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#总体思路"><span class="toc-text">总体思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何获取函数地址"><span class="toc-text">如何获取函数地址</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#获取so库的加载基址"><span class="toc-text">获取so库的加载基址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#计算目标进程中sleep函数地址"><span class="toc-text">计算目标进程中sleep函数地址</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何执行sleep函数"><span class="toc-text">如何执行sleep函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何注入"><span class="toc-text">如何注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#主函数"><span class="toc-text">主函数</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#番外"><span class="toc-text">番外</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#proc-lt-pid-gt-文件夹"><span class="toc-text">/proc/<pid> 文件夹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于pc寄存器"><span class="toc-text">关于pc寄存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于CPSR寄存器"><span class="toc-text">关于CPSR寄存器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于waitpid"><span class="toc-text">关于waitpid</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#参数status"><span class="toc-text">参数status</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参数options"><span class="toc-text">参数options</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#调用自定义so库中的函数"><span class="toc-text">调用自定义so库中的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#保存当前寄存器的状态"><span class="toc-text">保存当前寄存器的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取目标程序的mmap-dlopen-dlsym-dlclose函数地址"><span class="toc-text">获取目标程序的mmap, dlopen, dlsym, dlclose函数地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调用mmap分配空间保存参数信息"><span class="toc-text">调用mmap分配空间保存参数信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调用dlopen加载so库"><span class="toc-text">调用dlopen加载so库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调用dlsym找到目标函数地址"><span class="toc-text">调用dlsym找到目标函数地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#执行目标函数"><span class="toc-text">执行目标函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调用dlclose卸载so库"><span class="toc-text">调用dlclose卸载so库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#恢复寄存器的状态"><span class="toc-text">恢复寄存器的状态</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

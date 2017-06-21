@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 编译 lua 5.3.3 源码 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2016年8月31日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                编译 lua 5.3.3 源码
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/compile/">compile</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>lua 源码直接 <code>make platform</code> 编译没什么好说的，这里就说一下需要注意的地方。</p>
+<a id="more"></a>
+<h1 id="编译为so库"><a href="#编译为so库" class="headerlink" title="编译为so库"></a>编译为so库</h1><p>默认的编译只有 .a 库, so 库只能自己动手了.</p>
+<h2 id="修改-Makefile"><a href="#修改-Makefile" class="headerlink" title="修改 Makefile"></a>修改 Makefile</h2><p>将根目录中的Makefile作如下修改:</p>
+<p>将<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">TO_LIB= liblua.a</div></pre></td></tr></table></figure></p>
+<p>改为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">TO_LIB= liblua.a liblua.so</div></pre></td></tr></table></figure></p>
+<p>在src/Makefile中寻找合适的位置添加：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">LUA_SO=liblua.so</div><div class="line"></div><div class="line">$(LUA_SO): $(CORE_O) $(LIB_O)</div><div class="line">    $(CC) -o $@ -shared $? -ldl -lm</div></pre></td></tr></table></figure></p>
+<p>将<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T)</div></pre></td></tr></table></figure></p>
+<p>改为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(LUA_SO)</div></pre></td></tr></table></figure></p>
+<h2 id="END"><a href="#END" class="headerlink" title="END"></a>END</h2><p>编译完成后有两个主要的可执行文件<code>lua</code> 和 <code>luac</code> 和两个库 <code>liblua.a</code> 和 <code>liblua.so</code>.</p>
+<p><code>lua</code> : 虚拟机，用来执行 lua 代码<br><code>luac</code> : 编译器，用来为 lua 代码做一些优化什么的 (并不是说脚本语言就不需要编译器了啊啊啊啊)<br><code>liblua.a</code> : 静态库<br><code>liblua.so</code> : 动态库</p>
+<h1 id="为Android平台编译"><a href="#为Android平台编译" class="headerlink" title="为Android平台编译"></a>为Android平台编译</h1><p>新建 <code>liblua.mk</code> 和 <code>Android.mk</code>, 写入:</p>
+<p><strong>liblua.mk</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">LIB_VERSION:=lua-5.3.3-src</div><div class="line">SRC_ROOT_PATH:= ../../$(LIB_VERSION)</div><div class="line"></div><div class="line">LOCAL_PATH:= $(call my-dir)</div><div class="line">include $(CLEAR_VARS)</div><div class="line"></div><div class="line">LOCAL_MODULE := liblua</div><div class="line">LOCAL_CFLAGS := -D&quot;lua_getlocaledecpoint() =&apos;.&apos;&quot; -DLUA_USE_C89</div><div class="line"></div><div class="line">LOCAL_SRC_FILES := \</div><div class="line"> $(SRC_ROOT_PATH)/src/lapi.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lauxlib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lbaselib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lbitlib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lcode.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lcorolib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lctype.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ldblib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ldebug.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ldo.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ldump.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lfunc.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lgc.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/linit.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/liolib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/llex.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lmathlib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lmem.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/loadlib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lobject.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lopcodes.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/loslib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lparser.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lstate.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lstring.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lstrlib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ltable.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ltablib.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/ltm.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lua.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lundump.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lvm.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lzio.c \</div><div class="line"> $(SRC_ROOT_PATH)/src/lutf8lib.c\</div><div class="line"></div><div class="line">include $(BUILD_SHARED_LIBRARY)</div><div class="line">#include $(BUILD_STATIC_LIBRARY)</div><div class="line">#include $(BUILD_EXECUTABLE)</div></pre></td></tr></table></figure></p>
+<p><strong>Android.mk</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">LOCAL_PATH:= $(call my-dir)</div><div class="line">include $(LOCAL_PATH)/liblua.mk</div></pre></td></tr></table></figure></p>
+<p>此时文件结构如图 (lua-5.5.5-src文件夹为下载的源码,其他是新建的):</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/2016/08/30/1.png-styleOnlyWatermark" alt=""></p>
+<p>进入<code>jni</code>文件夹执行<code>ndk-build</code>编译, 成功后的文件结构如图:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/2016/08/30/2.png-styleOnlyWatermark" alt=""></p>
+<h1 id="错误列表"><a href="#错误列表" class="headerlink" title="错误列表"></a>错误列表</h1><h2 id="错误1"><a href="#错误1" class="headerlink" title="错误1"></a>错误1</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">file not recognized: 不可识别的文件格式</div></pre></td></tr></table></figure>
+<p>执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make clean</div></pre></td></tr></table></figure></p>
+<h2 id="错误2"><a href="#错误2" class="headerlink" title="错误2"></a>错误2</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">/usr/bin/ld: lapi.o: relocation R_X86_64_32 against `luaO_nilobject_&apos; can not be used when making a shared object; recompile with -fPIC</div><div class="line">lapi.o: error adding symbols: 错误的值</div></pre></td></tr></table></figure>
+<p>将src/Makefile文件中的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">CFLAGS= -O2 -Wall -Wextra -DLUA_COMPAT_5_2 $(SYSCFLAGS) $(MYCFLAGS)</div></pre></td></tr></table></figure></p>
+<p>改为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">CFLAGS= -O2 -Wall -Wextra -DLUA_COMPAT_5_2 $(SYSCFLAGS) -fPIC $(MYCFLAGS)</div></pre></td></tr></table></figure></p>
+<h2 id="错误3"><a href="#错误3" class="headerlink" title="错误3"></a>错误3</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">error: &apos;struct lconv&apos; has no member named &apos;decimal_point&apos;</div></pre></td></tr></table></figure>
+<p>将<code>luaconf.h</code>中的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#define lua_getlocaledecpoint()		(localeconv()-&gt;decimal_point[0])</div></pre></td></tr></table></figure></p>
+<p>改为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#define lua_getlocaledecpoint()		&apos;.&apos;</div></pre></td></tr></table></figure></p>
+<p><strong>或者</strong> 在makefile加上选项 <code>-D&quot;lua_getlocaledecpoint() =&#39;.&#39;&quot;</code>. (完整makefile内容见上)</p>
+<h2 id="错误4"><a href="#错误4" class="headerlink" title="错误4"></a>错误4</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">undefined reference to &apos;log2&apos;</div></pre></td></tr></table></figure>
+<p>在 <code>makefile</code> 加上选项 <code>-DLUA_USE_C89</code> . (完整makefile内容见上)</p>
+<hr>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2016/08/31/compile-lua-5-3-3/">http://kiya.studio/2016/08/31/compile-lua-5-3-3/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2017/03/10/chromeVSie/" id="art-left" class="art-right">
+                <span class="next-title">
+                    翻译 - “隔离”与“缓解” - Chrome、Edge 在浏览器防护上的终极对决！<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2016/08/07/use-studio-debug-smali/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>Android Studio 调试 smali 代码
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">编译 lua 5.3.3 源码</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#编译为so库"><span class="toc-text">编译为so库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#修改-Makefile"><span class="toc-text">修改 Makefile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#END"><span class="toc-text">END</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#为Android平台编译"><span class="toc-text">为Android平台编译</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#错误列表"><span class="toc-text">错误列表</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#错误1"><span class="toc-text">错误1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#错误2"><span class="toc-text">错误2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#错误3"><span class="toc-text">错误3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#错误4"><span class="toc-text">错误4</span></a></li></ol></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

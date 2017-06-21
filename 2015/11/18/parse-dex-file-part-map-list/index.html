@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 解析 dex 文件结构 - map_list · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月18日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                解析 dex 文件结构 - map_list
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><img src="http://7xo976.com1.z0.glb.clouddn.com/images/github-io/Android/dex-file-general-structure-map-list.png" alt="map-list"></p>
+<a id="more"></a>
+<h2 id="什么是-map-list？"><a href="#什么是-map-list？" class="headerlink" title="什么是 map_list？"></a>什么是 map_list？</h2><p>整个 dex 文件的内容清单，位于数据段内，其文件偏移由 DexHeader 中的 mapOff 字段指定。</p>
+<p>更加具体的解释在下面的 type 段落部分。</p>
+<hr>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>来到 mapOff 指定的偏移处，首先是 DexMapList 结构，存储了 map_list 内 map_item (DexMapItem) 的个数和内容，也就是说在 size 之后，有 size 个DexMapItem 类型的数据。</p>
+<h3 id="DexMapList"><a href="#DexMapList" class="headerlink" title="DexMapList"></a>DexMapList</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;map_list&quot;.</div><div class="line"> */</div><div class="line">struct DexMapList &#123;</div><div class="line">    u4  size;               /* DexMapItem 的个数 */</div><div class="line">    DexMapItem list[1];     /* DexMapItem 数组 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="DexMapItem"><a href="#DexMapItem" class="headerlink" title="DexMapItem"></a>DexMapItem</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;map_item&quot;.</div><div class="line"> */</div><div class="line">struct DexMapItem &#123;</div><div class="line">    u2 type;              /* 各 item 的类型，均以 kDexType 开头*/</div><div class="line">    u2 unused;            /* 未使用，用于字节对齐 */</div><div class="line">    u4 size;              /* 指定类型的个数 */</div><div class="line">    u4 offset;            /* 指定类型数据的起始文件偏移 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="type"><a href="#type" class="headerlink" title="type"></a>type</h3><p>在这些类型中，除了 0x0000 表示的就是 DexHeader 本身之外，0x0001 ~ 0x1000 部分与 DexHeader 中定义的类型是一致的；<br>而 0x1001 ~ 0x2006 部分是对 data 段的细分。<br>这样设计可以作为一种文件检验方式，一旦和 DexHeader 的数据有所不同就可以判定该 dex 是损坏的；而且 map_list 部分的内容更详细，以此作为整个文件的索引想必是极好的。<br>下面手动查找的例子可以证明。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">/* map item type codes */</div><div class="line">enum &#123;</div><div class="line">    kDexTypeHeaderItem               = 0x0000,</div><div class="line">    kDexTypeStringIdItem             = 0x0001,</div><div class="line">    kDexTypeTypeIdItem               = 0x0002,</div><div class="line">    kDexTypeProtoIdItem              = 0x0003,</div><div class="line">    kDexTypeFieldIdItem              = 0x0004,</div><div class="line">    kDexTypeMethodIdItem             = 0x0005,</div><div class="line">    kDexTypeClassDefItem             = 0x0006,</div><div class="line">    kDexTypeMapList                  = 0x1000,</div><div class="line">    kDexTypeTypeList                 = 0x1001,</div><div class="line">    kDexTypeAnnotationSetRefList     = 0x1002,</div><div class="line">    kDexTypeAnnotationSetItem        = 0x1003,</div><div class="line">    kDexTypeClassDataItem            = 0x2000,</div><div class="line">    kDexTypeCodeItem                 = 0x2001,</div><div class="line">    kDexTypeStringDataItem           = 0x2002,</div><div class="line">    kDexTypeDebugInfoItem            = 0x2003,</div><div class="line">    kDexTypeAnnotationItem           = 0x2004,</div><div class="line">    kDexTypeEncodedArrayItem         = 0x2005,</div><div class="line">    kDexTypeAnnotationsDirectoryItem = 0x2006,</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="手工查找"><a href="#手工查找" class="headerlink" title="手工查找"></a>手工查找</h2><p><strong>某 dex 文件的 map_list 部分</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">00001000  10 00 00 00 00 00 00 00  01 00 00 00 00 00 00 00  |................|</div><div class="line">00001010  01 00 00 00 5c 00 00 00  70 00 00 00 02 00 00 00  |....\...p.......|</div><div class="line">00001020  19 00 00 00 e0 01 00 00  03 00 00 00 12 00 00 00  |................|</div><div class="line">00001030  44 02 00 00 04 00 00 00  01 00 00 00 1c 03 00 00  |D...............|</div><div class="line">00001040  05 00 00 00 2b 00 00 00  24 03 00 00 06 00 00 00  |....+...$.......|</div><div class="line">00001050  02 00 00 00 7c 04 00 00  02 20 00 00 5c 00 00 00  |....|.... ..\...|</div><div class="line">00001060  bc 04 00 00 01 10 00 00  0a 00 00 00 f8 09 00 00  |................|</div><div class="line">00001070  04 20 00 00 01 00 00 00  4e 0a 00 00 03 10 00 00  |. ......N.......|</div><div class="line">00001080  02 00 00 00 58 0a 00 00  06 20 00 00 01 00 00 00  |....X.... ......|</div><div class="line">00001090  64 0a 00 00 03 20 00 00  09 00 00 00 7c 0a 00 00  |d.... ......|...|</div><div class="line">000010a0  01 20 00 00 09 00 00 00  10 0c 00 00 00 20 00 00  |. ........... ..|</div><div class="line">000010b0  02 00 00 00 c2 0f 00 00  00 10 00 00 01 00 00 00  |................|</div><div class="line">000010c0  00 10 00 00                                       |....|</div></pre></td></tr></table></figure>
+<p>前 4 字节表明接下来会有 <code>0x00000010</code> 个 DexMapItem 结构；</p>
+<table>
+<thead>
+<tr>
+<th>序数</th>
+<th>binary</th>
+<th>type</th>
+<th>size</th>
+<th>offset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x01</td>
+<td>00 00 00 00  01 00 00 00  00 00 00 00</td>
+<td>kDexTypeHeaderItem</td>
+<td>0x01</td>
+<td>0x0</td>
+</tr>
+<tr>
+<td>0x02</td>
+<td>01 00 00 00  5c 00 00 00  70 00 00 00</td>
+<td>kDexTypeStringIdItem</td>
+<td>0x5c</td>
+<td>0x70</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>02 00 00 00  19 00 00 00  e0 01 00 00</td>
+<td>kDexTypeTypeIdItem</td>
+<td>0x19</td>
+<td>0x1e0</td>
+</tr>
+<tr>
+<td>0x04</td>
+<td>03 00 00 00  12 00 00 00  44 02 00 00</td>
+<td>kDexTypeProtoIdItem</td>
+<td>0x12</td>
+<td>0x244</td>
+</tr>
+<tr>
+<td>0x05</td>
+<td>04 00 00 00  01 00 00 00  1c 03 00 00</td>
+<td>kDexTypeFieldIdItem</td>
+<td>0x01</td>
+<td>0x3c1</td>
+</tr>
+<tr>
+<td>0x06</td>
+<td>05 00 00 00  2b 00 00 00  24 03 00 00</td>
+<td>kDexTypeMethodIdItem</td>
+<td>0x2b</td>
+<td>0x324</td>
+</tr>
+<tr>
+<td>0x07</td>
+<td>06 00 00 00  02 00 00 00  7c 04 00 00</td>
+<td>kDexTypeClassDefItem</td>
+<td>0x02</td>
+<td>0x47c</td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>02 20 00 00  5c 00 00 00  bc 04 00 00</td>
+<td>kDexTypeStringDataItem</td>
+<td>0x5c</td>
+<td>0x4bc</td>
+</tr>
+<tr>
+<td>0x09</td>
+<td>01 10 00 00  0a 00 00 00  f8 09 00 00</td>
+<td>kDexTypeTypeList</td>
+<td>0x0a</td>
+<td>0x9f8</td>
+</tr>
+<tr>
+<td>0x0a</td>
+<td>04 20 00 00  01 00 00 00  4e 0a 00 00</td>
+<td>kDexTypeAnnotationItem</td>
+<td>0x01</td>
+<td>0xa4e</td>
+</tr>
+<tr>
+<td>0x0b</td>
+<td>03 10 00 00  02 00 00 00  58 0a 00 00</td>
+<td>kDexTypeAnnotationSetItem</td>
+<td>0x02</td>
+<td>0xa58</td>
+</tr>
+<tr>
+<td>0x0c</td>
+<td>06 20 00 00  01 00 00 00  64 0a 00 00</td>
+<td>kDexTypeAnnotationsDirectoryItem</td>
+<td>0x01</td>
+<td>0xa64</td>
+</tr>
+<tr>
+<td>0x0d</td>
+<td>03 20 00 00  09 00 00 00  7c 0a 00 00</td>
+<td>kDexTypeDebugInfoItem</td>
+<td>0x09</td>
+<td>0xa7c</td>
+</tr>
+<tr>
+<td>0x0e</td>
+<td>01 20 00 00  09 00 00 00  10 0c 00 00</td>
+<td>kDexTypeCodeItem</td>
+<td>0x09</td>
+<td>0xc10</td>
+</tr>
+<tr>
+<td>0x0f</td>
+<td>00 20 00 00  02 00 00 00  c2 0f 00 00</td>
+<td>kDexTypeClassDataItem</td>
+<td>0x02</td>
+<td>0xfc2</td>
+</tr>
+<tr>
+<td>0x10</td>
+<td>00 10 00 00  01 00 00 00  00 10 00 00</td>
+<td>kDexTypeMapList</td>
+<td>0x01</td>
+<td>0x1000</td>
+</tr>
+</tbody>
+</table>
+<p>这里的各项值可以和上一节 <a href="http://kiya-z.github.io/2015/11/17/parse-dex-file-part-dex-header/" target="_blank" rel="external">解析 dex 文件结构 - DexHeader</a> 手动查找部分中的数据进行比对，发现是相同的。</p>
+<hr>
+<h2 id="写程序解析-map-list"><a href="#写程序解析-map-list" class="headerlink" title="写程序解析 map_list"></a>写程序解析 map_list</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">class DexStruct(object):</div><div class="line">    DexMapList = &#123;</div><div class="line">        &quot;size&quot;: 0,</div><div class="line">        &quot;DexMapItem&quot;: []</div><div class="line">    &#125;</div><div class="line">    # DexMapItem = &#123;</div><div class="line">    #     &quot;type&quot; : 0</div><div class="line">    #     &quot;unused&quot; : 0</div><div class="line">    #     &quot;size&quot;  : 0</div><div class="line">    #     &quot;offset&quot; : 0</div><div class="line">    # &#125;</div><div class="line">    DexMapItemCode = &#123;</div><div class="line">        0x0000 : &quot;kDexTypeHeaderItem&quot;               ,</div><div class="line">        0x0001 : &quot;kDexTypeStringIdItem&quot;             ,</div><div class="line">        0x0002 : &quot;kDexTypeTypeIdItem&quot;               ,</div><div class="line">        0x0003 : &quot;kDexTypeProtoIdItem&quot;              ,</div><div class="line">        0x0004 : &quot;kDexTypeFieldIdItem&quot;              ,</div><div class="line">        0x0005 : &quot;kDexTypeMethodIdItem&quot;             ,</div><div class="line">        0x0006 : &quot;kDexTypeClassDefItem&quot;             ,</div><div class="line">        0x1000 : &quot;kDexTypeMapList&quot;                  ,</div><div class="line">        0x1001 : &quot;kDexTypeTypeList&quot;                 ,</div><div class="line">        0x1002 : &quot;kDexTypeAnnotationSetRefList&quot;     ,</div><div class="line">        0x1003 : &quot;kDexTypeAnnotationSetItem&quot;        ,</div><div class="line">        0x2000 : &quot;kDexTypeClassDataItem&quot;            ,</div><div class="line">        0x2001 : &quot;kDexTypeCodeItem&quot;                 ,</div><div class="line">        0x2002 : &quot;kDexTypeStringDataItem&quot;           ,</div><div class="line">        0x2003 : &quot;kDexTypeDebugInfoItem&quot;            ,</div><div class="line">        0x2004 : &quot;kDexTypeAnnotationItem&quot;           ,</div><div class="line">        0x2005 : &quot;kDexTypeEncodedArrayItem&quot;         ,</div><div class="line">        0x2006 : &quot;kDexTypeAnnotationsDirectoryItem&quot; ,</div><div class="line">    &#125;</div><div class="line">def parseMapList(map_data):</div><div class="line">    DexStruct.DexMapList[&apos;size&apos;] = struct.unpack(&apos;H&apos;,map_data[:2])[0]</div><div class="line">    curPos = 4</div><div class="line">    for x in range(DexStruct.DexMapList[&apos;size&apos;]):</div><div class="line">        tmpDexMapItem = &#123;</div><div class="line">            &quot;type&quot; : struct.unpack(&apos;H&apos;,map_data[curPos:curPos+2])[0],</div><div class="line">            &quot;unused&quot; : 0,</div><div class="line">            &quot;size&quot;  : struct.unpack(&apos;I&apos;,map_data[curPos+4:curPos+8])[0],</div><div class="line">            &quot;offset&quot; : struct.unpack(&apos;I&apos;,map_data[curPos+8:curPos+12])[0] &#125;</div><div class="line">        curPos += 12</div><div class="line">        DexStruct.DexMapList[&quot;DexMapItem&quot;].append(tmpDexMapItem)</div></pre></td></tr></table></figure>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://source.android.com/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik Executable format</a></p>
+<p><a href="http://www.ituring.com.cn/book/1131" target="_blank" rel="external">《Android 软件安全与逆向分析》</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/18/parse-dex-file-part-map-list/">http://kiya.studio/2015/11/18/parse-dex-file-part-map-list/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/18/parse-dex-file-part-leb128/" id="art-left" class="art-right">
+                <span class="next-title">
+                    解析 dex 文件结构 - LEB128<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/17/parse-dex-file-part-dex-header/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>解析 dex 文件结构 - DexHeader
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">解析 dex 文件结构 - map_list</a></li>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是-map-list？"><span class="toc-text">什么是 map_list？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结构"><span class="toc-text">结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#DexMapList"><span class="toc-text">DexMapList</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DexMapItem"><span class="toc-text">DexMapItem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#type"><span class="toc-text">type</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手工查找"><span class="toc-text">手工查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析-map-list"><span class="toc-text">写程序解析 map_list</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

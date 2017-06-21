@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 解析 dex 文件结构 - 索引区和数据区（二） - Protos & Fields & Methods · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月20日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                解析 dex 文件结构 - 索引区和数据区（二） - Protos & Fields & Methods
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/dex/">dex</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p><img src="http://7xo976.com1.z0.glb.clouddn.com/images/github-io/Android/dex-file-general-structure-2.png" alt="part-2"></p>
+<a id="more"></a>
+<h1 id="ProtoIds"><a href="#ProtoIds" class="headerlink" title="ProtoIds"></a>ProtoIds</h1><p>ProtoIds 存放的是<strong>原型的声明</strong>，包括原型简名、参数和返回值。<br>ProtoIds 的大小和文件偏移在 DexHeader 和 map_list 中都有指定。</p>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>ProtoIds 以4字节对齐，即总大小为 4 * 3 * protoIdsSize .</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;proto_id_item&quot;.</div><div class="line"> */</div><div class="line">struct DexProtoId &#123;</div><div class="line">    u4  shortyIdx;          /* 指向 stringIds 的索引，表示简名 */</div><div class="line">    u4  returnTypeIdx;      /* 指向 TypeIds 的索引，表示返回类型 */</div><div class="line">    u4  parametersOff;      /* 指向 type_list 的文件偏移，表示参数列表，为 0 表示没有参数，参数类型中没有空*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;type_list&quot;.</div><div class="line"> */</div><div class="line">struct DexTypeList &#123;</div><div class="line">    u4  size;               /* DexTypeItem 的个数 */</div><div class="line">    DexTypeItem list[1];    /* DexTypeItem 数组内容 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;type_item&quot;.</div><div class="line"> */</div><div class="line">struct DexTypeItem &#123;</div><div class="line">    u2  typeIdx;            /* 指向 typeIds 的索引*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h2 id="手工查找"><a href="#手工查找" class="headerlink" title="手工查找"></a>手工查找</h2><p><strong>某 dex 文件的 ProtoIds 部分</strong>：</p>
+<p>protoIdsSize : 0x12<br>protoIdsOff : 0x0244</p>
+<p>0x0244 ~ 0x031c</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">00000240  .. .. .. .. 06 00 00 00  00 00 00 00 40 0a 00 00  |)...........@...|</div><div class="line">00000250  07 00 00 00 01 00 00 00  00 00 00 00 08 00 00 00  |................|</div><div class="line">00000260  01 00 00 00 48 0a 00 00  09 00 00 00 08 00 00 00  |....H...........|</div><div class="line">00000270  00 00 00 00 0a 00 00 00  0c 00 00 00 f8 09 00 00  |................|</div><div class="line">00000280  09 00 00 00 0f 00 00 00  00 00 00 00 0a 00 00 00  |................|</div><div class="line">00000290  14 00 00 00 14 0a 00 00  .. .. .. .. .. .. .. ..  </div><div class="line">........  .. .. .. .. .. .. .. ..  28 00 00 00 17 00 00 00  |........(.......|</div><div class="line">00000300  2c 0a 00 00 27 00 00 00  17 00 00 00 1c 0a 00 00  |,...&apos;...........|</div><div class="line">00000310  .. .. .. .. .. .. .. ..  14 0a 00 00</div></pre></td></tr></table></figure>
+<p>以第一个 DexProtoId 为例，<br>shortyIdx=0x06 =&gt; stringIdOff=0x88 =&gt; stringDataOff=0x0544 =&gt; IL<br>returnTypeIdx=0x00 =&gt; stringId=0x05 =&gt; StringIdOff=0x84 =&gt; stringDataOff=0x0541 =&gt; I<br>parametersOff=0x0a40 =&gt; <code>01 00 00 00 18 00</code> =&gt; typeIdOff=0x240 =&gt; stringIdOff=0x29 =&gt; stringDataOff=0x079c =&gt; [B<br>即此函数声明为 int (Byte[])</p>
+<p><strong>以此类推：</strong></p>
+<table>
+<thead>
+<tr>
+<th>序数</th>
+<th>原型</th>
+<th>返回值</th>
+<th>参数</th>
+<th>方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>IL</td>
+<td>I</td>
+<td>[B</td>
+<td>int (Byte[])</td>
+</tr>
+<tr>
+<td>0x01</td>
+<td>J</td>
+<td>J</td>
+<td>无</td>
+<td>long ()</td>
+</tr>
+<tr>
+<td>0x02</td>
+<td>JL</td>
+<td>J</td>
+<td>Ljava/io/File;</td>
+<td>long (File)</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>L</td>
+<td>Ljava/io/File;</td>
+<td>无</td>
+<td>File ()</td>
+</tr>
+<tr>
+<td>0x04</td>
+<td>LL</td>
+<td>Ljava/io/InputStream;</td>
+<td>Ljava/util/zip/ZipEntry;</td>
+<td>InputStream (ZipENtry)</td>
+</tr>
+<tr>
+<td>0x05</td>
+<td>L</td>
+<td>Ljava/lang/String;</td>
+<td>无</td>
+<td>String ()</td>
+</tr>
+<tr>
+<td>0x06</td>
+<td>LL</td>
+<td>Ljava/util/zip/ZipEntry;</td>
+<td>Ljava/lang/String;</td>
+<td>ZipEntry (String)</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>0x10</td>
+<td>ZLL</td>
+<td>Z</td>
+<td>Landroid/app/Application; Ljava/lang/String;</td>
+<td>bool (Application,String)</td>
+</tr>
+<tr>
+<td>0x11</td>
+<td>ZL</td>
+<td>Z</td>
+<td>Ljava/lang/Object;</td>
+<td>bool (Object)</td>
+</tr>
+<tr>
+<td>0x12</td>
+<td>ZL</td>
+<td>Z</td>
+<td>Ljava/lang/String;</td>
+<td>bool (String)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="写程序解析"><a href="#写程序解析" class="headerlink" title="写程序解析"></a>写程序解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">def parseProtos(f):</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    此函数基于 parseStrings 和 parseTypes 函数的结果</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    cur_pos = 0</div><div class="line">    for i in range(DexStruct.DexHeader[&apos;protoIdsSize&apos;]):</div><div class="line">        f.seek(DexStruct.DexHeader[&apos;protoIdsOff&apos;] + cur_pos)</div><div class="line">        proto_shortyId = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        proto_returnTypeId = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        proto_paramtersOff = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">        parameters = []</div><div class="line">        if proto_paramtersOff &gt; 0:  # 有参数再读取</div><div class="line">            f.seek(proto_paramtersOff)</div><div class="line">            param_size = struct.unpack(&apos;I&apos;,f.read(4))[0]</div><div class="line">            for j in range(param_size):</div><div class="line">                param_typeId = struct.unpack(&apos;H&apos;,f.read(2))[0]</div><div class="line">                parameters.append(DexStruct.DexTypes[param_typeId][&apos;content&apos;])</div><div class="line">        tmpDexProto = &#123;</div><div class="line">            &apos;shortyDescription&apos; : DexStruct.DexStrings[proto_shortyId][&apos;content&apos;],</div><div class="line">            &apos;returnType&apos; : DexStruct.DexTypes[proto_returnTypeId][&apos;content&apos;],</div><div class="line">            &apos;parameters&apos; :  parameters,</div><div class="line">        &#125;;</div><div class="line">        DexStruct.DexProtos.append(tmpDexProto)</div><div class="line">        cur_pos += 12</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="FieldIds"><a href="#FieldIds" class="headerlink" title="FieldIds"></a>FieldIds</h1><p>fields 表示的是类中的字段，包括本字段所属的类、字段类型和字段名。<br>FieldIds 的大小和文件偏移在 DexHeader 和 map_list 中都有指定。</p>
+<h2 id="结构-1"><a href="#结构-1" class="headerlink" title="结构"></a>结构</h2><p>以 4 字节对齐。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;field_id_item&quot;.</div><div class="line"> */</div><div class="line">struct DexFieldId &#123;</div><div class="line">    u2  classIdx;           /* 指向 typeIds 的索引，表示定义这个字段的类 */</div><div class="line">    u2  typeIdx;            /* 指向 typeIds 的索引，表示字段类型 */</div><div class="line">    u4  nameIdx;            /* 指向 stringIds 的索引，表示字段名*/</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h2 id="手动查找"><a href="#手动查找" class="headerlink" title="手动查找"></a>手动查找</h2><p><strong>某 dex 文件的 FieldIds 部分</strong>：</p>
+<p>fieldIdsSize : 0x01<br>fieldIdsOff : 0x031c</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">00000310  .. .. .. .. .. .. .. ..  .. .. .. .. 04 00 0f 00  |&apos;...............|</div><div class="line">00000320  04 00 00 00 .. .. .. ..  .. .. .. .. .. .. .. ..  |................|</div></pre></td></tr></table></figure>
+<p>由 DexFieldId 可得 ：<br>classIdx=0x0004 =&gt; typeId=0x0d =&gt; stringDataOff=0x00a4 =&gt; Landroid/os/Build;<br>typeIdx=0x000f =&gt; typeId=0x18 =&gt; stringDataOff=0x00d0 =&gt; Ljava/lang/String;<br>nameIdx=0x00000004 =&gt; stringDataOff=0x0538 =&gt; CPU_ABI</p>
+<h2 id="写程序解析-1"><a href="#写程序解析-1" class="headerlink" title="写程序解析"></a>写程序解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">def parseFields(f):</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    此函数基于 parseStrings 和 parseTypes 函数的结果</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    f.seek(DexStruct.DexHeader[&apos;fieldIdsOff&apos;])</div><div class="line">    for i in range(DexStruct.DexHeader[&apos;fieldIdsSize&apos;]):</div><div class="line">        field_class = DexStruct.DexTypes[struct.unpack(&apos;H&apos;,f.read(2))[0]][&apos;content&apos;]</div><div class="line">        field_type = DexStruct.DexTypes[struct.unpack(&apos;H&apos;,f.read(2))[0]][&apos;content&apos;]</div><div class="line">        field_name = DexStruct.DexStrings[struct.unpack(&apos;I&apos;,f.read(4))[0]][&apos;content&apos;]</div><div class="line">        tmpDexFieldItem = &#123;</div><div class="line">            &apos;class&apos; : field_class,</div><div class="line">            &apos;Type&apos; : field_type,</div><div class="line">            &apos;name&apos; : field_name,</div><div class="line">        &#125;</div><div class="line">        DexStruct.DexFields.append(tmpDexFieldItem)</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="Methods"><a href="#Methods" class="headerlink" title="Methods"></a>Methods</h1><p>MethodId 表示的是方法，包括本方法所属的类、方法原型 (proto) 和方法名。<br>MethodId 的大小和文件偏移在 DexHeader 和 map_list 中都有指定。</p>
+<h2 id="结构-2"><a href="#结构-2" class="headerlink" title="结构"></a>结构</h2><p>以 4 字节对齐。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * Direct-mapped &quot;method_id_item&quot;.</div><div class="line"> */</div><div class="line">struct DexMethodId &#123;</div><div class="line">    u2  classIdx;           /* 指向 typeIds，表示定义这个方法的类 */</div><div class="line">    u2  protoIdx;           /* 指向 protoIds，表示方法的原型*/</div><div class="line">    u4  nameIdx;            /* 指向 stringIds，表示方法名 */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h2 id="手动查找-1"><a href="#手动查找-1" class="headerlink" title="手动查找"></a>手动查找</h2><p><strong>某 dex 文件的 methodIds 部分</strong>：</p>
+<p>methodIdsSize : 0x2b<br>methodIdsOff : 0x0324</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">00000320  .. .. .. .. 02 00 07 00  03 00 00 00 02 00 08 00  |................|</div><div class="line">00000330  30 00 00 00 .. ...</div><div class="line">........</div><div class="line">00000470  42 00 00 00 15 00 04 00  43 00 00 00</div></pre></td></tr></table></figure>
+<p>以第一个 <code>02 00 07 00 03 00 00 00</code> 为例：<br>classIdx=0x02 =&gt; Landroid/app/Application;<br>protoIdx=0x07 =&gt; void ()<br>nameIdx=0x03 =&gt; &lt;init&gt;<br>即该函数为 void android.app.Application.&lt;init&gt;()</p>
+<p>以此类推：</p>
+<table>
+<thead>
+<tr>
+<th>序数</th>
+<th>所属的类</th>
+<th>函数原型</th>
+<th>函数名</th>
+<th>全称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>Landroid/app/Application;</td>
+<td>void ()</td>
+<td><init></init></td>
+<td>void android.app.Application.<init>()</init></td>
+</tr>
+<tr>
+<td>0x01</td>
+<td>Landroid/app/Application;</td>
+<td>void (android.content.Context)</td>
+<td>attachBaseContext</td>
+<td>void android.app.Application.attachBaseContext(android.content.Context)</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>0x2b</td>
+<td>Ljava/util/zip/ZipFile;</td>
+<td>InputStream (ZipENtry)</td>
+<td>getInputStream</td>
+<td>java.io.InputStream java.util.zip.ZipFile.getInputStream(java.util.zip.ZipEntry)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="写程序解析-2"><a href="#写程序解析-2" class="headerlink" title="写程序解析"></a>写程序解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">def parseMethods(f):</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    此函数基于 parseStrings、parseProtos 和 parseTypes 函数的结果</div><div class="line">    &apos;&apos;&apos;</div><div class="line">    f.seek(DexStruct.DexHeader[&apos;methodIdsOff&apos;])</div><div class="line">    for i in range(DexStruct.DexHeader[&apos;methodIdsSize&apos;]):</div><div class="line">        method_class = DexStruct.DexTypes[struct.unpack(&apos;H&apos;,f.read(2))[0]][&apos;content&apos;]</div><div class="line">        method_proto = DexStruct.DexProtos[struct.unpack(&apos;H&apos;,f.read(2))[0]]</div><div class="line">        method_name = DexStruct.DexStrings[struct.unpack(&apos;I&apos;,f.read(4))[0]][&apos;content&apos;]</div><div class="line">        tmpDexMethodItem = &#123;</div><div class="line">            &apos;class&apos; : method_class,</div><div class="line">            &apos;proto&apos; : method_proto,</div><div class="line">            &apos;name&apos; : method_name,</div><div class="line">        &#125;</div><div class="line">        DexStruct.DexMethods.append(tmpDexMethodItem)</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://source.android.com/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik Executable format</a></p>
+<p><a href="http://www.ituring.com.cn/book/1131" target="_blank" rel="external">《Android 软件安全与逆向分析》</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/20/parse-dex-file-part-protos-fields-methods/">http://kiya.studio/2015/11/20/parse-dex-file-part-protos-fields-methods/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/21/parse-dex-file-part-classdefs/" id="art-left" class="art-right">
+                <span class="next-title">
+                    解析 dex 文件结构 - 索引区和数据区（三） - ClassDefs<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/19/parse-dex-file-part-strings-and-type-descriptors/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>解析 dex 文件结构 - 索引区和数据区（一） - Strings & Types
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">解析 dex 文件结构 - 索引区和数据区（二） - Protos & Fields & Methods</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ProtoIds"><span class="toc-text">ProtoIds</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手工查找"><span class="toc-text">手工查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析"><span class="toc-text">写程序解析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#FieldIds"><span class="toc-text">FieldIds</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构-1"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手动查找"><span class="toc-text">手动查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析-1"><span class="toc-text">写程序解析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Methods"><span class="toc-text">Methods</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构-2"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#手动查找-1"><span class="toc-text">手动查找</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写程序解析-2"><span class="toc-text">写程序解析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

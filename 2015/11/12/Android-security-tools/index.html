@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> Android 安全工具包（持续更新） · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年11月12日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                Android 安全工具包（持续更新）
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/tools/">tools</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <blockquote>
+<p><strong>工具清单</strong></p>
+<ul>
+<li>Apktool/SHakaApktool</li>
+<li>smali &amp; baksmali</li>
+<li>dex2jar</li>
+<li>JD-GUI</li>
+<li>signapk</li>
+<li>dx &amp; ddx</li>
+</ul>
+</blockquote>
+<p>以上工具可点击 <a href="https://github.com/kiya-z/Android/tree/master/tools" target="_blank" rel="external">这里</a> 打包下载</p>
+<p><strong>本文环境：<code>Ubuntu 14.04.3 LTS 64-bit</code></strong></p>
+<a id="more"></a>
+<hr>
+<p><strong>工具使用场景</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">java-&gt;class: javac</div><div class="line">smali-&gt;dex: smali.jar</div><div class="line">class-&gt;dex: dx</div><div class="line">dex-&gt;arm: execute</div><div class="line">dex-&gt;smali: baksmali</div><div class="line">dex-&gt;class: dex2jar</div><div class="line">class-&gt;java: JD-GUI</div></pre></td></tr></table></figure>
+<hr>
+<h1 id="Apktool"><a href="#Apktool" class="headerlink" title="Apktool"></a><strong>Apktool</strong></h1><p>点击 <a href="http://ibotpeaches.github.io/Apktool/install/" target="_blank" rel="external">官网</a> 下载，里面也有详细的安装步骤。</p>
+<p><strong>中文步骤及注意事项:</strong></p>
+<p>（<em>此处为 Apktool 2.x 版本</em>）</p>
+<ol>
+<li>右键另存 <a href="https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool" target="_blank" rel="external">脚本文件</a>，名为 <code>apktool</code> 。如果不能另存，打开 <a href="https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool" target="_blank" rel="external">脚本文件</a>， 复制全部内容到新建文件 <code>apktool</code> 中；</li>
+<li>下载 <a href="https://bitbucket.org/iBotPeaches/apktool/downloads" target="_blank" rel="external">apktool</a>，将其重命名为 <code>apktool.jar</code> 。</li>
+<li>如果是系统是 64 位，需要安装 32 位的库文件。如何安装可参考 <a href="http://stackoverflow.com/questions/23182765/how-to-install-ia32-libs-in-ubuntu-14-04-lts-trusty-tahr" target="_blank" rel="external">How to install ia32-libs in Ubuntu 14.04 LTS (Trusty Tahr)</a> . 或者直接执行以下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">sudo -i</div><div class="line">cd /etc/apt/sources.list.d</div><div class="line">echo &quot;deb http://old-releases.ubuntu.com/ubuntu/ raring main restricted universe multiverse&quot; &gt;ia32-libs-raring.list</div><div class="line">apt-get update</div><div class="line">apt-get install ia32-libs</div><div class="line">rm ia32-libs-raring.list /etc/apt/sources.list.d</div><div class="line">apt-get update</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>执行完成可按 <code>Ctrl+D</code> 注销 root .</p>
+<ol>
+<li>把 <code>apktool</code> 和 <code>apktool.jar</code> 两个文件移动到 <code>usr/local/bin</code> . 此步骤需要 <code>sudo</code> .</li>
+<li>为这两个文件加上可执行权限。</li>
+<li>执行 <code>apktool</code> 测试效果。如果提示 <code>can&#39;t find file apktool.jar</code> ，可能是因为当前用户没有 <code>apktool.jar</code> 的读权限，试试用 <code>sudo apktool</code> 或者为其加上读权限。</li>
+</ol>
+<hr>
+<h1 id="ShakaApktool"><a href="#ShakaApktool" class="headerlink" title="ShakaApktool"></a>ShakaApktool</h1><p>ShakaApktool是一个比apktool更强大的工具,源代码在此<a href="https://github.com/rover12421/ShakaApktool" target="_blank" rel="external">https://github.com/rover12421/ShakaApktool</a>.<br>尽情享用. :p</p>
+<hr>
+<h1 id="smali-amp-baksmali"><a href="#smali-amp-baksmali" class="headerlink" title="smali &amp; baksmali"></a><strong>smali &amp; baksmali</strong></h1><p>Apktool 中内置了 smali 和 baksmali，<a href="https://bitbucket.org/JesusFreke/smali/downloads" target="_blank" rel="external">下载链接</a></p>
+<hr>
+<h1 id="dex2jar"><a href="#dex2jar" class="headerlink" title="dex2jar"></a><strong>dex2jar</strong></h1><p>下载 <a href="https://bitbucket.org/pxb1988/dex2jar/downloads" target="_blank" rel="external">dex2jar</a> 解压，你可以选择为所有的 <code>.sh</code> 文件加上执行权限，目前我只加了 <code>d2j-dex2jar.sh</code> 和 <code>d2j_invoke.sh</code> 。如果报错找不到命令，就是因为你没有加执行权限。</p>
+<hr>
+<h1 id="JD-GUI"><a href="#JD-GUI" class="headerlink" title="JD-GUI"></a><strong>JD-GUI</strong></h1><p>去 <a href="http://jd.benow.ca/" target="_blank" rel="external">官网</a> 下载相应版本。<br>我下载的是 <code>.deb</code> 文件，安装命令为 <code>sudo dpkg -i filename</code> .</p>
+<hr>
+<h1 id="signapk"><a href="#signapk" class="headerlink" title="signapk"></a><strong>signapk</strong></h1><p>进行签名需要 <code>sianapk.sh</code> 、<code>signapk.jar</code> 和两个签名文件 <code>testkey.pk8</code> 、<code>testkey.x509.pem</code> 。<br><a href="https://github.com/kiya-z/Android/tree/master/tools/signapk" target="_blank" rel="external">点击下载</a></p>
+<hr>
+<h1 id="dx-amp-ddx"><a href="#dx-amp-ddx" class="headerlink" title="dx &amp; ddx"></a><strong>dx &amp; ddx</strong></h1><p><code>dx</code> 是整个编译过程的一部分，将 Java 字节码转换为 Dalvik 字节码（class 文件变成 dex 文件），<code>ddx</code> 则正好相反。<br>你可以在 SDK 中找到它们，或者 <a href="https://github.com/kiya-z/Android/tree/master/tools" target="_blank" rel="external">下载</a> 。</p>
+<hr>
+<h1 id="010-editor"><a href="#010-editor" class="headerlink" title="010 editor"></a><strong>010 editor</strong></h1><p>查看二进制数据的神器，具体在这里 -&gt; <a href="http://kiya-z.github.io/2015/11/19/tools-010-editor/" target="_blank" rel="external">号称 Edit Everything 的 010 Editor</a></p>
+<hr>
+<h1 id="adb"><a href="#adb" class="headerlink" title="adb"></a><strong>adb</strong></h1><p>全程 android debug bridge，位于 SDK 中的 platform-tools 中。</p>
+<hr>
+<h1 id="fastboot"><a href="#fastboot" class="headerlink" title="fastboot"></a><strong>fastboot</strong></h1><p>位于 SDK 中的 platform-tools,可用来刷recovery文件</p>
+<hr>
+<h1 id="jadx"><a href="#jadx" class="headerlink" title="jadx"></a><strong>jadx</strong></h1><p>dex2java工具,网址:<a href="https://github.com/skylot/jadx" target="_blank" rel="external">https://github.com/skylot/jadx</a></p>
+<hr>
+<blockquote>
+<p>to be continued.</p>
+</blockquote>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/11/12/Android-security-tools/">http://kiya.studio/2015/11/12/Android-security-tools/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/11/12/check-signature-for-avoiding-fake-app-java-level-check/" id="art-left" class="art-right">
+                <span class="next-title">
+                    校验数字签名防止 apk 被二次打包 - Java层校验<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/11/11/Python-a-murder-about-interface-and-polymorphism/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>Python 之 接口和多态引发的血案
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">Android 安全工具包（持续更新）</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Apktool"><span class="toc-text">Apktool</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ShakaApktool"><span class="toc-text">ShakaApktool</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#smali-amp-baksmali"><span class="toc-text">smali & baksmali</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dex2jar"><span class="toc-text">dex2jar</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JD-GUI"><span class="toc-text">JD-GUI</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#signapk"><span class="toc-text">signapk</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dx-amp-ddx"><span class="toc-text">dx & ddx</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#010-editor"><span class="toc-text">010 editor</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#adb"><span class="toc-text">adb</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#fastboot"><span class="toc-text">fastboot</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#jadx"><span class="toc-text">jadx</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>

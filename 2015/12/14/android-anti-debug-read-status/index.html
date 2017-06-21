@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title> 反调试方法一 - 读取进程status文件 · kiya </title>
+    <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<link rel="stylesheet" href="/style/style.css">
+<script src="/script/jquery.min.js"></script>
+<script>
+    var CONFIG = {
+        title: "kiya",
+        author: "kiya",
+        lightbox: true,
+        animate: true
+    }
+</script>
+
+
+
+    <link rel="stylesheet" href="/lightbox/css/lightbox.min.css">
+
+
+
+
+    <link rel="stylesheet" href="/syuanpi/syuanpi.min.css">
+
+
+
+
+    <link rel="icon" href="https://dn-coding-net-production-pp.qbox.me/159e486a-e407-4f88-8289-1ff286338478.png">
+
+
+
+
+
+
+
+</head>
+<body>
+    <div class="progress">
+    <div class="progress-inner"></div>
+</div>
+    <div class="body">
+    <div class="tagcloud" id="tagcloud">
+    <div class="tagcloud-inner">
+        <a href="/tags/CTF/" style="font-size: 14px;">CTF</a> <a href="/tags/MSC/" style="font-size: 14px;">MSC</a> <a href="/tags/Python/" style="font-size: 14px;">Python</a> <a href="/tags/Xposed/" style="font-size: 14px;">Xposed</a> <a href="/tags/anti-debug/" style="font-size: 14px;">anti-debug</a> <a href="/tags/arm/" style="font-size: 14px;">arm</a> <a href="/tags/compile/" style="font-size: 14px;">compile</a> <a href="/tags/dalvik/" style="font-size: 14px;">dalvik</a> <a href="/tags/debug/" style="font-size: 14px;">debug</a> <a href="/tags/dex/" style="font-size: 14px;">dex</a> <a href="/tags/enforce/" style="font-size: 14px;">enforce</a> <a href="/tags/hook/" style="font-size: 14px;">hook</a> <a href="/tags/ida/" style="font-size: 14px;">ida</a> <a href="/tags/instruction/" style="font-size: 14px;">instruction</a> <a href="/tags/ndk/" style="font-size: 14px;">ndk</a> <a href="/tags/reverse/" style="font-size: 14px;">reverse</a> <a href="/tags/reversing/" style="font-size: 14px;">reversing</a> <a href="/tags/smali/" style="font-size: 14px;">smali</a> <a href="/tags/tools/" style="font-size: 14px;">tools</a> <a href="/tags/translation/" style="font-size: 14px;">translation</a>
+    </div>
+</div>
+    <header class="header" id="header">
+    <div class="title syuanpi tvIn">
+    <div class="table">
+        <div class="connect">
+            <div class="connect-inner">
+                <span><a href="/">kiya</a></span>
+                
+                    <span id="subtitle">世界は今日も平和ですねー</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <nav class="main-nav syuanpi tvIn">
+<div class="table">
+
+    <ul class="menu">
+        
+        <li class="menu-item">
+            <a href="javascript:;" id="search">
+                <span>搜索</span>
+                
+                    <span class="menu-item-label">search</span>
+                
+            </a>
+        </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/">
+                    <span>文章</span>
+                    
+                        <span class="menu-item-label">article</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/archives">
+                    <span>归档</span>
+                    
+                        <span class="menu-item-label">archives</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="javascript:;" id="tags">
+                    <span>标签</span>
+                    
+                        <span class="menu-item-label">tags</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/about">
+                    <span>关于</span>
+                    
+                        <span class="menu-item-label">about</span>
+                    
+                </a>
+            </li>
+        
+        
+        
+            <li class="menu-item">
+                <a href="/atom.xml">
+                    <span>订阅</span>
+                    
+                        <span class="menu-item-label">RSS</span>
+                    
+                </a>
+            </li>
+        
+        
+    </ul>
+
+</div>
+</nav>
+<div class="mobile-nav"></div>
+</header>
+    <div class="container">
+        <main class="main" id="main">
+            
+    
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2015年12月14日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                反调试方法一 - 读取进程status文件
+            
+            </h1>
+            
+                
+                    <div class="post-tags syuanpi riseIn-light back-3">
+                    
+                        <a href="/tags/anti-debug/">anti-debug</a>
+                    
+                        <a href="/tags/MSC/">MSC</a>
+                    
+                    </div>
+                
+            
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
+            
+                <p>栗子:<a href="https://github.com/kiya-z/Android/blob/master/lab-mouse/AliCrackme_2.apk" target="_blank" rel="external">阿里移动安全挑战赛第二题</a></p>
+<a id="more"></a>
+<blockquote>
+<p>本栗反调试方法:<br>用fopen打开<code>/proc/&lt;pid&gt;/status</code>文件读取其中的<code>TracerPid</code>值来检测自己的进程是否被attach，<br>TracerPid如果为0说明没有别的进程在调试这个进程，如果不为0说明有程序在调试。</p>
+</blockquote>
+<p>使用ida附加进程,关键函数下断点F9之后,进程退出,ida退出.<br>调试过后发现JNI_OnLoad中有反调试方法(实际上是前辈的结论 :p).</p>
+<p>根据<a href="http://kiya.space/2015/12/11/ida-dynamic-debug-so/" target="_blank" rel="external">使用ida调试so文件</a>的步骤在<code>library load</code>处断下.</p>
+<h1 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h1><p>打开Debugger windows -&gt; Module list,找到<code>/data/app-lib/com.yaotong.crackme-1/libcrackme.so</code>,为其中的JNI_OnLoad方法右键<code>Add breakpoint</code>.这里我们也可以得到libcrackme.so的基址为0x520AE000.<br>(当然如果反调试方法是在.initarray中,其地址需要手动计算.)</p>
+<p>一步一步F8发现在执行这一句之后程序退出.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/14/22" alt=""></p>
+<p>F7进去,发现是<code>pthread_create</code>函数.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/14/57" alt=""></p>
+<p>所以上上图中的<code>unk_520AF6A4</code>函数就是线程回调函数咯.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/15/23" alt=""></p>
+<p>先不去分析(其实是水平达不到 :( ),所以我们要用守株待兔的方法.<br>在module list中找到<code>libc.so</code>,在fopen函数下断点,以此检验程序是否打开了某些文件检测状态值.<br>同时打开一个hex view(View -&gt; Open subviews -&gt; Hex dump),设置数据与R0同步.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/15/46" alt=""></p>
+<p>F9运行到fopen函数处(有时并不能一次就断在fopen,注意看注释).</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/16/06" alt=""></p>
+<p>所以程序确实是读取了status文件. :P<br>这是需要找到是谁调用了fopen函数,然后修改读取status的返回值为0(不然就露馅了).<br>一直摁F8直到fopen函数返回,于是我们来到了这里.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/16/21" alt=""></p>
+<p>一边是数据一边是代码,完全找不到函数开始的地方哇.<br>但是我们知道此处地址为<code>520AF420</code>,减去我们之前记下的libcrackme.so的基址520AE000,得到相对地址为<code>1420</code><br>另开一个ida,摁G键跳至此地址,F5发现是函数<code>sub_130c</code>.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/16/38" alt=""></p>
+<p>将<code>sub_130c</code>的文件偏移转换为绝对地址:130c+520AE000=520AF30C.<br>p键将此处数据视为代码变成这样:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/21/02" alt=""></p>
+<p>程序随后会用fgets()和strstr()来获取TracerId的值，于是我们在strstr()处下个断点，然后让hex view的数据与R0同步.<br>一直F9,直到R0的值变为这样:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/21/31" alt=""></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/21/48" alt=""></p>
+<p>F2修改为这样:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/22/34" alt=""></p>
+<p>但是过一会程序又要获取,我们得一直不停的改,所以我们需要将这段代码nop掉,世界才安静.</p>
+<h1 id="patch-so"><a href="#patch-so" class="headerlink" title="patch so"></a>patch so</h1><p>如果静态分析时找到JNI_OnLoad中关键的那句代码:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/16/59" alt=""></p>
+<p>进入线程的回调函数,发现竟然是这样子的!</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/17/15" alt=""></p>
+<p>回调函数<code>sub_16a4</code>中调用了<code>sub_130c</code>!<br>跟我们在动态调试时看到的完全不一样嘛.<br>现在将回调函数中的这一句nop掉就好了呗.<br>右键选择<code>copy to assembly</code></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/17/31" alt=""></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/17/48" alt=""></p>
+<p>我们的目标是<code>BL sub_130C</code>. arm中没有nop语句,所以将<code>movs r0,r0</code>作为NOP,对应的机器码为<code>00 00 A0 E1</code>.</p>
+<p>右键进入hex view.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/18/02" alt=""></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/18/17" alt=""></p>
+<p>摁F2将<code>13 FF FF EB</code>改为<code>00 00 A0 E1</code>,再摁F2应用.<br>点击<code>Edit -&gt; Patch program -&gt; Apply patches to input file...</code>保存即可.</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/18/34" alt=""></p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/14/21/20/31" alt=""></p>
+<p>将原apk中的so文件替换为此so文件,重新打包签名安装,现在直接打开app调试就不会退出了. Success!</p>
+<hr>
+<h1 id="番外"><a href="#番外" class="headerlink" title="番外"></a>番外</h1><p>ida中按三下D，将数据格式从字符转化为指针形式.</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://drops.wooyun.org/tips/6840" target="_blank" rel="external">安卓动态调试七种武器之孔雀翎 – Ida Pro</a></p>
+
+            
+        
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2015/12/14/android-anti-debug-read-status/">http://kiya.studio/2015/12/14/android-anti-debug-read-status/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
+        </div>
+    </div>
+
+        
+    </article>
+    
+        
+    <nav class="article-page">
+        
+            <a href="/2015/12/16/unshell-basic/" id="art-left" class="art-right">
+                <span class="next-title">
+                    脱壳基础 dvmDexFileOpenPartial<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2015/12/11/ida-dynamic-debug-so/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>使用ida调试so文件
+                </span>
+            </a>
+        
+    </nav>
+
+        
+    
+
+
+        </main>
+        <footer class="footer syuanpi fadeIn" id="footer">
+    <hr>
+    <div class="footer-wrapper">
+        <div class="left">
+            <div class="contact-icon">
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+            <a href="https://www.instagram.com/kiyadayo" class="iconfont icon-ins" title="instagram"></a>
+        
+    
+        
+            <a href="https://github.com/kiya-z" class="iconfont icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        
+    
+</div>
+        </div>
+        <div class="right">
+            <div class="copyright">
+    <div class="info">
+        <span>&copy;</span>
+        <span>2015 ~ 2017</span>
+        <span>❤</span>
+        <span>kiya</span>
+    </div>
+    <div class="theme">
+        <span>
+            动力来源于
+            <a href="http://hexo.io/" target="_blank">Hexo </a>
+        </span>
+        <span>
+            主题
+            <a href="https://github.com/ColMugX/hexo-theme-Nlvi"> Nlvi </a>
+        </span>
+    </div>
+    
+</div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <script src="/script/nlvi.js"></script>
+<script src="/script/search.js"></script>
+
+    <script src="/lightbox/js/lightbox.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    document.body.addEventListener('touchstart', function () {});
+    $('.progress').hide();
+    $('.body').show();
+    Nlvi.tagcloud();
+    Nlvi.back2top();
+    Nlvi.showToc();
+    Nlvi.showComments();
+    Nlvi.showReward();
+
+    !CONFIG.animate && Nlvi.offAnimate();
+    CONFIG.lightbox && Nlvi.onPicBox();
+})
+</script>
+    </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">反调试方法一 - 读取进程status文件</a></li>
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#验证"><span class="toc-text">验证</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#patch-so"><span class="toc-text">patch so</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#番外"><span class="toc-text">番外</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+
+    
+    <div class="backtop syuanpi dead toTop" id="backtop">
+    <i class="iconfont icon-up"></i>
+    <span style="text-align:center;font-family:Georgia;"><span style="font-family:Georgia;" id="scrollpercent">1</span>%</span>
+</div>
+    
+    <div class="search" id="search">
+        <div class="mask" id="mask"></div>
+        <div class="search-wrapper syuanpi">
+            <h1 id="search-header" class="syuanpi">找啥呢</h1>
+            <div class="input">
+                <input type="text" id="local-search-input" results="0" name="">
+            </div>
+            <div id="local-search-result"></div>
+        </div>
+    </div>
+    <script>
+    var GREETING = {
+        morning: "おはよう",
+        noon: "こんにちは",
+        after: "こんにちは",
+        night: "こんばんは",
+        midnight: "おやすみ"
+    }
+    $(document).ready(function(){
+        Nlvi.search();
+    });
+    </script>
+
+</body>
+</html>
