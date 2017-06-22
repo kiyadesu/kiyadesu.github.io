@@ -170,7 +170,7 @@
 <p>本次测试用 crackme 来自 0CTF 2015 Quals : <a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/simple.apk" target="_blank" rel="external">simple.apk</a></p>
 </blockquote>
 <p>在手机上打开 app 并执行：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ps | grep easy</div><div class="line">gdbserver :1234 --attach 7967   // 1234 为端口，可随意指定；7967位 pid。</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ps | grep easy</div><div class="line">gdbserver :1234 --attach 7967   // 1234 为端口，可随意指定；7967为 pid。</div></pre></td></tr></table></figure>
 <p>在电脑端执行：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">adb forward tcp:1234 tcp:1234</div><div class="line">arm-linux-androideabi-gdb</div><div class="line">(gdb) target remote :1234</div></pre></td></tr></table></figure>
 <p>此时调试算是已经开始了。</p>

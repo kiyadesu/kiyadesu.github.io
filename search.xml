@@ -5,7 +5,94 @@
     <entry>
       <title><![CDATA[Android 逆向技巧总结]]></title>
       <url>/2333/03/03/android-reversing-skills/</url>
-      <content type="html"><![CDATA[<p>以代表性的 crackme 为例总结相关知识点。一緒に頑張りましょう！github 仓库<a href="https://github.com/kiya-z/android-reversing-challenges" target="_blank" rel="external">在此</a>。<br><a id="more"></a><br>[TOC]</p>
+      <content type="html"><![CDATA[<p>以代表性的 crackme 为例总结相关知识点。一緒に頑張りましょう！github 仓库<a href="https://github.com/kiya-z/android-reversing-challenges" target="_blank" rel="external">在此</a>。<br><a id="more"></a></p>
+<p>[TOC]</p>
+<h1 id="工具列表"><a href="#工具列表" class="headerlink" title="工具列表"></a>工具列表</h1><table>
+<thead>
+<tr>
+<th>name</th>
+<th>How to get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jadx</td>
+<td><a href="https://github.com/skylot/jadx/releases" target="_blank" rel="external">https://github.com/skylot/jadx/releases</a></td>
+</tr>
+<tr>
+<td>jeb</td>
+<td><a href="https://down.52pojie.cn/Tools/Android_Tools/" target="_blank" rel="external">https://down.52pojie.cn/Tools/Android_Tools/</a></td>
+</tr>
+<tr>
+<td>Ida</td>
+<td><a href="https://down.52pojie.cn/Tools/Disassemblers/" target="_blank" rel="external">https://down.52pojie.cn/Tools/Disassemblers/</a></td>
+</tr>
+<tr>
+<td>010 Editor</td>
+<td><a href="https://down.52pojie.cn/Tools/Editors/" target="_blank" rel="external">https://down.52pojie.cn/Tools/Editors/</a></td>
+</tr>
+<tr>
+<td>010 templates</td>
+<td><a href="http://www.sweetscape.com/010editor/templates/" target="_blank" rel="external">http://www.sweetscape.com/010editor/templates/</a></td>
+</tr>
+<tr>
+<td>aapt</td>
+<td>in sdk build-tools</td>
+</tr>
+<tr>
+<td>Google signapk</td>
+<td><a href="https://github.com/kiya-z/Android/tree/master/tools/signapk" target="_blank" rel="external">https://github.com/kiya-z/Android/tree/master/tools/signapk</a></td>
+</tr>
+<tr>
+<td>Android Device Monitor</td>
+<td>in sdk tools</td>
+</tr>
+<tr>
+<td>gdb</td>
+<td>in ndk toolchains (ndk &lt;= r10)</td>
+</tr>
+<tr>
+<td>gdbserver</td>
+<td>in ndk prebuilt (ndk &lt;= r10)</td>
+</tr>
+<tr>
+<td>Android Studio</td>
+<td><a href="https://developer.android.com/studio" target="_blank" rel="external">https://developer.android.com/studio</a></td>
+</tr>
+<tr>
+<td>ShakaApktool</td>
+<td><a href="https://github.com/rover12421/ShakaApktool" target="_blank" rel="external">https://github.com/rover12421/ShakaApktool</a></td>
+</tr>
+<tr>
+<td>smalidea</td>
+<td><a href="https://bitbucket.org/JesusFreke/smali/downloads/" target="_blank" rel="external">https://bitbucket.org/JesusFreke/smali/downloads/</a></td>
+</tr>
+<tr>
+<td>smali</td>
+<td><a href="https://bitbucket.org/JesusFreke/smali/downloads/" target="_blank" rel="external">https://bitbucket.org/JesusFreke/smali/downloads/</a></td>
+</tr>
+<tr>
+<td>baksmali</td>
+<td><a href="https://bitbucket.org/JesusFreke/smali/downloads/" target="_blank" rel="external">https://bitbucket.org/JesusFreke/smali/downloads/</a></td>
+</tr>
+<tr>
+<td>axmlprinter</td>
+<td><a href="https://github.com/rednaga/axmlprinter/releases" target="_blank" rel="external">https://github.com/rednaga/axmlprinter/releases</a></td>
+</tr>
+<tr>
+<td>unluac</td>
+<td><a href="https://sourceforge.net/projects/unluac/" target="_blank" rel="external">https://sourceforge.net/projects/unluac/</a></td>
+</tr>
+<tr>
+<td>sqlcipher</td>
+<td><a href="https://github.com/sqlcipher/sqlcipher" target="_blank" rel="external">https://github.com/sqlcipher/sqlcipher</a></td>
+</tr>
+<tr>
+<td>android-backup-extractor</td>
+<td><a href="https://github.com/nelenkov/android-backup-extractor" target="_blank" rel="external">https://github.com/nelenkov/android-backup-extractor</a></td>
+</tr>
+</tbody>
+</table>
 <h1 id="mobicrackNDK-apk"><a href="#mobicrackNDK-apk" class="headerlink" title="mobicrackNDK.apk"></a><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/mobicrackNDK.apk" target="_blank" rel="external">mobicrackNDK.apk</a></h1><h2 id="JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数"><a href="#JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数" class="headerlink" title="JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数"></a>JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数</h2><p><strong>相关函数</strong>：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">signed int __fastcall JNI_OnLoad(_JavaVM *a1)</div><div class="line"></div><div class="line">((int (__fastcall *)(_JavaVM *, _JNIEnv **, signed int))v1-&gt;functions-&gt;GetEnv)(v1, &amp;v8, 65540)  </div><div class="line">    /*  v1:JavaVM  v8:JniEnv  65540:jni version */</div><div class="line"></div><div class="line">((int (__fastcall *)(_JNIEnv *, char *))v3-&gt;functions-&gt;FindClass)(v3, v4)   </div><div class="line">    /*  v3:JNIEnv  v4:类名    */</div><div class="line"></div><div class="line">((int (__fastcall *)(_JNIEnv *, int, char **, signed int))v3-&gt;functions-&gt;RegisterNatives)(v3, v5, off_400C, 2)</div><div class="line">    /*  v3:JniEnv  v5:FindClass得到的jclass对象  off_400C:要注册的methods  2:注册的methods个数</div><div class="line">        method的格式为：函数名 函数描述(smali格式) 函数指针</div><div class="line">        例如(in ida)：</div><div class="line">            DCD aHello              ; &quot;hello&quot;</div><div class="line">            DCD aLjavaLangStr_1     ; &quot;()Ljava/lang/String;&quot;</div><div class="line">            DCD native_hello+1</div><div class="line">    */</div></pre></td></tr></table></figure>
 <h2 id="init-array"><a href="#init-array" class="headerlink" title=".init_array"></a>.init_array</h2><p>根据 linker 源码, section 的执行顺序为 <code>.preinit_array</code> -&gt; <code>.init</code> -&gt; <code>.init_array</code> 。但 so 是不会执行 <code>.preinit_array</code> 的, 可以忽略。</p>
@@ -92,7 +179,7 @@
 <p>本次测试用 crackme 来自 0CTF 2015 Quals : <a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/simple.apk" target="_blank" rel="external">simple.apk</a></p>
 </blockquote>
 <p>在手机上打开 app 并执行：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ps | grep easy</div><div class="line">gdbserver :1234 --attach 7967   // 1234 为端口，可随意指定；7967位 pid。</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ps | grep easy</div><div class="line">gdbserver :1234 --attach 7967   // 1234 为端口，可随意指定；7967为 pid。</div></pre></td></tr></table></figure>
 <p>在电脑端执行：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">adb forward tcp:1234 tcp:1234</div><div class="line">arm-linux-androideabi-gdb</div><div class="line">(gdb) target remote :1234</div></pre></td></tr></table></figure>
 <p>此时调试算是已经开始了。</p>
@@ -1346,9 +1433,9 @@
         
         <tags>
             
-            <tag> MSC </tag>
-            
             <tag> debug </tag>
+            
+            <tag> MSC </tag>
             
             <tag> ida </tag>
             
@@ -1428,7 +1515,7 @@
 <p>r0为第一个参数(format字符串).</p>
 <p><strong>mov    r1, r2</strong></p>
 <p>r2为第二个参数(test_for返回值).(当参数少于4个时保存在通用寄存器中,多余4个的保存在栈中)</p>
-<p><strong>bl    8258 <a href="&#x6d;&#97;&#105;&#108;&#116;&#111;&#58;&#112;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#x74;">&#112;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#x70;&#108;&#x74;</a></strong></p>
+<p><strong>bl    8258 <a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x70;&#x72;&#105;&#x6e;&#x74;&#x66;&#64;&#x70;&#x6c;&#x74;">&#x70;&#x72;&#105;&#x6e;&#x74;&#x66;&#64;&#x70;&#x6c;&#x74;</a></strong></p>
 <p>调用printf函数.</p>
 <p><strong>sub    sp, fp, #4</strong></p>
 <p>与开辟栈空间相对应.</p>
