@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://kiya.studio/"/>
-  <updated>2017-06-26T06:16:31.000Z</updated>
+  <updated>2017-06-26T06:18:34.000Z</updated>
   <id>http://kiya.studio/</id>
   
   <author>
@@ -20,10 +20,9 @@
     <link href="http://kiya.studio/2333/03/03/android-reversing-skills/"/>
     <id>http://kiya.studio/2333/03/03/android-reversing-skills/</id>
     <published>2333-03-02T19:03:03.000Z</published>
-    <updated>2017-06-26T06:16:31.000Z</updated>
+    <updated>2017-06-26T06:18:34.000Z</updated>
     
     <content type="html"><![CDATA[<p>以代表性的 crackme 为例总结相关知识点。一緒に頑張りましょう！github 仓库<a href="https://github.com/kiya-z/android-reversing-challenges" target="_blank" rel="external">在此</a>。<br><a id="more"></a></p>
-<p>[TOC]</p>
 <h1 id="工具列表"><a href="#工具列表" class="headerlink" title="工具列表"></a>工具列表</h1><table>
 <thead>
 <tr>

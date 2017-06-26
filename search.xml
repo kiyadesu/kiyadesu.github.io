@@ -6,7 +6,6 @@
       <title><![CDATA[Android 逆向技巧总结]]></title>
       <url>/2333/03/03/android-reversing-skills/</url>
       <content type="html"><![CDATA[<p>以代表性的 crackme 为例总结相关知识点。一緒に頑張りましょう！github 仓库<a href="https://github.com/kiya-z/android-reversing-challenges" target="_blank" rel="external">在此</a>。<br><a id="more"></a></p>
-<p>[TOC]</p>
 <h1 id="工具列表"><a href="#工具列表" class="headerlink" title="工具列表"></a>工具列表</h1><table>
 <thead>
 <tr>
@@ -1569,7 +1568,7 @@
 <p>r0为第一个参数(format字符串).</p>
 <p><strong>mov    r1, r2</strong></p>
 <p>r2为第二个参数(test_for返回值).(当参数少于4个时保存在通用寄存器中,多余4个的保存在栈中)</p>
-<p><strong>bl    8258 <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#111;&#x3a;&#x70;&#x72;&#105;&#x6e;&#116;&#x66;&#x40;&#112;&#x6c;&#116;">&#x70;&#x72;&#105;&#x6e;&#116;&#x66;&#x40;&#112;&#x6c;&#116;</a></strong></p>
+<p><strong>bl    8258 <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#58;&#x70;&#x72;&#x69;&#x6e;&#x74;&#x66;&#64;&#112;&#x6c;&#x74;">&#x70;&#x72;&#x69;&#x6e;&#x74;&#x66;&#64;&#112;&#x6c;&#x74;</a></strong></p>
 <p>调用printf函数.</p>
 <p><strong>sub    sp, fp, #4</strong></p>
 <p>与开辟栈空间相对应.</p>
