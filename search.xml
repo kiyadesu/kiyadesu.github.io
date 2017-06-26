@@ -28,6 +28,10 @@
 <td><a href="https://down.52pojie.cn/Tools/Disassemblers/" target="_blank" rel="external">https://down.52pojie.cn/Tools/Disassemblers/</a></td>
 </tr>
 <tr>
+<td>ARM ⇌ Hex</td>
+<td><a href="http://armconverter.com/" target="_blank" rel="external">http://armconverter.com/</a></td>
+</tr>
+<tr>
 <td>010 Editor</td>
 <td><a href="https://down.52pojie.cn/Tools/Editors/" target="_blank" rel="external">https://down.52pojie.cn/Tools/Editors/</a></td>
 </tr>
@@ -93,14 +97,16 @@
 </tr>
 </tbody>
 </table>
-<h1 id="mobicrackNDK-apk"><a href="#mobicrackNDK-apk" class="headerlink" title="mobicrackNDK.apk"></a><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/mobicrackNDK.apk" target="_blank" rel="external">mobicrackNDK.apk</a></h1><h2 id="JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数"><a href="#JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数" class="headerlink" title="JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数"></a>JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数</h2><p><strong>相关函数</strong>：</p>
+<h1 id="JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数"><a href="#JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数" class="headerlink" title="JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数"></a>JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数</h1><p><strong>相关函数</strong>：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">signed int __fastcall JNI_OnLoad(_JavaVM *a1)</div><div class="line"></div><div class="line">((int (__fastcall *)(_JavaVM *, _JNIEnv **, signed int))v1-&gt;functions-&gt;GetEnv)(v1, &amp;v8, 65540)  </div><div class="line">    /*  v1:JavaVM  v8:JniEnv  65540:jni version */</div><div class="line"></div><div class="line">((int (__fastcall *)(_JNIEnv *, char *))v3-&gt;functions-&gt;FindClass)(v3, v4)   </div><div class="line">    /*  v3:JNIEnv  v4:类名    */</div><div class="line"></div><div class="line">((int (__fastcall *)(_JNIEnv *, int, char **, signed int))v3-&gt;functions-&gt;RegisterNatives)(v3, v5, off_400C, 2)</div><div class="line">    /*  v3:JniEnv  v5:FindClass得到的jclass对象  off_400C:要注册的methods  2:注册的methods个数</div><div class="line">        method的格式为：函数名 函数描述(smali格式) 函数指针</div><div class="line">        例如(in ida)：</div><div class="line">            DCD aHello              ; &quot;hello&quot;</div><div class="line">            DCD aLjavaLangStr_1     ; &quot;()Ljava/lang/String;&quot;</div><div class="line">            DCD native_hello+1</div><div class="line">    */</div></pre></td></tr></table></figure>
-<h2 id="init-array"><a href="#init-array" class="headerlink" title=".init_array"></a>.init_array</h2><p>根据 linker 源码, section 的执行顺序为 <code>.preinit_array</code> -&gt; <code>.init</code> -&gt; <code>.init_array</code> 。但 so 是不会执行 <code>.preinit_array</code> 的, 可以忽略。</p>
+<p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/mobicrackNDK.apk" target="_blank" rel="external">mobicrackNDK.apk</a></p>
+<h1 id="init-array"><a href="#init-array" class="headerlink" title=".init_array"></a>.init_array</h1><p>根据 linker 源码, section 的执行顺序为 <code>.preinit_array</code> -&gt; <code>.init</code> -&gt; <code>.init_array</code> 。但 so 是不会执行 <code>.preinit_array</code> 的, 可以忽略。</p>
 <p><code>.init_array</code> 是一个函数指针数组。编写代码时在函数声明时加上 <code>__attribute__((constructor))</code> 使之成为共享构造函数，即可使该函数出现在 <code>.init_array</code> section 中。</p>
 <p>IDA 动态调试时 ‘ctrl+s’ 查看 section 信息即可定位这两个 setction，特别的，对于 <code>.init_array</code>，可通过搜索 <code>Calling %s @ %p for &#39;%s&#39;</code> 定位。</p>
 <p><strong>部分源码</strong>:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">void soinfo::CallConstructors() &#123;</div><div class="line">    ...</div><div class="line">    // DT_INIT should be called before DT_INIT_ARRAY if both are present.</div><div class="line">    CallFunction(&quot;DT_INIT&quot;, init_func);</div><div class="line">    CallArray(&quot;DT_INIT_ARRAY&quot;, init_array, init_array_count, false);    // CallArray 中也会调用 CallFunction 函数</div><div class="line">&#125;</div><div class="line"></div><div class="line">void soinfo::CallFunction(const char* function_name UNUSED, linker_function_t function) &#123;</div><div class="line">  if (function == NULL || reinterpret_cast&lt;uintptr_t&gt;(function) == static_cast&lt;uintptr_t&gt;(-1)) &#123;</div><div class="line">    return;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  TRACE(&quot;[ Calling %s @ %p for &apos;%s&apos; ]&quot;, function_name, function, name);</div><div class="line">  function();</div><div class="line">  TRACE(&quot;[ Done calling %s @ %p for &apos;%s&apos; ]&quot;, function_name, function, name);</div><div class="line"></div><div class="line">  // The function may have called dlopen(3) or dlclose(3), so we need to ensure our data structures</div><div class="line">  // are still writable. This happens with our debug malloc (see http://b/7941716).</div><div class="line">  set_soinfo_pool_protection(PROT_READ | PROT_WRITE);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h1 id="misc-apk"><a href="#misc-apk" class="headerlink" title="misc.apk"></a><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/misc.apk" target="_blank" rel="external">misc.apk</a></h1><h2 id="dex-结构（修复dex）"><a href="#dex-结构（修复dex）" class="headerlink" title="dex 结构（修复dex）"></a>dex 结构（修复dex）</h2><p>快速简记：</p>
+<p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/mobicrackNDK.apk" target="_blank" rel="external">mobicrackNDK.apk</a></p>
+<h1 id="dex-结构"><a href="#dex-结构" class="headerlink" title="dex 结构"></a>dex 结构</h1><h2 id="修复-dexHeader-amp-onCreate"><a href="#修复-dexHeader-amp-onCreate" class="headerlink" title="修复 dexHeader &amp; onCreate"></a>修复 dexHeader &amp; onCreate</h2><p>快速简记：</p>
 <table>
 <thead>
 <tr>
@@ -152,10 +158,57 @@
 </tr>
 </tbody>
 </table>
-<h1 id="EasyRe-apk"><a href="#EasyRe-apk" class="headerlink" title="EasyRe.apk"></a><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/EasyRe.apk" target="_blank" rel="external">EasyRe.apk</a></h1><h2 id="hook-系统函数"><a href="#hook-系统函数" class="headerlink" title="hook 系统函数"></a>hook 系统函数</h2><p>常规方法静态分析</p>
-<h2 id="dump-内存搜索-flag"><a href="#dump-内存搜索-flag" class="headerlink" title="dump 内存搜索 flag"></a>dump 内存搜索 flag</h2><h3 id="1-利用-ddms-的-dump-HPROF-file-功能-带箭头的油桶图标"><a href="#1-利用-ddms-的-dump-HPROF-file-功能-带箭头的油桶图标" class="headerlink" title="1. 利用 ddms 的 dump HPROF file 功能 (带箭头的油桶图标)"></a>1. 利用 ddms 的 <code>dump HPROF file</code> 功能 (带箭头的油桶图标)</h3><p>搜索：<code>strings easyre.sjl.gossip.easyre.hprof | grep 0ctf</code></p>
-<h3 id="2-利用-gore"><a href="#2-利用-gore" class="headerlink" title="2. 利用 gore"></a>2. 利用 gore</h3><p>gdb 附加进程后直接执行 <code>gcore</code> dump，搜索：<code>strings core.7967 | grep 0ctf</code></p>
-<h1 id="Timer-apk"><a href="#Timer-apk" class="headerlink" title="Timer.apk"></a><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/Timer.apk" target="_blank" rel="external">Timer.apk</a></h1><h2 id="修改-smali-代码"><a href="#修改-smali-代码" class="headerlink" title="修改 smali 代码"></a>修改 smali 代码</h2><p>指令参考这里👉<a href="https://source.android.com/devices/tech/dalvik/dalvik-bytecode" target="_blank" rel="external">dalvik bytecode</a></p>
+<p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/misc.apk" target="_blank" rel="external">misc.apk</a></p>
+<h1 id="hook-系统函数"><a href="#hook-系统函数" class="headerlink" title="hook 系统函数"></a>hook 系统函数</h1><p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/EasyRe.apk" target="_blank" rel="external">EasyRe.apk</a></p>
+<h1 id="dump-内存搜索-flag"><a href="#dump-内存搜索-flag" class="headerlink" title="dump 内存搜索 flag"></a>dump 内存搜索 flag</h1><h2 id="1-利用-ddms-的-dump-HPROF-file-功能-带箭头的油桶图标"><a href="#1-利用-ddms-的-dump-HPROF-file-功能-带箭头的油桶图标" class="headerlink" title="1. 利用 ddms 的 dump HPROF file 功能 (带箭头的油桶图标)"></a>1. 利用 ddms 的 <code>dump HPROF file</code> 功能 (带箭头的油桶图标)</h2><p>搜索：<code>strings easyre.sjl.gossip.easyre.hprof | grep 0ctf</code></p>
+<h2 id="2-利用-gore"><a href="#2-利用-gore" class="headerlink" title="2. 利用 gore"></a>2. 利用 gore</h2><p>gdb 附加进程后直接执行 <code>gcore</code> dump，搜索：<code>strings core.7967 | grep 0ctf</code></p>
+<p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/EasyRe.apk" target="_blank" rel="external">EasyRe.apk</a></p>
+<h1 id="修改-smali-代码"><a href="#修改-smali-代码" class="headerlink" title="修改 smali 代码"></a>修改 smali 代码</h1><p>指令参考这里👉<a href="https://source.android.com/devices/tech/dalvik/dalvik-bytecode" target="_blank" rel="external">dalvik bytecode</a></p>
+<p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/Timer.apk" target="_blank" rel="external">Timer.apk</a></p>
+<h1 id="ARM"><a href="#ARM" class="headerlink" title="ARM"></a>ARM</h1><h2 id="ARM-的参数传递规则"><a href="#ARM-的参数传递规则" class="headerlink" title="ARM 的参数传递规则"></a>ARM 的参数传递规则</h2><p>R0、R1、R2、R3， 在调用函数时，用来存放前4个函数参数；如果函数的参数多于 4 个，则多余参数存放在堆栈当中；<br>低于32位的函数返回值存于 R0。</p>
+<h2 id="ARM-的寄存器规则"><a href="#ARM-的寄存器规则" class="headerlink" title="ARM 的寄存器规则"></a>ARM 的寄存器规则</h2><table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R0 ~ R3</td>
+<td>调用函数时，用来存放前4个函数参数</td>
+</tr>
+<tr>
+<td>R0</td>
+<td>函数返回时，存放低于32位的函数返回值</td>
+</tr>
+<tr>
+<td>R4 ~ R11</td>
+<td>保存局部变量。进入函数时必须保存所用到的局部变量寄存器的值，在返回前必须恢复这些寄存器的值；对于函数中没有用到的寄存器则不必进行这些操作。<br>在Thumb中，通常只能使用寄存器 R4~R7来保存局部变量，<br>所以函数内部通用的入栈出栈代码可以为：<br>STMFD sp!,{r4-r11,lr}<br>// body of ASM code<br>LDMFD sp!,{r4-r11,pc}</td>
+</tr>
+<tr>
+<td>R12</td>
+<td>用作 IP，内部调用暂时寄存器</td>
+</tr>
+<tr>
+<td>R13</td>
+<td>用作 SP，栈指针，sp 中存放的值在退出被调用函数时必须与进入时的值相同。</td>
+</tr>
+<tr>
+<td>R14</td>
+<td>用作 LR，链接寄存器，保存函数的返回地址；如果在函数中保存了返回地址，寄存器R14 则可以用作其他用途</td>
+</tr>
+<tr>
+<td>R15</td>
+<td>用作 PC，程序计数器</td>
+</tr>
+<tr>
+<td>R16</td>
+<td>CPSR，状态寄存器</td>
+</tr>
+</tbody>
+</table>
+<p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/LoopAndLoop.apk" target="_blank" rel="external">LoopAndLoop.apk</a></p>
 <h1 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h1><p><a href="https://github.com/toToCW/CTF-Mobile" target="_blank" rel="external">CTF-Mobile</a></p>
 <p><a href="https://github.com/ctfs/write-ups-2015" target="_blank" rel="external">write-ups-2015</a></p>
 ]]></content>
@@ -1434,9 +1487,9 @@
         
         <tags>
             
-            <tag> debug </tag>
-            
             <tag> MSC </tag>
+            
+            <tag> debug </tag>
             
             <tag> ida </tag>
             
@@ -1516,7 +1569,7 @@
 <p>r0为第一个参数(format字符串).</p>
 <p><strong>mov    r1, r2</strong></p>
 <p>r2为第二个参数(test_for返回值).(当参数少于4个时保存在通用寄存器中,多余4个的保存在栈中)</p>
-<p><strong>bl    8258 <a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x70;&#x72;&#105;&#x6e;&#x74;&#x66;&#64;&#x70;&#x6c;&#x74;">&#x70;&#x72;&#105;&#x6e;&#x74;&#x66;&#64;&#x70;&#x6c;&#x74;</a></strong></p>
+<p><strong>bl    8258 <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#111;&#x3a;&#x70;&#x72;&#105;&#x6e;&#116;&#x66;&#x40;&#112;&#x6c;&#116;">&#x70;&#x72;&#105;&#x6e;&#116;&#x66;&#x40;&#112;&#x6c;&#116;</a></strong></p>
 <p>调用printf函数.</p>
 <p><strong>sub    sp, fp, #4</strong></p>
 <p>与开辟栈空间相对应.</p>
