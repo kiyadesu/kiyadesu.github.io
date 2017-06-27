@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <title>
-  
-    归档 · kiya
-  
-</title>
+    <title> javassist · kiya </title>
     <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
@@ -146,45 +142,83 @@
         <main class="main" id="main">
             
     
-    <div class="archive syuanpi riseIn-light" id="archive">
-        
-            <h1 class="archive-title">Total</h1>
-            <span class="archive-num">一共有 41 篇文章</span>
-        
-        <div class="archive-list">
-            <ul>
-        
+    <article class="post">
+        <header class="post-header">
+            <div class="post-time syuanpi riseIn-light back-1">
+                <span>2017年6月27日</span>
+            </div>
+            <h1 class="post-title syuanpi riseIn-light back-2">
+            
+                javassist
+            
+            </h1>
             
                 
-                
-                
+                    <div class="post-tags syuanpi riseIn-light back-3">
                     
-                     
-                        <h2 class="archive-year"> 2333 </h2>
+                        <a href="/tags/tools/">tools</a>
                     
+                    </div>
                 
             
+        </header>
+        <div class="post-content syuanpi riseIn-light back-3">
             
-            <li class="archive-post">
-                <span class="archive-post-time">
-                
-                    03-03
-                
-                </span>
-                <span class="archive-post-link">
-                    <a href="/2333/03/03/android-reversing-skills/">Android 逆向技巧总结</a>
-                </span>
-            </li>
+                <p>Javassist (Java Programming Assistant) 是个开发中可以辅助修改 Java 字节码的工具。我们可以用它来修改 jar 包之类的文件。</p>
+<a id="more"></a>
+<p>官方的教程在<a href="http://jboss-javassist.github.io/javassist/tutorial/tutorial.html" target="_blank" rel="external">这里</a>。</p>
+<p>有一点需要注意的是某些 jar 文件中还附带有依赖的其他 jar 文件，此时 ClassPool 是 get 不到其中的类的，会报 <code>ClassNotFound</code> 错误，需要使用 <code>jar</code> 命令先将其提取出来，修改后再更新进原 jar 包即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">jar tf xx.jar   //列出 jar 中的文件 </div><div class="line">jar xf xx.jar libs/yy.jar   //提取 jar 中的文件</div><div class="line">jar uvf xx.jar libs/yy.jar  //更新 jar 中的文件</div><div class="line">jar uvf xx.jar path/to/.class //更新 jar 中的文件</div></pre></td></tr></table></figure>
 
+            
         
-            </ul>
+        </div>
+        
+            
+            
+    <hr class="copy-line">
+    <div class="post-copyright">
+        <div class="copy-author">
+            <span>作者 :</span>
+            <span>kiya</span>
+        </div>
+        <div class="copy-url">
+            <span>地址 :</span>
+            <a href="http://kiya.studio/2017/06/27/javassist/">http://kiya.studio/2017/06/27/javassist/</a>
+        </div>
+        <div class="copy-origin">
+            <span>来源 :</span>
+            <a href="http://kiya.studio">http://kiya.studio</a>
+        </div>
+        <div class="copy-license">
+            
+            著作权归作者所有，转载请联系作者获得授权。
         </div>
     </div>
+
+        
+    </article>
     
-    <nav class="pagination">
-        <span class="page-number current">1</span>
+        
+    <nav class="article-page">
+        
+            <a href="/2333/03/03/android-reversing-skills/" id="art-left" class="art-right">
+                <span class="next-title">
+                    Android 逆向技巧总结<i class="iconfont icon-right"></i> 
+                </span>
+            </a>
+        
+        
+            <a href="/2017/06/21/android-gdb/" id="art-right" class="art-left">
+                <span class="prev-title"> 
+                    <i class="iconfont icon-left"></i>gdb 调试 Android app
+                </span>
+            </a>
+        
     </nav>
 
+        
+    
 
 
         </main>
@@ -268,6 +302,16 @@ $(document).ready(function(){
 })
 </script>
     </div>
+    
+        
+    <div class="post-toc">
+        <span class="title">文章目录</span>
+        <div class="toc-inner syuanpi back-1 fallIn-light">
+            <li class="title-link"><a href="javascript:;" class="toTop">javassist</a></li>
+            
+        </div>
+    </div>
+
     
     <div class="backtop syuanpi dead toTop" id="backtop">
     <i class="iconfont icon-up"></i>
