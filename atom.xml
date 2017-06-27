@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://kiya.studio/"/>
-  <updated>2017-06-27T06:25:10.000Z</updated>
+  <updated>2017-06-27T06:27:12.000Z</updated>
   <id>http://kiya.studio/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://kiya.studio/2333/03/03/android-reversing-skills/"/>
     <id>http://kiya.studio/2333/03/03/android-reversing-skills/</id>
     <published>2333-03-02T19:03:03.000Z</published>
-    <updated>2017-06-27T06:25:10.000Z</updated>
+    <updated>2017-06-27T06:27:12.000Z</updated>
     
     <content type="html"><![CDATA[<p>以代表性的 crackme 为例总结相关知识点。一緒に頑張りましょう！github 仓库<a href="https://github.com/kiya-z/android-reversing-challenges" target="_blank" rel="external">在此</a>。<br><a id="more"></a></p>
 <h1 id="JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数"><a href="#JNI-Onload-中通过-RegisterNatives-动态注册-jni-函数" class="headerlink" title="JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数"></a>JNI_Onload 中通过 RegisterNatives 动态注册 jni 函数</h1><p><strong>相关函数</strong>：</p>
@@ -85,7 +85,6 @@
 </tbody>
 </table>
 <p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/misc.apk" target="_blank" rel="external">misc.apk</a></p>
-<p>例子的参考：<a href="http://jaq.alibaba.com/blog.htm?id=76" target="_blank" rel="external">Apk协作攻击漏洞“炸弹引爆”详解</a></p>
 <h1 id="hook-系统函数"><a href="#hook-系统函数" class="headerlink" title="hook 系统函数"></a>hook 系统函数</h1><p><strong>例：</strong><a href="https://github.com/kiya-z/android-reversing-challenges/tree/master/apks/EasyRe.apk" target="_blank" rel="external">EasyRe.apk</a></p>
 <h1 id="dump-内存搜索-flag"><a href="#dump-内存搜索-flag" class="headerlink" title="dump 内存搜索 flag"></a>dump 内存搜索 flag</h1><h2 id="1-利用-ddms-的-dump-HPROF-file-功能-带箭头的油桶图标"><a href="#1-利用-ddms-的-dump-HPROF-file-功能-带箭头的油桶图标" class="headerlink" title="1. 利用 ddms 的 dump HPROF file 功能 (带箭头的油桶图标)"></a>1. 利用 ddms 的 <code>dump HPROF file</code> 功能 (带箭头的油桶图标)</h2><p>搜索：<code>strings easyre.sjl.gossip.easyre.hprof | grep 0ctf</code></p>
 <h2 id="2-利用-gore"><a href="#2-利用-gore" class="headerlink" title="2. 利用 gore"></a>2. 利用 gore</h2><p>gdb 附加进程后直接执行 <code>gcore</code> dump，搜索：<code>strings core.7967 | grep 0ctf</code></p>
