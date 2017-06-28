@@ -154,31 +154,6 @@
   </entry>
   
   <entry>
-    <title>javassist</title>
-    <link href="http://kiya.studio/2017/06/27/javassist/"/>
-    <id>http://kiya.studio/2017/06/27/javassist/</id>
-    <published>2017-06-27T05:52:35.000Z</published>
-    <updated>2017-06-27T06:22:54.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Javassist (Java Programming Assistant) 是个开发中可以辅助修改 Java 字节码的工具。我们可以用它来修改 jar 包之类的文件。</p>
-<a id="more"></a>
-<p>官方的教程在<a href="http://jboss-javassist.github.io/javassist/tutorial/tutorial.html" target="_blank" rel="external">这里</a>。</p>
-<p>有一点需要注意的是某些 jar 文件中还附带有依赖的其他 jar 文件，此时 ClassPool 是 get 不到其中的类的，会报 <code>ClassNotFound</code> 错误，需要使用 <code>jar</code> 命令先将其提取出来，修改后再更新进原 jar 包即可。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">jar tf xx.jar   //列出 jar 中的文件 </div><div class="line">jar xf xx.jar libs/yy.jar   //提取 jar 中的文件</div><div class="line">jar uvf xx.jar libs/yy.jar  //更新 jar 中的文件</div><div class="line">jar uvf xx.jar path/to/.class //更新 jar 中的文件</div></pre></td></tr></table></figure>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Javassist (Java Programming Assistant) 是个开发中可以辅助修改 Java 字节码的工具。我们可以用它来修改 jar 包之类的文件。&lt;/p&gt;
-    
-    </summary>
-    
-    
-      <category term="tools" scheme="http://kiya.studio/tags/tools/"/>
-    
-  </entry>
-  
-  <entry>
     <title>gdb 调试 Android app</title>
     <link href="http://kiya.studio/2017/06/21/android-gdb/"/>
     <id>http://kiya.studio/2017/06/21/android-gdb/</id>
@@ -1359,9 +1334,9 @@
       <category term="Android Security" scheme="http://kiya.studio/categories/Android-Security/"/>
     
     
-      <category term="MSC" scheme="http://kiya.studio/tags/MSC/"/>
-    
       <category term="enforce" scheme="http://kiya.studio/tags/enforce/"/>
+    
+      <category term="MSC" scheme="http://kiya.studio/tags/MSC/"/>
     
   </entry>
   
@@ -1434,6 +1409,81 @@
       <category term="anti-debug" scheme="http://kiya.studio/tags/anti-debug/"/>
     
       <category term="MSC" scheme="http://kiya.studio/tags/MSC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用ida调试so文件</title>
+    <link href="http://kiya.studio/2015/12/11/ida-dynamic-debug-so/"/>
+    <id>http://kiya.studio/2015/12/11/ida-dynamic-debug-so/</id>
+    <published>2015-12-11T05:16:52.000Z</published>
+    <updated>2017-06-21T11:26:35.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>保护代码通常放在so文件中.</p>
+<a id="more"></a>
+<h1 id="正常的应用"><a href="#正常的应用" class="headerlink" title="正常的应用"></a>正常的应用</h1><h2 id="android机的准备工作"><a href="#android机的准备工作" class="headerlink" title="android机的准备工作"></a>android机的准备工作</h2><p>找到<code>ida</code>目录下的<code>/dbgsrv/android_server</code>文件,push进android机,启动<code>android_server</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">adb push android_server /data/local/tmp/</div><div class="line">adb shell</div><div class="line">su</div><div class="line">cd data/local/tmp</div><div class="line">chmod 755 android_server</div><div class="line">./android_server</div></pre></td></tr></table></figure>
+<p>出现:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@android:/data/local/tmp # ./android_server</div><div class="line">IDA Android 32-bit remote debug server(ST) v1.19. Hex-Rays (c) 2004-2015</div><div class="line">Listening on port #23946...</div></pre></td></tr></table></figure>
+<p>另开命令行进行tcp端口转发：<br><code>adb forward tcp:23946 tcp:23946</code></p>
+<p>[<strong>注意事项</strong>]</p>
+<ol>
+<li>此android_server需和ida是配套的</li>
+<li>出现<code>bind: Address already in use</code>错误<br>这是因为手机中可能已经在运行android_server,使用<code>ps | grep android_server</code>看一下,有的话杀掉.<br>如下:(14061是pid)</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@android:/ # ps | grep android_server</div><div class="line">root      14061 13574 11180  9504  ffffffff 40183da0 S /data/local/tmp/android_server</div><div class="line">127|root@android:/ # kill -s 9 14061</div></pre></td></tr></table></figure>
+<h2 id="ida-的准备"><a href="#ida-的准备" class="headerlink" title="ida 的准备"></a>ida 的准备</h2><p>打开ida，打开so文件,记录so文件中感兴趣的函数的文件偏移.</p>
+<p>手机打开app.</p>
+<p>另开一个ida,菜单栏设置<code>Debugger -&gt; Attach -&gt; Remote ARMLinux/Android debugger</code>如下:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/46/45" alt=""></p>
+<p>点击ok,弹出进程列表,例如:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/11/13/49/17" alt=""></p>
+<blockquote>
+<p><strong>注意</strong><br>如果此时进程列表中只有一两个进程,可能是因为上一步启动<code>android_server</code>时你使用了这样的命令:<br><code>adb shell /data/local/tmp/android_server</code><br>只要先进入<code>adb shell</code>再执行就没问题了.</p>
+</blockquote>
+<p>选择要调试的进程,等待分析完毕.</p>
+<p><code>ctrl+s</code>打开segment列表,找到要调试的so文件,选择class属性为CODE的那个就ok了.记得记下so的基址(start属性).<br>基址加上刚刚记录的函数的文件偏移即得函数的地址,按快捷键G输入地址跳转,下断点运行即可.</p>
+<h1 id="不正常的应用"><a href="#不正常的应用" class="headerlink" title="不正常的应用"></a>不正常的应用</h1><p>(此步骤也适用于给系统函数下断点)<br>so文件在被加载的时候会首先执行.init_array中的函数，然后再执行JNI_OnLoad()函数。如果在这中间加了反调试代码,那么我们一旦开始调试app可能就会退出.所以我们需要在so文件被加载之前就断下来.</p>
+<h2 id="启动app"><a href="#启动app" class="headerlink" title="启动app"></a>启动app</h2><p>使用am start命令启动app:<br><code>adb shell am start -D -n com.yaotong.crackme/com.yaotong.crackme.MainActivity</code><br><strong>com.yaotong.crackme</strong> 为包名,<strong>com.yaotong.crackme.MainActivity</strong> 为主activity名.</p>
+<p>此时手机上会弹出:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/12/13/35/08" alt=""></p>
+<h2 id="ida准备"><a href="#ida准备" class="headerlink" title="ida准备"></a>ida准备</h2><p>同样是设置<code>Debugger -&gt; Attach -&gt; Remote ARMLinux/Android debugger</code>再选择进程.<br>之后需要设置调试器调试选项为:</p>
+<p><img src="http://7xo976.com1.z0.glb.clouddn.com/from_clipboard/2015/12/12/13/35/31" alt=""></p>
+<p>F9运行.<br>在控制台使用jdb恢复进程运行:<br><code>jdb -connect com.sun.jdi.SocketAttach:hostname=127.0.0.1,port=8700</code></p>
+<p>正常情况会出现:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">设置未捕获的java.lang.Throwable</div><div class="line">设置延迟的未捕获的java.lang.Throwable</div><div class="line">正在初始化jdb...</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">java.net.ConnectException: Connection refused: connect</div><div class="line">        at java.net.DualStackPlainSocketImpl.connect0(Native Method)</div><div class="line">        at java.net.DualStackPlainSocketImpl.socketConnect(DualStackPlainSocketImpl.java:79)</div><div class="line">        at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:345)</div><div class="line">        at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)</div><div class="line">        at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)</div><div class="line">        at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:172)</div><div class="line">        at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)</div><div class="line">        at java.net.Socket.connect(Socket.java:589)</div><div class="line">        at com.sun.tools.jdi.SocketTransportService.attach(SocketTransportService.java:222)</div><div class="line">        at com.sun.tools.jdi.GenericAttachingConnector.attach(GenericAttachingConnector.java:116)</div><div class="line">        at com.sun.tools.jdi.SocketAttachingConnector.attach(SocketAttachingConnector.java:90)</div><div class="line">        at com.sun.tools.example.debug.tty.VMConnection.attachTarget(VMConnection.java:519)</div><div class="line">        at com.sun.tools.example.debug.tty.VMConnection.open(VMConnection.java:328)</div><div class="line">        at com.sun.tools.example.debug.tty.Env.init(Env.java:63)</div><div class="line">        at com.sun.tools.example.debug.tty.TTY.main(TTY.java:1066)</div><div class="line">致命错误:</div><div class="line">无法附加到目标 VM。</div></pre></td></tr></table></figure>
+<ul>
+<li>打开ddms尝试.</li>
+<li>检查调试的app配置文件中是否有<code>android:debuggable=&quot;true&quot;</code>，导致不能调试。<br>若无则在清单文件的application中加上,重新打包即可.</li>
+</ul>
+<p>接下来就可以在.initarray和JNI_OnLoad下断点了.</p>
+<hr>
+<blockquote>
+<p>番外</p>
+</blockquote>
+<h1 id="initarray"><a href="#initarray" class="headerlink" title=".initarray"></a>.initarray</h1><p>静态分析so文件时,按<code>ctrl+s</code>出现segment列表,进入<code>.initarray</code>即可看到列表.</p>
+<h1 id="如何dump-so文件"><a href="#如何dump-so文件" class="headerlink" title="如何dump so文件"></a>如何dump so文件</h1><p>dump时务必确保so文件已经加载.<br>python脚本:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">import idaapi</div><div class="line">data = idaapi.dbg_read_memory(start_addr,file_len)</div><div class="line">f = open(r&apos;C:\Users\...\Desktop\dump.so&apos;,&apos;wb&apos;)</div><div class="line">f.write(data)</div><div class="line">f.close()</div></pre></td></tr></table></figure>
+<p>ida的api函数地址:<a href="https://www.hex-rays.com/products/ida/support/idapython_docs/idaapi-module.html" target="_blank" rel="external">https://www.hex-rays.com/products/ida/support/idapython_docs/idaapi-module.html</a></p>
+<p>以上.</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;保护代码通常放在so文件中.&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://kiya.studio/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="MSC" scheme="http://kiya.studio/tags/MSC/"/>
+    
+      <category term="debug" scheme="http://kiya.studio/tags/debug/"/>
+    
+      <category term="ida" scheme="http://kiya.studio/tags/ida/"/>
     
   </entry>
   

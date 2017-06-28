@@ -135,25 +135,6 @@
     </entry>
     
     <entry>
-      <title><![CDATA[javassist]]></title>
-      <url>/2017/06/27/javassist/</url>
-      <content type="html"><![CDATA[<p>Javassist (Java Programming Assistant) 是个开发中可以辅助修改 Java 字节码的工具。我们可以用它来修改 jar 包之类的文件。</p>
-<a id="more"></a>
-<p>官方的教程在<a href="http://jboss-javassist.github.io/javassist/tutorial/tutorial.html" target="_blank" rel="external">这里</a>。</p>
-<p>有一点需要注意的是某些 jar 文件中还附带有依赖的其他 jar 文件，此时 ClassPool 是 get 不到其中的类的，会报 <code>ClassNotFound</code> 错误，需要使用 <code>jar</code> 命令先将其提取出来，修改后再更新进原 jar 包即可。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">jar tf xx.jar   //列出 jar 中的文件 </div><div class="line">jar xf xx.jar libs/yy.jar   //提取 jar 中的文件</div><div class="line">jar uvf xx.jar libs/yy.jar  //更新 jar 中的文件</div><div class="line">jar uvf xx.jar path/to/.class //更新 jar 中的文件</div></pre></td></tr></table></figure>
-]]></content>
-      
-        
-        <tags>
-            
-            <tag> tools </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[gdb 调试 Android app]]></title>
       <url>/2017/06/21/android-gdb/</url>
       <content type="html"><![CDATA[<p>Android NDK 在 r11 之后去掉了 toolchain 中的 gdb 工具，无奈下载了 r10 的 arm-linux-androideabi-gdb 和 gdbserver。<a id="more"></a></p>
@@ -1275,9 +1256,9 @@
         
         <tags>
             
-            <tag> MSC </tag>
-            
             <tag> enforce </tag>
+            
+            <tag> MSC </tag>
             
         </tags>
         
@@ -1498,7 +1479,7 @@
 <p>r0为第一个参数(format字符串).</p>
 <p><strong>mov    r1, r2</strong></p>
 <p>r2为第二个参数(test_for返回值).(当参数少于4个时保存在通用寄存器中,多余4个的保存在栈中)</p>
-<p><strong>bl    8258 <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#112;&#114;&#x69;&#x6e;&#116;&#102;&#x40;&#x70;&#x6c;&#x74;">&#112;&#114;&#x69;&#x6e;&#116;&#102;&#x40;&#x70;&#x6c;&#x74;</a></strong></p>
+<p><strong>bl    8258 <a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#112;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#112;&#108;&#x74;">&#112;&#114;&#x69;&#x6e;&#x74;&#102;&#x40;&#112;&#108;&#x74;</a></strong></p>
 <p>调用printf函数.</p>
 <p><strong>sub    sp, fp, #4</strong></p>
 <p>与开辟栈空间相对应.</p>
